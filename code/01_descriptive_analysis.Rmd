@@ -1,0 +1,317 @@
+---
+title: "Descriptive analysis"
+author: "Jae Yeon Kim"
+output:
+html_document: 
+  toc: true
+  theme: united
+---
+
+## 0. Setup 
+
+I tweaked the global option of the R Markdown to enlarge figures produced by ggplot2.
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width = 12, fig.height = 8, 
+                      echo = FALSE, warning = FALSE, message = FALSE) # global setting for enlarging image size
+```
+
+```{r}
+
+# Clean up the environment
+
+rm(list = ls())
+
+# Import libraries (adapted from this link: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(
+        tidyverse, # for the tidyverse framework
+        patchwork, # for arranging ggplots 
+        ggthemes, # for fancy ggplot themes
+        
+        ### For making maps (https://geocompr.robinlovelace.net/adv-map.html#animated-maps)
+        
+        sf,
+        raster,
+        spData, 
+        tmap,     # for static and interactive maps
+        leaflet,  # for interactive maps
+        mapview,  # for interactive maps
+        shiny,    # for web applications
+        openintro # for abbr2state function 
+)
+
+```
+
+
+## 1. Load files
+
+N of Asian orgs: 299
+N of Latino orgs: 519 
+
+```{r}
+
+# Load files
+
+asian_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv")
+
+latino_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv")
+
+glimpse(asian_org)
+glimpse(latino_org)
+```
+
+## 2. Descriptive analysis
+
+### 2.1. Cross-sectional analysis
+
+```{r}
+aa_org_n <- asian_org %>%
+  dplyr::select(City, Type) %>%
+  group_by(Type) %>%
+  summarize(n = n()) %>%
+  arrange(desc(n)) %>%
+  ggplot(aes(x = reorder(Type, -n), y = n)) +
+    geom_col() +
+    theme_base() +
+    labs(x = "Type", y = "Count", 
+         title = "Asian organizations (N = 299)",
+         subtitle = "Sorted by organization types")
+
+latino_org_n <- latino_org %>%
+  dplyr::select(City, Type) %>%
+  group_by(Type) %>%
+  summarize(n = n()) %>%
+  arrange(desc(n)) %>%
+  ggplot(aes(x = reorder(Type, -n), y = n)) +
+    geom_col() +
+    theme_base() +
+    labs(x = "Type", y = "Count", 
+         title = "Latino organizations (N = 519)",
+         subtitle = "Sorted by organization types")
+
+aa_org_n / latino_org_n
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/asian_latino_orgs_n.png")
+
+```
+### 2.2. Time-series analysis
+
+#### 2.2.1. Turning into time-series data 
+
+Don't forget to fill the missing years!
+
+```{r}
+
+# Create the full years
+
+asian_all_years <- seq(min(asian_org$F.year), max(asian_org$F.year))
+latino_all_years <- seq(min(latino_org$F.year), max(latino_org$F.year))
+
+# Turn it into a dataframe 
+
+asian_all_years <- data.frame(F.year = asian_all_years)
+latino_all_years <- data.frame(F.year = latino_all_years)
+
+# Count by year and type
+
+asian_year <- asian_org %>%
+  count(F.year, States, Type) %>%
+  rename(Freq = n) %>%
+  right_join(asian_all_years, by = "F.year")
+
+latino_year <- latino_org %>%
+  count(F.year, States, Type) %>% 
+  rename(Freq = n) %>%
+  right_join(latino_all_years, by = "F.year")
+
+```
+
+#### 2.2.2 Plotting
+
+```{r}
+
+# Merge
+
+merged <- bind_rows(mutate(asian_year, group = "Asian Americans"),
+          mutate(latino_year, group = "Latinos"))
+
+# Running total 
+
+merged_running_total <- merged %>%
+  group_by(group, Type) %>% 
+  mutate(running_total = cumsum(Freq))
+
+# Plot
+
+merged_running_total %>%
+  ggplot(aes(x = F.year, y = Freq, fill = Type)) +
+    geom_col() +
+    labs(x = "Year", y = "Number of organizations founded") +
+    facet_wrap(~group) +
+    xlim(c(1960,2017)) + 
+    theme_base() 
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year.png")
+
+```
+
+### 2.3. Geospatial analysis 
+
+I adapted code from [this](https://github.com/Robinlovelace/Creating-maps-in-R), [this](https://geocompr.robinlovelace.net/adv-map.html#animated-maps) and [this](https://d4tagirl.com/2017/05/how-to-plot-animated-maps-with-gganimate) site.
+
+#### 2.3.1. Geocoding
+
+```{r}
+
+# Base map
+
+us_states <- map_data("state")
+us_county <- map_data("county")
+
+# Get state names 
+
+asian_org$region <- tolower(abbr2state(asian_org$States))
+latino_org$region <- tolower(abbr2state(latino_org$States))
+
+# Create fuctions 
+
+county_map <- function(data){
+  data_county<- count(data, County)
+
+  colnames(data_county)[1] <- "subregion"
+
+  data_county$subregion <- as.character(data_county$subregion)
+  data_county$subregion <- tolower(data_county$subregion)
+
+  us_county_data <- left_join(us_county, data_county)
+  return(us_county_data)
+}
+
+state_map <- function(data){
+  data_state<- count(data, region)
+  
+  colnames(data_state)[1] <- "region"
+  
+  data_state$region <- as.character(data_state$region)
+  data_state$region <- tolower(data_state$region)
+  
+  us_state_data <- left_join(us_states, data_state)
+  return(us_state_data)
+}
+
+# Get state and county maps 
+
+asian_state_map <- state_map(asian_org)
+latino_state_map <- state_map(latino_org)
+
+asian_county_map <- county_map(asian_org)
+latino_county_map <- county_map(latino_org)
+
+```
+
+#### 2.3.2. Plotting  
+
+##### 2.3.2.1. Static maps 
+
+```{r}
+
+# Asian Americans
+
+## State
+
+asian_state <- ggplot(data = asian_state_map,
+            aes(x = long, y = lat,
+                group = group, fill = n))+
+  geom_polygon(color = "gray90", size = 0.05) +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  theme_map() +
+  labs(fill = "Number of organizations",
+       title = "Asian American advocacy and CBOs in States (2017)")+
+  theme(legend.position = "bottom") 
+
+## County 
+
+asian_county <- ggplot(data = asian_county_map,
+            aes(x = long, y = lat,
+                group = group, fill = n))+
+  geom_polygon(color = "gray90", size = 0.05) +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  theme_map() +
+  labs(fill = "Number of organizations",
+       title = "Asian American advocacy and CBOs in Counties (2017)")+
+  theme(legend.position = "bottom") 
+
+# Latinos 
+
+## State
+
+latino_state <- ggplot(data = latino_state_map,
+            aes(x = long, y = lat,
+                group = group, fill = n))+
+  geom_polygon(color = "gray90", size = 0.05) +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  theme_map() +
+  labs(fill = "Number of organizations",
+       title = "Latino advocacy and CBOs in States (2017)")+
+  theme(legend.position = "bottom") 
+
+## County 
+
+latino_county <- ggplot(data = latino_county_map,
+            aes(x = long, y = lat,
+                group = group, fill = n))+
+  geom_polygon(color = "gray90", size = 0.05) +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  theme_map() +
+  labs(fill = "Number of organizations",
+       title = "Latino advocacy and CBOs in Counties (2017)")+
+  theme(legend.position = "bottom") 
+
+(asian_state + asian_county) / (latino_state + latino_county)
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/state_county_maps.png")
+```
+
+##### 2.3.2.2. Dynamic maps 
+
+```{r}
+
+# Asian Americans
+
+## County 
+
+ggplot(data = asian_county_map,
+            aes(x = long, y = lat,
+                group = group, fill = n))+
+  geom_polygon(color = "gray90", size = 0.05) +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  theme_map() +
+  labs(fill = "Number of organizations",
+       title = "Asian American advocacy and CBOs in Counties (2017)")+
+  theme(legend.position = "bottom") 
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/animated_asian_county_maps.png")
+
+```
+
+```{r}
+# Latinos 
+
+## County 
+
+ggplot(data = latino_county_map,
+            aes(x = long, y = lat,
+                group = group, fill = n))+
+  geom_polygon(color = "gray90", size = 0.05) +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  theme_map() +
+  labs(fill = "Number of organizations",
+       title = "Latino advocacy and CBOs in Counties (2017)")+
+  theme(legend.position = "bottom") 
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/animated_latino_county_map.png")
+
+```
+
