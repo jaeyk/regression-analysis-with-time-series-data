@@ -108,16 +108,34 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/a
 
 ```{r}
 
+# Create the full years
+
+asian_all_years <- seq(min(asian_org$F.year), max(asian_org$F.year))
+latino_all_years <- seq(min(latino_org$F.year), max(latino_org$F.year))
+
+# Turn it into a dataframe 
+
+asian_all_years <- data.frame(F.year = asian_all_years)
+latino_all_years <- data.frame(F.year = latino_all_years)
+
+# Count by year and type
+
 # Count by year and type
 
 asian_year <- asian_org %>%
   count(F.year, States, Type) %>%
-  rename(Freq = n) 
+  rename(Freq = n) %>%
+  right_join(asian_all_years, by = "F.year")
 
 latino_year <- latino_org %>%
   count(F.year, States, Type) %>% 
-  rename(Freq = n) 
+  rename(Freq = n) %>%
+  right_join(latino_all_years, by = "F.year")
 
+# Replace NAs with 0s
+
+asian_year$Freq[is.na(asian_year$Freq)] <- 0
+latino_year$Freq[is.na(latino_year$Freq)] <- 0
 ```
 
 #### 2.2.2 Plotting
@@ -138,6 +156,7 @@ merged_running_total <- merged %>%
 # Plot
 
 merged_running_total %>%
+  filter(!is.na(Type)) %>%
   ggplot(aes(x = F.year, y = Freq)) +
     geom_col() +
     labs(x = "Year", y = "Number of organizations founded in each year") +
@@ -145,7 +164,8 @@ merged_running_total %>%
     xlim(c(1960,2017)) + 
     theme_base() 
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year.png", height = 8)
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year.png", height = 8, width = 8)
+
 ```
 
 ### 2.3. Geospatial analysis 
