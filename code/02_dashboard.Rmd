@@ -1,0 +1,103 @@
+---
+title: "Asian American and Latino community-based and advocacy organizations"
+author: "Jae Yeon Kim"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+# Clean up the environment
+
+rm(list = ls())
+
+# Import libraries (adapted from this link: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(
+        tidyverse, # for the tidyverse framework
+        patchwork, # for arranging ggplots 
+        ggpubr, # for arranging ggplots 
+        ggthemes, # for fancy ggplot themes
+        
+        ### For making maps (https://geocompr.robinlovelace.net/adv-map.html#animated-maps)
+        
+        sf,
+        raster,
+        spData, 
+        ggmap,
+        maps,
+        mapdata,
+        tmap,     # for static and interactive maps
+        leaflet,  # for interactive maps
+        mapview,  # for interactive maps
+        shiny,    # for web applications
+        openintro, # for abbr2state function 
+        gganimate, # for animated maps
+        gifski, # for animated maps
+        DT, # for data tables 
+        flexdashboard # fordashboard
+)
+
+```
+
+
+```{r}
+# Import files 
+
+asian_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv")
+
+latino_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv")
+
+asian_county_map <- read_rds( "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/asian_county_map")
+
+latino_county_map<- read_rds( "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_county_map")
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+```{r}
+ggplot(data = asian_county_map,
+            aes(x = long, y = lat,
+                group = group, fill = n))+
+  geom_polygon(color = "gray10", size = 0.05) +
+  labs(fill = "Number of organizations",
+       title = "Asian American advocacy and CBOs",
+       subtitle = "In Counties (2017)")+
+  theme_map()
+```
+
+Column 
+
+```{r}
+ggplot(data = latino_county_map,
+            aes(x = long, y = lat,
+                group = group, fill = n))+
+  geom_polygon(color = "gray10", size = 0.05) +
+  labs(fill = "Number of organizations",
+       title = "Asian American advocacy and CBOs",
+       subtitle = "In Counties (2017)")+
+  theme_map()
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Asian American Community-based and Advocacy Organizations
+
+```{r}
+datatable(asian_org %>% dplyr::select(-Address), 
+          rownames = FALSE,
+          options = list(pagelength = 10))
+```
+
+### Latino Community-based and Advocacy Organizations
+
+```{r}
+datatable(latino_org %>% dplyr::select(-Address), 
+          rownames = FALSE,
+          options = list(pagelength = 10))
+```

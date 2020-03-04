@@ -1,0 +1,394 @@
+---
+title: "Descriptive analysis"
+author: "Jae Yeon Kim"
+output:
+html_document: 
+  toc: true
+  theme: united
+---
+
+## 0. Setup 
+
+I tweaked the global option of the R Markdown to enlarge figures produced by ggplot2.
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width = 12, fig.height = 8, 
+                      echo = FALSE, warning = FALSE, message = FALSE) # global setting for enlarging image size
+```
+
+```{r}
+
+# Clean up the environment
+
+rm(list = ls())
+
+# Import libraries (adapted from this link: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(
+        tidyverse, # for the tidyverse framework
+        patchwork, # for arranging ggplots 
+        ggpubr, # for arranging ggplots 
+        ggthemes, # for fancy ggplot themes
+        
+        ### For making maps (https://geocompr.robinlovelace.net/adv-map.html#animated-maps)
+        
+        sf,
+        raster,
+        spData, 
+        ggmap,
+        maps,
+        mapdata,
+        tmap,     # for static and interactive maps
+        leaflet,  # for interactive maps
+        mapview,  # for interactive maps
+        shiny,    # for web applications
+        openintro, # for abbr2state function 
+        gganimate, # for animated maps
+        gifski # for animated maps
+)
+
+```
+
+
+## 1. Load files
+
+```{r}
+
+# Load files
+
+asian_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv")
+
+latino_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv")
+
+cap <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/cap_recoded.csv")
+
+historical_census <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/historical_census.csv")
+
+all_combined <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/all_combined.csv")
+
+# Column name change
+colnames(all_combined)[1] <- "City" 
+
+reagan <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_budget.csv")
+
+asian_latino_census <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_latino_census.csv")                     
+
+reagan_org_extended <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_org_extended.csv") 
+
+basic_party_covariates <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/basic_party_covariates.csv") 
+
+# hopkins <- read.csv("/home/jae/opportunity_over_threat/Data/Hopkins/immigsalience9206public.csv")
+
+# Asian professional organizations 
+asian_prof_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_prof_org.csv")
+
+# Latino professional organizations
+latino_prof_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_prof_org.csv")
+
+# Set theme 
+
+source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/theme_publications.r")
+
+theme_set(theme_Publication())
+
+```
+
+## 2. Wrangle data 
+
+```{r}
+# Merge 
+
+asian_census <- asian_latino_census %>%
+  filter(Group == "Asian")
+
+latino_census <- asian_latino_census %>%
+  filter(Group == "Latino")
+
+```
+
+
+```{r}
+
+# Set dplyr 
+conflicted::conflict_prefer("select", "dplyr")
+conflicted::conflict_prefer("filter", "dplyr")
+
+# Merge
+asian_org <- asian_org %>%
+  select(F.year, Type)
+
+latino_org <- latino_org %>%
+  select(F.year, Type)
+
+merge_by_group <- function(x, y){
+  bind_rows(
+    mutate(x, category="Asian"),
+    mutate(y, category="Latino"))
+}
+
+combined_org <- merge_by_group(asian_org, latino_org)
+
+org_freq <- rename(count(combined_org, F.year, Type, category), Freq=n)
+
+```
+
+```{r}
+# Column name change
+colnames(org_freq)[1] <- "Year"
+
+all_years <- seq(min(org_freq$Year), max(org_freq$Year), by = 1)
+
+# Turn it into a dataframe 
+
+all_years <- data.frame(Year = all_years)
+
+# Filling the missing days 
+
+org_freq <- all_years %>%
+  merge(org_freq, by = "Year", all.x = TRUE)
+
+# Merge
+reagan_org <- merge(org_freq,
+                           subset(reagan, Category == "ETES"), by = "Year")
+
+# Add covariates 
+
+colnames(basic_party_covariates)[1] <- "Year"
+
+reagan_org <- merge(reagan_org, basic_party_covariates, by = "Year")
+
+reagan_org$divided <- reagan_org$presidency + reagan_org$senate + reagan_org$house
+
+reagan_org$Asian <- ifelse(reagan_org$category == "Asian", 1, 0)
+
+reagan_org$intervention <- ifelse(reagan_org$Year <= 1980, 1, 0)
+
+```
+
+
+## 3. Descriptive analysis 
+
+```{r}
+
+ggplot(reagan_org, aes(x = Year, y = Percentage)) +
+  geom_point() +
+  geom_line() + #  geom_vline(xintercept = c(1981,1984), col = "red", linetype ="dashed") +
+ # ggplot2::annotate("rect", xmin = 1981, xmax = 1984, ymin = 0, ymax = 7.2, alpha = .2)+
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) + # scale parameter determines the digits
+  ylab("Budget for education, employment, and social service") 
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/reagan_budget_cut.png")
+
+```
+
+## 4. Statistical modeling 
+
+```{r}
+
+visualize_its<- function(input){
+  
+  # Apply OLS regression
+  
+  model <- lm(Freq ~ intervention + Percentage + Asian + presidency + senate + house, data = input)
+  
+  # Make predictions 
+  
+  input$pred <- predict(model, type = "response", input)
+    
+  # Create confidence intervals  
+  
+  ilink <- family(model)$linkinv # Extracting the inverse link from parameter objects 
+  
+  # Combined prediction outputs 
+  
+  input <-predict(model, input, se.fit = TRUE)[1:2] %>%
+    bind_cols(input) %>%
+    mutate(
+      upr = ilink(fit + (2 * se.fit)),
+      lwr = ilink(fit - (2 * se.fit)))
+  
+  # Visualize the outcome 
+  
+  return(input)
+}
+
+```
+```{r}
+visualize_its(reagan_org) %>%
+   ggplot(aes(x = Year, y = Freq)) +
+    geom_point(alpha = 0.2) +
+#    facet_wrap(~group, scale = "free_y") +
+    geom_line(aes(y = pred), size = 1) +
+    ggthemes::theme_base() +
+    geom_vline(xintercept = c(1981), linetype = "dashed", size = 1, color = "red") +
+    ggthemes::theme_base() +
+    labs(x = "Year",
+         y = "Organizational founding") +
+    geom_ribbon(aes(ymin = lwr, ymax = upr),
+                alpha = 0.3, color = "blue")
+```
+
+# Regression analysis
+
+## Percentage
+
+### Modeling
+```{r}
+reagan_org_extended$Type[reagan_org_extended$Type == "Hybrid"] <- "CBO"
+
+# create models 
+pre_model1 <- lm(Freq ~ Percentage + Asian, 
+             data=subset(reagan_org_extended, Year <= 1980))
+pre_model2 <- lm(Freq ~ Percentage + pop_percentage + Asian, 
+             data=subset(reagan_org_extended, Year <= 1980))
+pre_model3 <- lm(Freq ~ Percentage + pop_percentage + Asian + presidency, 
+             data=subset(reagan_org_extended, Year <= 1980))
+pre_model4 <- lm(Freq ~ Percentage + pop_percentage + Asian + presidency, 
+             data=subset(reagan_org_extended, Year <= 1980 & Type == "CBO"))
+
+post_model1 <- lm(Freq ~ pop_percentage + Asian, 
+             data=subset(reagan_org_extended, Year > 1981))
+post_model2 <- lm(Freq ~ pop_percentage + Percentage + Asian, 
+             data=subset(reagan_org_extended, Year > 1981))
+post_model3 <- lm(Freq ~ pop_percentage + Percentage + Asian + presidency + senate + house, 
+             data=subset(reagan_org_extended, Year > 1981))
+post_model4 <- lm(Freq ~ pop_percentage + Percentage + Asian + presidency + senate + house, 
+             data=subset(reagan_org_extended, Year > 1981 & Type == "CBO"))
+
+
+```
+
+
+### Plot
+
+```{r}
+
+# models 
+models <- reagan_org_extended %>%
+  mutate(WOP = ifelse(Year <= 1980, "Pre-Reagan", "Post-Reagan")) %>%
+  mutate(WOP = factor(WOP, levels = c("Pre-Reagan", "Post-Reagan"))) %>%
+  group_by(WOP, Type) %>%
+  do(ols = lm(Freq ~ pop_percentage + Percentage + Asian + presidency + senate + house, data = .),
+     glm = glm(Freq ~ pop_percentage + Percentage + Asian + presidency + senate + house, data = .)) %>%
+  tidy(ols, conf.int = TRUE) %>%
+  filter(term == "Percentage" | term == "pop_percentage") 
+
+models$term[models$term == "Percentage"] <- "Federal funding (%)"
+models$term[models$term == "pop_percentage"] <- "Population (%)"
+
+models %>%
+  ggplot(aes(term, estimate)) +
+    geom_point() +
+    geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+    
+    coord_flip() +
+    facet_grid(WOP ~ Type) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    labs(y = "OLS coefficients", x = "")
+
+ggsave("/home/jae/opportunity_over_threat/Output/reg_comp.png")
+
+models
+```
+
+
+```{r}
+# plots 
+reg_pre_reagan <- plot_summs(pre_model1, pre_model2, pre_model3, pre_model3, pre_model4, pre_model4,
+           robust = list(FALSE, FALSE, FALSE, "HC1",FALSE,"HC1"),
+           coefs = c("Social spending (%)" = "Percentage","Population (%)" = "pop_percentage"),
+           omit.coefs = c("Asian","presidency","senate","house","(Intercept)"),
+           model.names = c("Asian/Latino dummy","Asian/Latino dummy and population","Full specification","Full specification with robust SEs","Only CBOS; Full specification","Only CBOs; Full specification with robust SEs")) +
+  theme(legend.position = "bottom")+
+  guides(col = guide_legend(nrow = 3)) +
+  ggtitle("Pre-Reagan") +
+  theme_bw() +
+  ylab("") +
+  xlim(c(-2,3))
+
+reg_post_reagan <- plot_summs(post_model1, post_model2, post_model3, post_model3, post_model4, post_model4, 
+           robust = list(FALSE, FALSE, FALSE, "HC1",FALSE,"HC1"),
+           coefs = c("Social spending (%)" = "Percentage","Population (%)" = "pop_percentage"),
+           omit.coefs = c("Asian","presidency","senate","house","(Intercept)"),
+           model.names = c("Asian/Latino dummy","Asian/Latino dummy and social spending","Full specification","Full specification with robust SEs","Only CBOS; Full specification","Only CBOs; Full specification with robust SEs")) +
+  theme(legend.position = "bottom") +
+  guides(col = guide_legend(nrow = 3)) +
+  ggtitle("Post-Reagan") +
+  theme_bw() +
+  ylab("")+
+  xlim(c(-2,3)) 
+  
+ggarrange(reg_pre_reagan, reg_post_reagan, ncol = 1, nrow = 2)
+```
+
+### Table
+```{r}
+# create regression tables
+stargazer(pre_model2, pre_model3, pre_model4, 
+          align = TRUE, 
+          no.space = TRUE, 
+          style = "apsr", 
+          title = "Pre-Reagan regression results",
+          covariate.labels = c("Federal funding (%)","Population (%)","Asian","Presidency"),
+          dep.var.caption = "A Number of organizations",
+          dep.var.labels = "Number of organizations",
+          star.cutoffs = c(0.05, 0.01, 0.001))
+```
+
+```{r}
+stargazer(post_model2, post_model3, post_model4, 
+          align = TRUE, 
+          no.space = TRUE, 
+          style = "apsr", 
+          title = "Post-Reagan regression results",
+          covariate.labels = c("Population (%)","Federal funding (%)","Asian","Presidency","Senate","House"),
+          dep.var.caption = "A Number of organizations",
+          dep.var.labels = "Number of organizations",
+          star.cutoffs = c(0.05, 0.01, 0.001))
+
+
+```
+
+
+## Size
+```{r}
+
+alt_pre_model1 <- lm(Freq ~ log(Size) + Asian, 
+             data=subset(reagan_org_extended, Year <= 1980))
+alt_pre_model2 <- lm(Freq ~ log(Size) + pop_percentage + Asian, 
+             data=subset(reagan_org_extended, Year <= 1980))
+alt_pre_model3 <- lm(Freq ~ log(Size) + pop_percentage + Asian + presidency + senate + house, 
+             data=subset(reagan_org_extended, Year <= 1980))
+
+alt_post_model1 <- lm(Freq ~ pop_percentage + log(Size) + Asian, 
+             data=subset(reagan_org_extended, Year > 1980))
+alt_post_model2 <- lm(Freq ~ pop_percentage + log(Size) + Asian, 
+             data=subset(reagan_org_extended, Year > 1980))
+alt_post_model3 <- lm(Freq ~ pop_percentage + log(Size) + Asian + presidency + senate + house, 
+             data=subset(reagan_org_extended, Year > 1980))
+
+stargazer(alt_pre_model1, alt_pre_model2, alt_pre_model3,
+          align = TRUE, 
+          no.space = TRUE, 
+          style = "apsr", 
+          title = "Pre-Reagan regression results",
+          covariate.labels = c("Social spending (logged amount)","Population (%)","Asian","Presidency","Senate","House"),
+          dep.var.caption = "A Number of organizations",
+          dep.var.labels = "Number of organizations")
+
+
+stargazer(alt_post_model1, alt_post_model2, alt_post_model3, 
+          align = TRUE, 
+          no.space = TRUE, 
+          style = "apsr", 
+          title = "Post-Reagan regression results",
+          covariate.labels = c("Population (%)","Social spending (logged amount)","Asian","Presidency","Senate","House"),
+          dep.var.caption = "A Number of organizations",
+          dep.var.labels = "Number of organizations")
+```
+
+
+
+
+

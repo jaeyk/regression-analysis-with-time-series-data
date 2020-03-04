@@ -45,7 +45,7 @@ pacman::p_load(
         shiny,    # for web applications
         openintro, # for abbr2state function 
         gganimate, # for animated maps
-        gifski, # for animated maps
+        gifski # for animated maps
 )
 
 ```
@@ -64,8 +64,43 @@ asian_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastru
 
 latino_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv")
 
-glimpse(asian_org)
-glimpse(latino_org)
+cap <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/cap_recoded.csv")
+
+historical_census <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/historical_census.csv")
+
+all_combined <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/all_combined.csv")
+
+# Column name change
+colnames(all_combined)[1] <- "City" 
+
+reagan <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_budget.csv")
+
+asian_latino_census <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_latino_census.csv")                     
+
+reagan_org_extended <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_org_extended.csv") 
+
+basic_party_covariates <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/basic_party_covariates.csv") 
+
+# hopkins <- read.csv("/home/jae/opportunity_over_threat/Data/Hopkins/immigsalience9206public.csv")
+
+# Asian professional organizations 
+asian_prof_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_prof_org.csv")
+
+# Latino professional organizations
+latino_prof_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_prof_org.csv")
+
+# Chinese service org 
+chinese_service_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/chinese_service_org.csv") 
+  
+# Mexican service org 
+mexican_service_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/mexican_service_org.csv")
+
+# Set theme 
+
+source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/theme_publications.r")
+
+theme_set(theme_Publication())
+
 ```
 
 ## 2. Descriptive analysis
@@ -73,6 +108,7 @@ glimpse(latino_org)
 ### 2.1. Cross-sectional analysis
 
 ```{r}
+
 aa_org_n <- asian_org %>%
   dplyr::select(City, Type) %>%
   group_by(Type) %>%
@@ -138,7 +174,7 @@ asian_year$Freq[is.na(asian_year$Freq)] <- 0
 latino_year$Freq[is.na(latino_year$Freq)] <- 0
 ```
 
-#### 2.2.2 Plotting
+#### 2.2.2. Plotting
 
 ```{r}
 
@@ -147,25 +183,50 @@ latino_year$Freq[is.na(latino_year$Freq)] <- 0
 merged <- bind_rows(mutate(asian_year, group = "Asian Americans"),
           mutate(latino_year, group = "Latinos"))
 
-# Running total 
-
-merged_running_total <- merged %>%
-  group_by(group, Type) %>% 
-  mutate(running_total = cumsum(Freq))
-
 # Plot
 
-merged_running_total %>%
+merged %>%
   filter(!is.na(Type)) %>%
   ggplot(aes(x = F.year, y = Freq)) +
     geom_col() +
     labs(x = "Year", y = "Number of organizations founded in each year") +
     facet_grid(Type~group) +
-    xlim(c(1960,2017)) + 
-    theme_base() 
+    xlim(c(1960,2017)) 
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year.png", height = 8, width = 8)
 
+```
+
+```{r}
+
+panethnic <- merged %>%
+  filter(!is.na(Type)) %>%
+  filter(Type == "CBO") %>%
+  ggplot(aes(x = F.year, y = Freq)) +
+    geom_col() +
+    labs(x = "Year", y = "Number of organizations founded in each year",
+         title = "Panethnic organizations",
+         subtitle = "Only included CBOs") +
+    facet_grid(~group) +
+    xlim(c(1960,2017)) + 
+    ylim(c(0, 20))
+    
+
+ethnic <- bind_rows(mutate(chinese_service_org[,c("Name", "F.year")], group = "Chinese"),
+          mutate(mexican_service_org[,c("Name", "F.year")], group = "Mexicans")) %>% 
+  count(F.year, group) %>%
+  ggplot(aes(x = F.year, y = n)) +
+    geom_col() +    
+    labs(x = "Year", y = "Number of organizations founded in each year",
+         title = "Ethnic organizations",
+         subtitle = "Only included CBOs") +     
+    facet_grid(~group) +
+    xlim(c(1960,2017)) + 
+    ylim(c(0, 20))
+
+panethnic / ethnic
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year_combined.png", height = 10, width = 8)
 ```
 
 ### 2.3. Geospatial analysis 
@@ -249,6 +310,9 @@ latino_county_map <- county_map(latino_org)
 asian_county_year_map <- county_year_map(asian_org)
 latino_county_year_map <- county_year_map(latino_org)
 
+write_rds(asian_county_map, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/asian_county_map")
+write_rds(latino_county_map, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_county_map")
+
 ```
 
 #### 2.3.2. Plotting  
@@ -279,7 +343,7 @@ theme_map <- function(...) {
 
 ```
 
-##### 2.3.2.1. Static maps 
+##### 2.3.2.1. Maps 
 
 ```{r}
 
