@@ -41,6 +41,12 @@ pacman::p_load(
         flexdashboard # fordashboard
 )
 
+# Set theme 
+
+source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/theme_publications.r")
+
+theme_set(theme_Publication())
+
 ```
 
 

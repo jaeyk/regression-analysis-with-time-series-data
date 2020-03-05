@@ -9,13 +9,6 @@ html_document:
 
 ## 0. Setup 
 
-I tweaked the global option of the R Markdown to enlarge figures produced by ggplot2.
-
-```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width = 12, fig.height = 8, 
-                      echo = FALSE, warning = FALSE, message = FALSE) # global setting for enlarging image size
-```
-
 ```{r}
 
 # Clean up the environment
@@ -64,35 +57,14 @@ asian_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastru
 
 latino_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv")
 
-cap <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/cap_recoded.csv")
-
-historical_census <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/historical_census.csv")
-
-all_combined <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/all_combined.csv")
-
-# Column name change
-colnames(all_combined)[1] <- "City" 
-
 reagan <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_budget.csv")
 
-asian_latino_census <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_latino_census.csv")                     
-
-reagan_org_extended <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_org_extended.csv") 
-
-basic_party_covariates <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/basic_party_covariates.csv") 
-
-# hopkins <- read.csv("/home/jae/opportunity_over_threat/Data/Hopkins/immigsalience9206public.csv")
-
-# Asian professional organizations 
-asian_prof_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_prof_org.csv")
-
-# Latino professional organizations
-latino_prof_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_prof_org.csv")
-
 # Chinese service org 
+
 chinese_service_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/chinese_service_org.csv") 
   
 # Mexican service org 
+
 mexican_service_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/mexican_service_org.csv")
 
 # Set theme 
