@@ -282,118 +282,108 @@ for_loop %>%
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/AIC_scores.png")
 
-for_loop %>%
-  gather(measures, values, c(Fed_funding, Pop_growth)) %>%
-  ggplot(aes(x = Year, y = values)) +
+fed_coef <- for_loop %>%
+  ggplot(aes(x = Year, y = Fed_funding)) +
   geom_point() +
-  facet_wrap(~measures) +
   geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
-  labs(title = "Changes in Regression Coefficients", 
+  labs(title = "Federal funding", 
        subtitle = "Only included CBOs", y = "OLS coefficients") +
-  annotate("rect", xmin = 1964, xmax = 1980, ymin = -7, ymax = 4, alpha = .2)
+  annotate("rect", xmin = 1970, xmax = 1980, ymin = -7, ymax = 4, alpha = .2)
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/reg_coeffs.png")
+pop_coef <- for_loop %>%
+  ggplot(aes(x = Year, y = Pop_growth)) +
+  geom_point() +
+  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
+  labs(title = "Population growth", 
+       subtitle = "Only included CBOs", y = "OLS coefficients") +
+  annotate("rect", xmin = 1970, xmax = 1980, ymin = -7, ymax = 4, alpha = .2)
+  
+fed_coef + pop_coef 
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/reg_coeffs.png",
+              height = 6, width = 10)
 
 ```
-
 
 ### 5.4. Bootstrapping 
 
 ```{r}
 
-# For reproducibility
+boot_ci <- function(i){
+
 set.seed(1234)
 
 stat <- data.frame()
 result <- data.frame()
-year <- NA
+year <- data.frame()
 
-n = length(reagan_org$Year)
-B = 30
+boot.data <- subset(reagan_org, Year <= 1970 + i)
 
-for (i in c(0:5)){
+m <- Boot(lm(Freq ~ Percentage + pop_percentage + category, data = boot.data), R = 1000)
 
-for (draw in 1:B)
-{
+stat = rbind(stat, summary(m) %>% data.frame() %>% select(bootSE))
 
-  boot.data = subset(reagan_org, Year <= 1970 + i)[sample(1:n, size = n, replace = TRUE), ]
-  model = lm(Freq ~ Percentage + pop_percentage + category, data = boot.data) 
-  df = data.frame(coef(model))
-  stat = rbind(stat, df)
+Year = rep(c(1970 + i), nrow(stat))
 
-}
-  year[i] = rep(c(1970 + i), length(stat$coef.model.))
-  result = cbind(stat, year)
-}
+Names = c("Intercept", "Fed_SE", "Pop_SE", "Latino_SE")
 
-result
+result = cbind(stat, Year, Names)
 
-```
+rownames(result) <- NULL
 
-```{r}
-
-for (i in c(0:38)){
-lm_model <- lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
-
-lm_boot <- lm.boot(lm_model, R = 1)
-
-tidied_boot <- samples(lm_boot, name = c("coef")) %>% tidy() 
-
-summary_stat <- tidied_boot %>%
-  gather(sims, values, c(2:ncol(.))) %>%
-  group_by(.rownames) %>%
-  summarize(mean = mean(values),
-            se = std.error(values)) %>%
-  filter(.rownames == "Percentage" | .rownames == "pop_percentage")
-
-fed_mean[i] <- summary_stat[1,2]
-fed_se[i] <- summary_stat[1,3]
-pop_mean[i] <- summary_stat[2,2]
-pop_se[i] <- summary_stat[2,3]
-year[i] <- year[i] <- 1970 + i
-}
-
-boot_for_loop <- data.frame("Fed_mean" = fed_mean %>% unlist(),
-                            "Fed_se" = fed_se %>% unlist(),
-                            "Pop_mean" = pop_mean %>% unlist(),
-                            "Pop_se" = pop_se %>% unlist(),
-                            "Year" = year %>% unlist())
-
-boot_for_loop %>%
-  ggplot(aes(x = Year, y = Fed_mean, ymax = Fed_mean + 2*Fed_se, ymin = Fed_mean - 2*Fed_se)) +
-  geom_point() +
-  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
-  labs(title = "Federal funding", y = "Bootstrapped coefficients")
-
-boot_for_loop %>%
-  ggplot(aes(x = Year, y = Fed_mean, ymax = Fed_mean + 2*Fed_se, ymin = Fed_mean - 2*Fed_se)) +
-  geom_point() +
-  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
-  labs(title = "Population", y = "Bootstrapped coefficients")
+result}
 
 ```
 
 
 ```{r}
-boot.coef <- data.frame("boot.coef" = boot.coef)
 
-boot.mean <- mean(boot.coef$boot.coef)
-boot.se <- sd(boot.coef$boot.coef)/sqrt(length(boot.coef$boot.coef))
+cis <- data.frame()
 
-ggplot(data = boot.coef, aes(x = boot.coef)) +
-  geom_histogram(alpha = 0.3) +
-  geom_vline(xintercept = c(mean(boot.coef) - 2*boot.se, mean(boot.coef)), col = "red", linetype ="dashed", size = 1) +
-  labs(y = "Frequency", x = "Coefficients")
+for (i in c(1:38)){
+  print(paste0(i, " iteration completed"))
+  cis = rbind(cis, boot_ci(i))
 }
 
-(visualize_boot(300) + ggtitle("R = 300")) + 
-(visualize_boot(1000) + ggtitle("R = 1,000")) + 
-(visualize_boot(10000) + ggtitle("R = 10,000"))  
+colnames(cis)[1:2] <- c("SE", "Year")
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/boot_sim.png", height = 5, width = 10)
+cis_spread <- cis %>%
+  spread(Names, SE) %>%
+  select(-c(Intercept, Latino_SE))
+
+boot_merged <- merge(cis_spread, for_loop)
+
+fed_boot <- boot_merged %>%
+  ggplot(aes(x = Year, y = Fed_funding, 
+             ymax = Fed_funding + 2*Fed_SE, 
+             ymin = Fed_funding - 2*Fed_SE)) +
+  geom_pointrange() +
+  labs(x = "Year", y = "OLS coefficients", 
+       title = "Federal funding",
+       subtitle = "With bootstrapped CIs") +
+  annotate("rect", xmin = 1970, xmax = 1980, ymin = -7, ymax = 4, alpha = .2) +
+  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") 
+
+pop_boot <- boot_merged %>%
+  ggplot(aes(x = Year, y = Pop_growth, 
+             ymax = Pop_growth + 2*Pop_SE, 
+             ymin = Pop_growth - 2*Pop_SE)) +
+  geom_pointrange() +
+  labs(x = "Year", y = "OLS coefficients", 
+       title = "Population growth",
+       subtitle = "With bootstrapped CIs") +
+  annotate("rect", xmin = 1970, xmax = 1980, ymin = -7, ymax = 4, alpha = .2) +
+  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") 
+
+fed_boot + pop_boot
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/boot_cis.png", 
+       height = 6, width = 10)
+
 ```
 
-## 7. Export LaTex tables
+
+## 6. Export LaTex tables
 ```{r}
 # create regression tables
 stargazer(pre_model2, pre_model3, pre_model4, 
