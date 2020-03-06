@@ -1,5 +1,5 @@
 ---
-title: "Statistical analysis"
+title: "Interrupted time series design analysis"
 author: "Jae Yeon Kim"
 output:
 html_document: 
@@ -32,7 +32,13 @@ pacman::p_load(
         plotrix, # for plotting functions
         stargazer, # for model outputs 
         MASS, # for negative binominal regression
-        pscl # for zero-inflated poisson
+        pscl, # for zero-inflated poisson
+        phenocamr, # for time series post-processing
+        fANCOVA, # for nonparametric analysis of covariance
+        RColorBrewer, # for color palettes 
+        robustbase, # for robust linear modeling 
+        lmtest, # for robustness checks
+        sensemakr # for sensitivity analysis
         )
 
 ```
@@ -66,6 +72,9 @@ source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions
 
 ## For ITS analysis
 source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/visualize_its.r")
+
+## For optimizing span parameter in loess 
+source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/span_loess.r")
 
 ## For custom ggtheme 
 source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/theme_publications.r")
@@ -159,7 +168,7 @@ reagan_org <- merge(reagan_org, basic_party_covariates, by = "Year")
 
 ```
 
-### 2.4. Additioanl tidying  
+### 2.4. Additional tidying  
 
 ```{r}
 
@@ -190,7 +199,7 @@ ggplot(reagan_org, aes(x = Year, y = Percentage)) +
   geom_point() +
   geom_line() +   
   geom_vline(xintercept = c(1981), col = "red", linetype ="dashed") +
-  ggplot2::annotate("rect", xmin = 1964, xmax = 1981, ymin = 0, ymax = 7.2, alpha = .2) +
+  annotate("rect", xmin = 1964, xmax = 1981, ymin = 0, ymax = 7.2, alpha = .2) +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) + # scale parameter determines the digits
   ylab("Budget for education, employment, and social service") +
   annotate(geom="text", x=1973, y=2, label="War on Poverty",
@@ -248,17 +257,25 @@ reagan_org$Freq <- as.integer(reagan_org$Freq)
 
 reagan_org$Type[reagan_org$Type == "Hybrid"] <- "CBO"
 
-ols.model <- ols_its(reagan_org) + ggtitle("OLS") + labs(y = "Organizatioanl founding") + ylim(c(-1,9))
+ols.model <- ols_its(reagan_org) + ggtitle("OLS") + labs(y = "Organizational founding") + ylim(c(-1,9))
 
-logged.ols.model <- ols_its(reagan_org %>% mutate(Freq = log(Freq))) + ggtitle("OLS with logged DV") + labs(y = "Organizatioanl founding (logged)") + ylim(c(-1, 4))
+logged.ols.model <- ols_its(reagan_org %>% mutate(Freq = log(Freq))) + ggtitle("OLS with logged DV") + labs(y = "Organizational founding (logged)") + ylim(c(-1, 4))
 
-poisson.model <- ps_its(reagan_org) + ggtitle("Poisson") + ylim(c(-1,9))
+ols.model + logged.ols.model
 
-nb.model <- ps_its(reagan_org) + ggtitle("Negative binominal") + ylim(c(-1,9))
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/ols_plots.png", width = 10)
 
-(ols.model + logged.ols.model) / (poisson.model + nb.model)
+```
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_plots.png", height = 5, width = 10)
+```{r}
+
+poisson.model <- ps_its(reagan_org) + ggtitle("Poisson") 
+
+nb.model <- ps_its(reagan_org) + ggtitle("Negative binominal") 
+
+poisson.model + nb.model 
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/non_ols_plots.png", width = 10)
 
 ```
 
@@ -266,17 +283,19 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/p
 
 ```{r}
 
+# test <- reagan_org
+
 reagan_org <- subset(reagan_org, Type == "CBO")
 
-lm.out <- lm(Freq ~ intervention + Percentage + pop_percentage + category + Type + presidency + senate + house, data = reagan_org)
+lm.out <- lm(Freq ~ intervention + Percentage + pop_percentage + category + presidency + senate + house, data = reagan_org)
 
-lm_log.out <- lm(log(Freq) ~ intervention + Percentage + pop_percentage + category + Type + presidency + senate + house, data = reagan_org)
+lm_log.out <- lm(log(Freq) ~ intervention + Percentage + pop_percentage + category + presidency + senate + house, data = reagan_org)
   
-poisson.out <- glm(Freq ~ intervention + Percentage + pop_percentage + category + Type + presidency + senate + house, data = reagan_org, family = "poisson")
+poisson.out <- glm(Freq ~ intervention + Percentage + pop_percentage + category + presidency + senate + house, data = reagan_org, family = "poisson")
 
-nb.out <- glm.nb(Freq ~ intervention + Percentage + pop_percentage + category + Type + presidency + senate + house, data = reagan_org)
+nb.out <- glm.nb(Freq ~ intervention + Percentage + pop_percentage + category + presidency + senate + house, data = reagan_org)
 
-stargazer(lm.out, lm_log.out, poisson.out, 
+stargazer(lm.out, lm_log.out, poisson.out, nb.out, 
           nb.out, type = "text")
 
 ```
@@ -296,17 +315,67 @@ dispersiontest(poisson.out, trafo = 1)
 ```{r}
 cat(paste0("OLS AIC:", AIC(lm.out), "\n",
        "Logged OLS AIC:", AIC(lm_log.out), "\n",
-       "Poisson AIC:", AIC(poisson.out)))
+       "Poisson AIC:", AIC(poisson.out), "\n",
+       "Negative Binominal AIC:", AIC(nb.out)))
 ```
 
-### 5.3. For loop 
+#### 5.3.2. AIC in time 
+
+```{r}
+
+lm.AIC <-NA
+lm_log.AIC <-NA
+poisson.AIC <- NA
+nb.AIC <- NA
+year <-NA
+
+for (i in c(0:38)){
+
+lm.out <- lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
+
+lm_log.out <- lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
+  
+poisson.out <- glm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i), family = "poisson")
+
+nb.out <- glm.nb(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
+
+lm.AIC[i] <- AIC(lm.out)
+lm_log.AIC[i] <- AIC(lm_log.out)
+poisson.AIC[i] <- AIC(poisson.out)
+nb.AIC[i] <- AIC(nb.out)
+  
+year[i] <- 1970 + i
+}
+
+AICs <- data.frame("OLS" = lm.AIC,
+                       "Logged_OLS" = lm_log.AIC,
+                       "Poisson" = poisson.AIC,
+                       "Negative_Binominal" = nb.AIC,
+                       "Year" = year)
+
+AICs %>%
+  gather(Models, values, OLS:Negative_Binominal) %>%
+  ggplot(aes(x = Year, y = values, col = Models)) +
+  scale_color_brewer(type = "div", palette = "Set1") +
+  geom_point() +
+  geom_line() +
+  labs(y = "AIC scores")
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/AIC_in_time.png",
+              height = 6, width = 10)
+
+```
+
+### 5.3. Discontinuity in time
+
+### 5.3.2. Coefficients 
 
 ```{r}
 
 fed <- NA
 pop <- NA
 year <- NA
-C()
+
 for (i in c(0:38)){
 model <- lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
 
@@ -351,7 +420,7 @@ stat = data.frame()
 result = data.frame()
 year = data.frame()
 
-m = Boot(lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i)), R = 1000)
+m = Boot(lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i)), R = 500)
 
 stat = rbind(stat, summary(m) %>% data.frame() %>% select(bootSE))
 
@@ -392,7 +461,8 @@ fed_boot <- boot_merged %>%
   labs(x = "Year", y = "OLS coefficients", 
        title = "Federal funding",
        subtitle = "With bootstrapped CIs") +
-  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") 
+  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +          
+  annotate("rect", xmin = 1964, xmax = 2010, ymin = -2, ymax = 0, alpha = .2)
   
 
 pop_boot <- boot_merged %>%
@@ -403,7 +473,8 @@ pop_boot <- boot_merged %>%
   labs(x = "Year", y = "OLS coefficients", 
        title = "Population growth",
        subtitle = "With bootstrapped CIs") +
-  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") 
+  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
+  annotate("rect", xmin = 1964, xmax = 2010, ymin = -8, ymax = 0, alpha = .2)
 
 fed_boot + pop_boot
 
@@ -412,32 +483,40 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/b
 
 ```
 
+### 5.5. Standard errors 
 
-## 6. Export LaTex tables
+I adated some code from [this post](https://www.brodrigues.co/blog/2018-07-08-rob_stderr/).
+```{r}
+
+lm_log.out <- lm(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org, Year <= 1980))
+
+```
+
+#### 5.5.1. Heteroskedasticity 
+
+- Null: the variance of residuals is constant = heteroskedasticity 
 
 ```{r}
-# create regression tables
-stargazer(pre_model2, pre_model3, pre_model4, 
-          align = TRUE, 
-          no.space = TRUE, 
-          style = "apsr", 
-          title = "Pre-Reagan regression results",
-          covariate.labels = c("Federal funding (%)","Population (%)","Asian","Presidency"),
-          dep.var.caption = "A Number of organizations",
-          dep.var.labels = "Number of organizations",
-          star.cutoffs = c(0.05, 0.01, 0.001))
+
+lmtest::bptest(lm_log.out)
+
 ```
 
 ```{r}
-stargazer(post_model2, post_model3, post_model4, 
-          align = TRUE, 
-          no.space = TRUE, 
-          style = "apsr", 
-          title = "Post-Reagan regression results",
-          covariate.labels = c("Population (%)","Federal funding (%)","Asian","Presidency","Senate","House"),
-          dep.var.caption = "A Number of organizations",
-          dep.var.labels = "Number of organizations",
-          star.cutoffs = c(0.05, 0.01, 0.001))
 
+lmrobfit <- lmrob(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org, Year <= 1980))
+
+stargazer(lm_log.out, lmrobfit, type = "text")
+
+```
+
+### 5.6. Sensitivity analysis 
+
+```{r}
+
+lm.sense <- sensemakr(lm_log.out, treatment = "Percentage",
+                         benchmark_covariates = c("pop_percentage", "categoryLatino"))
+
+summary(lm.sense)
 
 ```
