@@ -38,7 +38,9 @@ pacman::p_load(
         RColorBrewer, # for color palettes 
         robustbase, # for robust linear modeling 
         lmtest, # for robustness checks
-        sensemakr # for sensitivity analysis
+        sensemakr, # for sensitivity analysis
+        tm, # for text analysis 
+        quanteda # for text analysis
         )
 
 ```
@@ -58,8 +60,15 @@ reagan <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructu
 
 asian_latino_census <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_latino_census.csv")                     
 
+reagan_funding_1982 <- read.csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_funding_1982.csv")
+
+medicare <- read.csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/medicare.csv")
+
 # Party control data 
 basic_party_covariates <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/basic_party_covariates.csv") 
+
+# Community newspaper 
+ie_data <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/ie_data.csv")
 
 ```
 
@@ -81,6 +90,11 @@ source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions
 
 theme_set(theme_Publication())
 
+# Set preferred packages for conflicted functions 
+conflicted::conflict_prefer("select", "dplyr")
+conflicted::conflict_prefer("filter", "dplyr")
+conflicted::conflict_prefer("annotate", "ggplot2")
+
 ```
 
 ## 2. Wrangle data 
@@ -88,10 +102,6 @@ theme_set(theme_Publication())
 ### 2.1. Merge Asian American and Latino CBO and advocacy org 
 
 ```{r}
-
-# Set preferred packages for conflicted functions 
-conflicted::conflict_prefer("select", "dplyr")
-conflicted::conflict_prefer("filter", "dplyr")
 
 # Merge CBO and advocacy org data 
 org_freq <- merge_by_group(asian_org, latino_org) %>% 
@@ -193,6 +203,8 @@ reagan_org <- reagan_org %>%
 
 ### 3.1. Intervention 
 
+#### 3.1.1. Overall trend 
+
 ```{r}
 
 ggplot(reagan_org, aes(x = Year, y = Percentage)) +
@@ -200,7 +212,7 @@ ggplot(reagan_org, aes(x = Year, y = Percentage)) +
   geom_line() +   
   geom_vline(xintercept = c(1981), col = "red", linetype ="dashed") +
   annotate("rect", xmin = 1964, xmax = 1981, ymin = 0, ymax = 7.2, alpha = .2) +
-  scale_y_continuous(labels = scales::percent_format(scale = 1)) + # scale parameter determines the digits
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
   ylab("Budget for education, employment, and social service") +
   annotate(geom="text", x=1973, y=2, label="War on Poverty",
               color="red") +
@@ -209,9 +221,76 @@ ggplot(reagan_org, aes(x = Year, y = Percentage)) +
   xlim(c(1964,2017))
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/reagan_budget_cut.png")
+
+```
+
+#### 3.1.2. Specific programs 
+
+```{r}
+
+cuts <- as_tibble(reagan_funding_1982) %>%
+  ggplot(aes(x = fct_reorder(Name, -Outlays), y = Outlays*0.01)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    title = "The impact of Reagan budget cut on community empowerment programs",
+    subtitle = "Percentage difference between 1981 and 1982",
+    x = "Grant names", y = "Percentage")
+
+survived <- medicare %>%
+  ggplot(aes(x = factor(year), y = amount)) +
+  geom_vline(xintercept = factor(1981)) +
+  geom_col() +
+  labs(
+    title = "The impact of Reagan budget cut on indiviual assistance programs",
+    subtitle = "Total Medicare spending from 1970 to 2018 (in billion US dollars)",
+    x = "Year",
+    y = "Amount"
+  )
+
+cuts / survived 
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/grant_changes.png", width = 10, height = 8)
+
 ```
 
 ### 3.2. DV
+
+```{r}
+
+# Text data 
+ie_processed <- ie_data[,-1] %>% # drop the first col
+  ########################## Cleaning vars ##########################
+  mutate(date = gsub(".*:", "", date) %>% str_trim(),
+         date = gsub(",", "", date),
+         date = as.Date(as.character(date), format = "%b%d%Y"),
+         source = gsub(".*:", "", source) %>% str_trim(),
+         author = gsub(".*:", "", author) %>% str_trim())
+
+# Create a document term matrix based on a custom dictionary 
+ie_dic <- dfm(corpus(ie_processed), 
+              dictionary = dictionary(list(budget = 
+                                      c("spending","grants","grant","funding","funds","fund"))))
+
+# Add to the original data  
+ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
+
+# Plot
+ggplot(ie_processed) +
+  geom_histogram(aes(x = date), binwidth = 0.1) + 
+#  geom_vline(xintercept = c(as.Date("Jan 20, 1981", format = "%b%d%Y")), col = "red", linetype ="dashed") +
+  geom_point(aes(x = date, y = budget), size = 2, alpha = 0.3) +
+  geom_smooth(aes(x = date, y = budget), span = 0.1) +
+  labs(x = "Date" , y = "Count",  
+       title = "The frequency of budget related terms in a Reagan related article")  
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/dic_newspaper.png")
+
+```
+
+
+## 4. Treating outliers 
 
 ```{r}
 
@@ -222,10 +301,6 @@ ols_plot_cooksd_bar(model)
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/outliers_detected.png")
 
 ```
-
-## 4. Treating outliers 
-
-I used the capping function comes from [this post](https://stackoverflow.com/questions/13339685/how-to-replace-outliers-with-the-5th-and-95th-percentile-values-in-r) at StackOverFlow.
 
 ```{r}
 
@@ -502,11 +577,35 @@ lmtest::bptest(lm_log.out)
 
 ```
 
+#### 5.5.2. Autocorrelation test 
+
+- Null: the autocorrelation of residuals is 0. 
+
+```{r}
+lmtest::dwtest(lm_log.out)
+
+```
+
+- ACF shows an autoregressive pattern. 
+
+```{r}
+acf(residuals(lm_log.out))
+```
+
+- Using HAC standard errors 
+
+```{r}
+# Coefficient summary using the Newey-West SE estimates
+lm_new <- coeftest(lm_log.out, vcov = NeweyWest, prewhite = F, adjust = T)
+```
+
+#### 5.5.3. Outliers 
+
 ```{r}
 
 lmrobfit <- lmrob(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org, Year <= 1980))
 
-stargazer(lm_log.out, lmrobfit, type = "text")
+stargazer(lm_log.out, lm_new, lmrobfit, type = "text")
 
 ```
 

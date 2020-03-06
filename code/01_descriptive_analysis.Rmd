@@ -107,7 +107,7 @@ latino_org_n <- latino_org %>%
 
 aa_org_n / latino_org_n
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/asian_latino_orgs_n.png")
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/asian_latino_orgs_n.png", height = 8)
 
 ```
 ### 2.2. Time-series analysis

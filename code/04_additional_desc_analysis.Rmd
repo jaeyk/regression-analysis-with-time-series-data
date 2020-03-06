@@ -1,0 +1,104 @@
+---
+title: "Additional descriptive analysis"
+author: "Jae Yeon Kim"
+output:
+html_document: 
+  toc: true
+  theme: united
+---
+
+## 0. Setup 
+
+```{r}
+
+# Clean up the environment
+
+rm(list = ls())
+
+# Import libraries (adapted from this link: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(
+        tidyverse, # for the tidyverse framework
+        patchwork, # for arranging ggplots 
+        ggpubr, # for arranging ggplots 
+        ggthemes, # for fancy ggplot themes
+        AER, # for applied econometrics
+        olsrr, # for ols modeling
+        outliers, # for outliers
+        DMwR, # for data mining in R
+        simpleboot, # for bootstrapping 
+        broom, # for modeling
+        plotrix # for plotting functions
+        )
+
+```
+
+## 1. Load files
+
+```{r include=FALSE}
+
+ford <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/foundation.csv")
+
+```
+
+
+```{r include=FALSE}
+# Set theme 
+
+## Custom functions 
+source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r")
+
+## For custom ggtheme 
+source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/theme_publications.r")
+
+theme_set(theme_Publication())
+
+# Set preferred packages for conflicted functions 
+conflicted::conflict_prefer("select", "dplyr")
+conflicted::conflict_prefer("mutate", "dplyr")
+conflicted::conflict_prefer("filter", "dplyr")
+conflicted::conflict_prefer("summarize", "dplyr")
+conflicted::conflict_prefer("rename", "dplyr")
+conflicted::conflict_prefer("annotate", "ggplot2")
+
+```
+
+## 2. Wrangle data
+
+```{r}
+
+# Clean, mutate, group by, summarize, filter, and recode
+
+ford_sum <- ford %>%
+  rename(Foundation_name = Foundation) %>%
+  mutate(Grant_amount = as.numeric(gsub("," , "", as.character(Grant_amount))),
+         Org_name = str_trim(Org_name)) %>%
+  group_by(Org_name, Type, Groups, Start_year, End_year) %>%
+  summarize(sum_grant = sum(Grant_amount)) %>%
+  filter(Start_year >= 1960 & Start_year < 1980)
+
+ford_sum$Type[ford_sum$Type == "Service"] <- "CBO"
+ford_sum$Type[ford_sum$Type == "Mixed"] <- "Hybrid"
+
+```
+
+## 3. Descriptive analysis
+
+```{r}
+         
+ford_sum %>%
+    mutate(sum_grant = sum_grant / 10^6) %>%
+    ggplot(aes(x= reorder(Org_name, sum_grant), y = sum_grant, fill = Groups)) +
+    geom_bar(stat="identity")+
+    coord_flip()+
+    scale_fill_manual(name = "Group", labels = c("Asian","Latino"), values=c("red","blue")) +
+    labs(x = "Grantee names",
+         y = "Total amount of grants received",
+         title = "Ford foundation grants (1968 - 1998)") +
+    expand_limits(x = c(0, NA), y = c(0, NA)) +
+    scale_y_continuous(labels = scales::unit_format(unit = "Millions"))
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/ford_sum_graph.png", width = 11)
+
+```
