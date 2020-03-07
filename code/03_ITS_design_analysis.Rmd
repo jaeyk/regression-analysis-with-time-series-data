@@ -2,9 +2,10 @@
 title: "Interrupted time series design analysis"
 author: "Jae Yeon Kim"
 output:
-html_document: 
-  toc: true
-  theme: united
+  html_document:
+    toc: yes
+  pdf_document:
+    toc: yes
 ---
 
 ## 0. Setup 
@@ -590,6 +591,8 @@ lmtest::dwtest(lm_log.out)
 
 ```{r}
 acf(residuals(lm_log.out))
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/acf_test.png")
 ```
 
 - Using HAC standard errors 
