@@ -41,7 +41,10 @@ pacman::p_load(
         lmtest, # for robustness checks
         sensemakr, # for sensitivity analysis
         tm, # for text analysis 
-        quanteda # for text analysis
+        quanteda, # for text analysis
+        forecast, # for ARIMA modeling
+        tseries, # for stat tests for time series data 
+        nlme # for GLS
         )
 
 ```
@@ -562,6 +565,7 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/b
 ### 5.5. Standard errors 
 
 I adated some code from [this post](https://www.brodrigues.co/blog/2018-07-08-rob_stderr/).
+
 ```{r}
 
 lm_log.out <- lm(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org, Year <= 1980))
@@ -583,6 +587,7 @@ lmtest::bptest(lm_log.out)
 - Null: the autocorrelation of residuals is 0. 
 
 ```{r}
+
 lmtest::dwtest(lm_log.out)
 
 ```
@@ -590,9 +595,11 @@ lmtest::dwtest(lm_log.out)
 - ACF shows an autoregressive pattern. 
 
 ```{r}
+
 acf(residuals(lm_log.out))
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/acf_test.png")
+
 ```
 
 - Using HAC standard errors 
@@ -600,6 +607,7 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/a
 ```{r}
 # Coefficient summary using the Newey-West SE estimates
 lm_new <- coeftest(lm_log.out, vcov = NeweyWest, prewhite = F, adjust = T)
+  
 ```
 
 #### 5.5.3. Outliers 
