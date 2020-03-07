@@ -31,6 +31,7 @@ pacman::p_load(
         simpleboot, # for bootstrapping 
         broom, # for modeling
         plotrix, # for plotting functions
+        ggfortify, # extended version of ggplot
         stargazer, # for model outputs 
         MASS, # for negative binominal regression
         pscl, # for zero-inflated poisson
@@ -42,6 +43,8 @@ pacman::p_load(
         sensemakr, # for sensitivity analysis
         tm, # for text analysis 
         quanteda, # for text analysis
+        xts, # for time series objects 
+        zoo, # for time series objects 
         forecast, # for ARIMA modeling
         tseries, # for stat tests for time series data 
         nlme # for GLS
@@ -300,10 +303,10 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/d
 
 model <- lm(Freq ~ intervention + Percentage + pop_percentage + factor(category) + Type + presidency + senate + house, data = reagan_org)
 
-ols_plot_cooksd_bar(model)
+  ols_plot_cooksd_bar(model)
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/outliers_detected.png")
-
+  
 ```
 
 ```{r}
@@ -618,6 +621,13 @@ lmrobfit <- lmrob(log(Freq) ~ Percentage + pop_percentage + category + presidenc
 
 stargazer(lm_log.out, lm_new, lmrobfit, type = "text")
 
+bind_rows(mutate(lm_log.out %>% tidy(), Type = "lm"), 
+          mutate(lm_new %>% tidy(), Type = "HAC"))
+
+          mutate(lmrobfit %>% tidy(), Type = "lmrob"))
+
+lmrobfit %>% unlist() %>% select(contains("coefficients"))
+
 ```
 
 ### 5.6. Sensitivity analysis 
@@ -626,7 +636,5 @@ stargazer(lm_log.out, lm_new, lmrobfit, type = "text")
 
 lm.sense <- sensemakr(lm_log.out, treatment = "Percentage",
                          benchmark_covariates = c("pop_percentage", "categoryLatino"))
-
-summary(lm.sense)
-
+     
 ```
