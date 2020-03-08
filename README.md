@@ -1,6 +1,7 @@
-# analyzing-latino-asian-civic-infrastructure
-Analyzing Asian American and Latino Advocacy and Community-based organizations
+# regression-analysis-with-time-series-data
 
+
+**Regression analysis with time series data**
 
 - The goal of this article is to document how I have developed this machine learning + causal inference project from end to end. I intend to share my successes and failures from the project and what I learned along the journey. What was really challenging about this project was that I needed to apply a wide range of skills (e.g., parsing HTML pages, sampling, classifying texts, and inferring causality in time series data) at the different stages. But, that's also what made working on the project so fun!
 - Many people helped me to push this project forward. [Andrew Thompson](https://sites.northwestern.edu/athompson/) (Northwestern and MIT) was essential in getting the project started in summer 2019. He's also a co-author of the paper based on this project. We plan to present the findings at the upcoming Western Political Science Association annual meeting (we would love to see you there and hear your feedback). My three amazing Berkeley undergraduate RAs---[Carlos Ortiz](https://www.linkedin.com/in/carlosortizdev/), [Sarah Santiago](https://www.linkedin.com/in/sarah-santiago-7a297b18a/), and [Vivek Datta](https://www.linkedin.com/in/vivek-datta/)---made it possible to complete most of the data analysis in fall 2019.
@@ -8,7 +9,9 @@ Analyzing Asian American and Latino Advocacy and Community-based organizations
 
 ## Motivation
 
-As Andrew Ng said, [artificial intelligence, especially machine learning, is the new electricity](https://www.youtube.com/watch?v=21EiKfQYZXc). Yet, compared to the industry, the impact of machine learning has been relatively marginal in the social sciences. One reason for this is that most machine learning applications focus on prediction tools and have little to do with explaining the causal relationship between two variables, X and Y (causal inference). However, these relationships are what many social scientists deeply care about, as they are useful for making sound recommendations for policy or behavioral changes. In this context, I co-developed this project with Andrew Thompson to demonstrate **how machine learning can help create critical data for causal inference**. We hope that this project draws more social scientists to machine learning and AI.
+This project is part of my dissertation research. I have mostly worked with survey and experimental data to study political opinion among racial minority groups in the United States. However, as I started working on my dissertation prospectus, I realized that survey data is not a panacea. The major surveys on racial minority groups started in the 1990s and 2000s. It does not provide a good data source for studying what political issues were prevalent among racial minority communities during the civil rights movement. These data missed the defining period in American racial politics. As an alternative strategy to collect data, I developed a project that uses machine learning to classify newspaper articles circulated among racial minority groups from the 1960s through the 1980s. These articles were intentionally collected from the West Coast newspapers as my research focus was multiracial coalition-building.
+
+## Workflow
 
 **Figure 1**
 
