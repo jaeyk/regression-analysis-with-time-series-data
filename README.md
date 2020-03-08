@@ -70,7 +70,7 @@ org_to_ts <- function(data){
 }
 ```
 
-I also created a [dashboard](https://rpubs.com/jaeyeonkim/581083) based on the organizational data. In case, if you were interested in examining the data by yourself, please take a look.
+I also created a [dashboard](https://rpubs.com/jaeyeonkim/581083) based on the organizational data for those interested in examining the data by themselves.
 
 ## 2. Descriptive data analysis [[Code](https://github.com/jaeyk/regression-analysis-with-time-series-data/blob/master/code/01_descriptive_analysis.Rmd)]
 
