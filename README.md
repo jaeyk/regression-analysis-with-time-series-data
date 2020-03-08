@@ -85,7 +85,7 @@ Figure 1 shows that the founding rate (the slope of line plot) of community-base
 
 ## 3. Statistical modeling of time series data [[Code](https://github.com/jaeyk/regression-analysis-with-time-series-data/blob/master/code/03_ITS_design_analysis.Rmd)]
 
-### Checking on independent and dependent variables 
+### 3.1. Checking on independent and dependent variables
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/reagan_budget_cut.png)
 
@@ -101,7 +101,7 @@ Figure 3 shows how minority community members reacted to the budget crisis. The 
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/outliers_detected.png)
 
-### Interrupted time series design
+### 3.2. Interrupted time series design
 
 **Figure 4**
 
@@ -237,7 +237,7 @@ rownames(result) <- NULL
 result}
 ```
 
-### Correct standard errors
+### 3.3. Correct standard errors
 
 **Figure 7**
 
@@ -248,13 +248,13 @@ result}
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/se_table.png)
 
 
-### Sensitivity analysis`
+### 3.4. Sensitivity analysis`
 
 the absolute value of the effect size by 100 % at the significance level of alpha = 0.05 . Conversely, unobserved confounders that do not explain more than 10.34% of the residual variance of both the treatment and the outcome are not strong enough to reduce the absolute value of the effect size by 100% at the significance level of alpha = 0.05 .
 
 An extreme confounder (orthogonal to the covariates) that explains 100% of the residual variance of the outcome, would need to explain at least 15.53% of the residual variance of the treatment to fully account for the observed estimated effect.
 
-## Conclusions
+## 4. Conclusions
 
 1.
 
