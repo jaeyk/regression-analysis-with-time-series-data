@@ -203,7 +203,7 @@ year[i] <- 1970 + i}
 
 ```
 
-I also added confidence intervals using bootstrapping. Bootstrapping is resampling wiht replacement. For each regression model at a time point, I resampleed the data and ran the same analysis for 1,000 times, and created confidence intervals based on the sampling variability of regression coefficients.
+I also added confidence intervals using bootstrapping. Bootstrapping is resampling wiht replacement. For each regression model at a time point, I resampleed the data and ran the same analysis for 1,000 times, and created confidence intervals based on the sampling variability of regression coefficients. This informatino shwos that the coefficient change around the cutpoint is statistically significant.
 
 ```{r}
 boot_ci <- function(i){
@@ -250,6 +250,8 @@ boot_merged <- merge(cis_spread, for_loop)
 ```
 
 ### 3.3. Correct standard errors
+
+
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/acf_test.png)
 
