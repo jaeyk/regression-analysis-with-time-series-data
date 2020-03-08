@@ -3,7 +3,7 @@
 
 **Regression analysis with time series data**
 
-- Big data is a buzz word. However, still most of research projects are based on small and medium size data (less than 10 GB). Collecting, cleaning, and merging these small and meidum data takes serious efforts and care because they are usually unstructured and have widely different formats. Drawing a sound inference from them is also quite challenging as the data is small and noisy. I documented this project to demonstrate how we can tackle these small (in terms of size) and wide (in terms of formats) data and provide insights.
+- Big data is a buzz word. However, still most of research projects are based on small and medium size data (less than 10 GB). Collecting, cleaning, and merging these small and meidum data takes serious efforts and care because they are usually unstructured and have widely different formats. Drawing a sound inference from them is also quite challenging as the data is small and noisy. I documented this project to demonstrate how we can tackle these small (in terms of size) and wide (in terms of formats) data and provide insights into the dynamics of policy and behavioral changes.
 
 ## Motivation
 
