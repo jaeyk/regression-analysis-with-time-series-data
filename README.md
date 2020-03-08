@@ -254,7 +254,7 @@ boot_merged <- merge(cis_spread, for_loop)
 So far, we have examined how the reduced treatment (reduced budget) influenced the DV. In this section, I focus on the first half of the previous analysis: the relationship between the increasing budget and the increasing organizational fouding rate. We saw that they are correlated but is the relationship statisticall significant? In Figure 7, we saw that the regression coefficients are all overzero. However, the confidence intervals are wide and close to zero. To check that, I ran the model with the subset of the data that included observations up to the year 1980. Then, I employed various methods to calculate corrrect standard errors.
 
 - Heteroskedasticity: I ran studentized Breusch-Pagan test to check the presence of heteroskedasticity. The null hypothesis of the test is the the variance of residuals is constant (homoscedasticity). The p-vaue of the test result is 0.04. Thus, we reject the null hypothesis.
-- Autocorrelation: Autocorrelation test (ACF) (Figure 8) shows the correlation between time lags. It appears none of the correlation coefficients are statistically significant. Thus, we worry about heteroskedasticity but not Autocorrelation.
+- Autocorrelation: Autocorrelation test (ACF) (Figure 8) shows the correlation between the time series and its lagged values. It appears none of the correlation coefficients are statistically significant. Thus, we worry about heteroskedasticity but not autocorrelation.
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/acf_test.png)
 
