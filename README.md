@@ -129,7 +129,7 @@ ols_plot_cooksd_bar(model)
 
 ### 3.2. Interrupted time series design
 
-Did the Reagan budget cut influence the founding rate of Asian American and Latino community-based and advocacy organizations? One difficulty to answer this question is that other factors also could have influenced the outcome. To account for these other factors, I built a multivariate statistical model. Also, we don't know which model would fit the data best. For that reason, I constructed various statistical models, fitted each of them to the data, and compared their model fit using Akaike information Criterion (AIC).
+Did the Reagan budget cut influence the founding rate of Asian American and Latino community-based and advocacy organizations? One difficulty to answer this question is that other factors also could have influenced the outcome. To account for these other factors, I built a multivariate statistical model. Also, we don't know which model would fit the data best. For that reason, I constructed various statistical models, fitted each of them to the data, and compared their model fit using Akaike information Criterion (AIC). Ordinary least square (OLS) regression model is a base model. OLS with logged depenednet variable fits for skewed data. Poisson model assumes that the residuals follow a Poisson, not a normal, distribution. It also models the natural log of the response variable. Negative binominal model is similar to poissson model except it does not assume that conditional means and conditional variances are equal.
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/pred_plots.png)
 
@@ -141,7 +141,7 @@ Figure 5 shows how these different models fitted to the data. The blue line plot
 
 **Figure 6. Model performance comparisons**
 
-I then checked the performances of these four models using AIC. AIC score measures the difference between the model accuracy and complexity. Lower AIC score indicates a closer fit. However, checking AIC scores of these models at one point could be not sufficient for a comprehensive test. Another concern is these models perform differently depending on the period under investigation. Some models may fit for the short-term time period and others do better for the long-term period. To address this concern, I created a for loop function and checked how AIC scores of these four models vary as I extended the data from the year 1970 to 2017. Fogire 6 demonstrates that the ordinary least square (OLS) model with logged dependent variable consistently outperforms OLS, poisson, and negative binominal models.
+I then checked the performances of these four models using AIC. AIC score measures the difference between the model accuracy and complexity. Lower AIC score indicates a closer fit. However, checking AIC scores of these models at one point could be not sufficient for a comprehensive test. Another concern is these models perform differently depending on the period under investigation. Some models may fit for the short-term time period and others do better for the long-term period. To address this concern, I created a for loop function and checked how AIC scores of these four models vary as I extended the data from the year 1970 to 2017. Fogire 6 demonstrates that the ordinary least square model with logged dependent variable consistently outperforms OLS, poisson, and negative binominal models.
 
 ```{r}
 
