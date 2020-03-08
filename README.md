@@ -137,11 +137,13 @@ Did the Reagan budget cut influence the founding rate of Asian American and Lati
 
 **Figure 5. Interrupted time series design analysis**
 
-Figure 5 shows how these different models fitted to the data. The blue line plot indicates the preicted values. The grey ribbons around the line plot displays two standard errors, which are approximate to 95% confidence intervals. The impacts of the intervention could be detected in two ways in an interrupted time series design: level and slope. The level of the DV is almost identical between the pre- and post-intervention period. The slope change is detected in all the four models. 
+Figure 5 shows how these different models fitted to the data. The blue line plot indicates the preicted values. The grey ribbons, around the line plot, display two standard errors, which are approximate to 95% confidence intervals. The impacts of the intervention could be detected in two ways in an interrupted time series design: level and slope. The level of the DV is almost identical between the pre- and post-intervention period. The slope change is detected in the all four models.
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
 
 **Figure 6. Model performance comparisons**
+
+I then checked the performances of these four models using AIC. AIC score measures the difference between the model accuracy and complexity. Lower AIC score indicates a closer fit. For more information on AIC, see [this blog post](https://medium.com/@analyttica/akaike-information-criterion-aic-7a4b58bce206). Another concern is these models perform differently depending on the date they are fed. Some models may fit for the short-term time period and others do better for the long-term period. To address this concern, I created a for loop function and checked how AIC scores of these four models vary as I extended the data from the year 1970 to 2017. Fogire 6 demonstrates that the ordinary least square (OLS) model with logged dependent variable performs better than OLS, poisson, and negative binominal models.
 
 ```{r}
 
