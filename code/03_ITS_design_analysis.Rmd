@@ -475,7 +475,7 @@ year <- NA
 for (i in c(0:38)){
 
 # Model   
-model <- lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
+model <- lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
 
 # Save iterations 
 fed[i] <- model$coefficients[3] %>% as.numeric()
@@ -524,7 +524,7 @@ result = data.frame()
 year = data.frame()
 
 # Model 
-m = Boot(lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i)), R = 500)
+m = Boot(lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i)), R = 500)
 
 # Extract bootSE
 stat = rbind(stat, summary(m) %>% data.frame() %>% select(bootSE))
@@ -568,7 +568,7 @@ fed_boot <- boot_merged %>%
        title = "Federal funding",
        subtitle = "With bootstrapped CIs") +
   geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +          
-  annotate("rect", xmin = 1964, xmax = 2010, ymin = -2, ymax = 0, alpha = .2)
+  annotate("rect", xmin = 1964, xmax = 2010, ymin = -0.5, ymax = 0, alpha = .2)
   
 pop_boot <- boot_merged %>%
   ggplot(aes(x = Year, y = Pop_growth, 
@@ -579,7 +579,7 @@ pop_boot <- boot_merged %>%
        title = "Population growth",
        subtitle = "With bootstrapped CIs") +
   geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
-  annotate("rect", xmin = 1964, xmax = 2010, ymin = -8, ymax = 0, alpha = .2)
+  annotate("rect", xmin = 1964, xmax = 2010, ymin = -2, ymax = 0, alpha = .2)
 
 fed_boot + pop_boot
 
