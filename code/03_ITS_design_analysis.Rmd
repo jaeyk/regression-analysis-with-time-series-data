@@ -315,7 +315,7 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/d
 ```{r}
 
 model <- lm(Freq ~ intervention + Percentage + pop_percentage + factor(category) + Type + presidency + senate + house, data = reagan_org)
-  
+
 ols_plot_cooksd_bar(model)
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/outliers_detected.png")
@@ -524,7 +524,7 @@ result = data.frame()
 year = data.frame()
 
 # Model 
-m = Boot(lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i)), R = 500)
+m = Boot(lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i)), R = 1000)
 
 # Extract bootSE
 stat = rbind(stat, summary(m) %>% data.frame() %>% select(bootSE))
@@ -653,4 +653,6 @@ stargazer(lm_log.out, lm_new, lmrobfit, type = "html")
 lm.sense <- sensemakr(lm_log.out, treatment = "Percentage",
                          benchmark_covariates = c("pop_percentage", "categoryLatino"))
      
+summary(lm.sense)
+
 ```

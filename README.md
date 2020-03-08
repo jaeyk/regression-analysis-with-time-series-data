@@ -182,6 +182,8 @@ year[i] <- 1970 + i
 
 **Figure 7. Changes in coefficients with bootstrapped CIs**
 
+From now on, I use the OLS with logged DV for the analysis. We saw the slope change. Given the research question, it is important to know to what extent the federal funding contributed to the slope change as opposed to other factors. To do so, I examine how the coefficient of federal funding changed as we extended the data from the year 1970 to 2017. For instance, the 1970 data is the subset of the original data which includes observations up to the year 1970. I created point plot using the for loop. The point plot in Figure 7 shows that the coefficients of the federal funding were positive up to the cutpoint. Then, they became almost zero after the cut point. An opposite trend was found from the changes in the coefficients of population growth. They were either negative or zero before the cutpoint. Then, they became positive in the 1980s and then became almost zero or negative again.
+
 ```{r}
 # Initilization vars
 fed <- NA
@@ -201,6 +203,8 @@ year[i] <- 1970 + i}
 
 ```
 
+I also added confidence intervals using bootstrapping. Bootstrapping is resampling wiht replacement. For each regression model at a time point, I resampleed the data and ran the same analysis for 1,000 times, and created confidence intervals based on the sampling variability of regression coefficients.
+
 ```{r}
 boot_ci <- function(i){
 
@@ -213,7 +217,7 @@ result = data.frame()
 year = data.frame()
 
 # Model
-m = Boot(lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i)), R = 500)
+m = Boot(lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i)), R = 1000)
 
 # Extract bootSE
 stat = rbind(stat, summary(m) %>% data.frame() %>% select(bootSE))
@@ -228,6 +232,21 @@ result = cbind(stat, Year, Names)
 rownames(result) <- NULL
 
 result}
+
+cis <- data.frame()
+
+for (i in c(1:38)){
+  print(paste0(i, " iteration completed"))
+  cis = rbind(cis, boot_ci(i))
+}
+
+colnames(cis)[1:2] <- c("SE", "Year")
+
+cis_spread <- cis %>%
+  spread(Names, SE) %>%
+  select(-c(Intercept, Latino_SE))
+
+boot_merged <- merge(cis_spread, for_loop)
 ```
 
 ### 3.3. Correct standard errors
