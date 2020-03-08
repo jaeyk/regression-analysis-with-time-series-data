@@ -21,7 +21,7 @@ theme_Publication <- function(base_size) {
             axis.ticks = element_line(),
             panel.grid.major = element_line(colour="#f0f0f0"),
             panel.grid.minor = element_blank(),
-            legend.key = element_rect(colour = NA),
+            legend.key = element_re+ct(colour = NA),
             legend.position = "bottom",
             legend.direction = "horizontal",
             legend.title = element_text(),
@@ -44,17 +44,13 @@ scale_colour_Publication <- function(...){
   
 }
 
-theme_map <- function(){
-      theme_Publication(14) + theme(
-      axis.line = element_blank(),
-      axis.text.x = element_blank(),
-      axis.text.y = element_blank(),
-      axis.ticks = element_blank(),
-      axis.title.x = element_blank(),
-      axis.title.y = element_blank(),
-      panel.grid.minor = element_blank(),
-      panel.grid.major = element_blank(),
-      plot.background = element_blank(), 
-      panel.background = element_blank(), 
-      legend.background = element_blank(),
-      panel.border = element_blank())}
+# The following code comes from [*-this blog post
+
+ditch_the_axes <- theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+)

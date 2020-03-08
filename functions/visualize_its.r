@@ -27,16 +27,15 @@ ols_its <- function(input){
   input %>%
     ggplot(aes(x = Year, y = Freq)) +
     geom_point(alpha = 0.2) +
-    geom_line(aes(y = pred), size = 1) +
-    
+    geom_line(aes(y = pred), size = 1, col = "blue") +
     geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
-    ggthemes::theme_base() +
     labs(x = "Year",
          y = "Organizational founding") +
     geom_ribbon(aes(ymin = lwr, ymax = upr),
                 alpha = 0.3) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))  +
-    facet_grid(category~Type)
+  #  facet_grid(category~Type) +
+    scale_y_continuous(breaks = scales::pretty_breaks())
 }
 
 ps_its <- function(input){
@@ -67,16 +66,15 @@ ps_its <- function(input){
   input %>%
     ggplot(aes(x = Year, y = Freq)) +
     geom_point(alpha = 0.2) +
-    geom_line(aes(y = pred), size = 1) +
-    
+    geom_line(aes(y = pred), size = 1, col = "blue") +
     geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
-    ggthemes::theme_base() +
     labs(x = "Year",
          y = "Organizational founding") +
     geom_ribbon(aes(ymin = lwr, ymax = upr),
                 alpha = 0.3) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    facet_grid(category~Type)
+  #  facet_grid(category~Type) +
+    scale_y_continuous(breaks = scales::pretty_breaks())
 }
 
 nb_its <- function(input){
@@ -108,16 +106,15 @@ nb_its <- function(input){
   input %>%
     ggplot(aes(x = Year, y = Freq)) +
     geom_point(alpha = 0.2) +
-    geom_line(aes(y = pred), size = 1) +
-    
+    geom_line(aes(y = pred), size = 1, col = "blue") +
     geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
-    ggthemes::theme_base() +
     labs(x = "Year",
          y = "Organizational founding") +
     geom_ribbon(aes(ymin = lwr, ymax = upr),
                 alpha = 0.3) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    facet_grid(category~Type)
+  #  facet_grid(category~Type) +
+    scale_y_continuous(breaks = scales::pretty_breaks())
 }
 
 zerofinl_its <- function(input){
@@ -150,14 +147,13 @@ zerofinl_its <- function(input){
   input %>%
     ggplot(aes(x = Year, y = Freq)) +
     geom_point(alpha = 0.2) +
-    geom_line(aes(y = pred), size = 1) +
-    
+    geom_line(aes(y = pred), size = 1, col = "blue") +
     geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
-    ggthemes::theme_base() +
     labs(x = "Year",
          y = "Organizational founding") +
     geom_ribbon(aes(ymin = lwr, ymax = upr),
                 alpha = 0.3) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    facet_grid(category~Type)
+  #  facet_grid(category~Type) +
+    scale_y_continuous(breaks = scales::pretty_breaks())
 }
