@@ -282,4 +282,4 @@ An extreme confounder (orthogonal to the covariates) that explains 100% of the r
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/state_county_maps.png)
 
-**Figure 10. US County map of Asian American and Latino community-based and advocacy organizations**
+**Figure 10. US county map of Asian American and Latino community-based and advocacy organizations**
