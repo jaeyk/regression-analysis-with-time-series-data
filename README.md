@@ -78,7 +78,7 @@ There is a reason why it is useful to plot time series data using both point and
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/org_founding_year.png)
 
-Figure 1 shows that the founding rate of community-based organizations (CBOs, those organizations that focus on providing social services) both in Asian American and Latino communities increased before the budget cut (red dashed line) and decreased after the budget cut. We cannot find a similar trend from advocacy organizations or hybrid organizations (organizations active both in advocacy and service delivery). This evidence is consistnet with the theory as CBOs are most dependnet on the outside financial support than the other two types of organizations. However, the evidence is only suggestive as the change could also have been influenced by other factors and the data includes noises as well as signals.
+Figure 1 shows that the founding rate of community-based organizations (CBOs, those organizations that focus on providing social services) both in Asian American and Latino communities increased before the budget cut (red dashed line) and decreased after the budget cut. We cannot find a similar trend from advocacy organizations or hybrid organizations (organizations active both in advocacy and service delivery). This evidence is consistnet with the theory as CBOs are most dependnet on the outside financial support than the other two types of organizations. However, the evidence is only suggestive as the change could also have been influenced by other factors and the data includes noises as well as signals
 
 **Figure 2**
 
@@ -86,27 +86,25 @@ Figure 1 shows that the founding rate of community-based organizations (CBOs, th
 
 **Figure 3**
 
-## 3. Statistical modeling of time series data (interrupted time series design)
-
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/dic_newspaper.png)
 
-**Figure 4**
+## 3. Statistical modeling of time series data (interrupted time series design)
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/outliers_detected.png)
 
-**Figure 5**
+**Figure 4**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/pred_plots.png)
 
-**Figure 6**
+**Figure 5**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
 
-**Figure 7**
+**Figure 6**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/boot_cis.png)
 
-**Figure 8**
+**Figure 7**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/acf_test.png)
 
