@@ -7,7 +7,7 @@ merge_by_group <- function(x, y){
 
 org_to_ts <- function(data){
   
-  # Create the full years
+  # Create the year sequence
   
   all_years <- seq(min(data$F.year), max(data$F.year))
   
