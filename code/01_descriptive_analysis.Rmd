@@ -112,9 +112,9 @@ latino_org_n <- latino_org %>%
          title = "Latino organizations (N = 519)",
          subtitle = "Sorted by organization types")
 
-aa_org_n / latino_org_n
+aa_org_n + latino_org_n
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/asian_latino_orgs_n.png", height = 8)
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/asian_latino_orgs_n.png", width = 10)
 
 ```
 ### 2.2. Time-series analysis
@@ -362,7 +362,7 @@ latino_county <- ggplot(data = latino_county_map,
        subtitle = "In Counties (2017)")+
   theme_map()
 
-ggarrange(asian_state, asian_county, latino_state, latino_county, common.legend = TRUE)
+ggarrange(asian_county, latino_county, common.legend = TRUE)
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/state_county_maps.png", width = 10, height= 10)
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/state_county_maps.png", width = 12)
 ```

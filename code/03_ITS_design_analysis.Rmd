@@ -228,7 +228,7 @@ ggplot(reagan_org, aes(x = Year, y = Percentage)) +
               color="red") +
   xlim(c(1964,2017))
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/reagan_budget_cut.png")
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/reagan_budget_cut.png", height = 8)
 
 ```
 
@@ -303,7 +303,7 @@ ggplot(ie_processed) +
   labs(x = "Date" , y = "Count",  
        title = "The frequency of budget related terms in a Reagan related article")  
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/dic_newspaper.png")
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/dic_newspaper.png", width = 10)
 
 ```
 
