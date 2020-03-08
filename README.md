@@ -135,7 +135,7 @@ Did the Reagan budget cut influence the founding rate of Asian American and Lati
 
 **Figure 5. Interrupted time series design analysis**
 
-Figure 5 shows how these different models fitted to the data. The blue line plot indicates the preicted values. The grey ribbons, around the line plot, display two standard errors, which are approximate to 95% confidence intervals. The impacts of the intervention could be detected in two ways in an interrupted time series design: level and slope. The level of the DV is almost identical between the pre- and post-intervention period. The slope change is detected in the all four models.
+Figure 5 shows how these different models fitted to the data. The blue line plot indicates the preicted values. The grey ribbons, around the line plot, display two standard errors, which are approximate to 95% confidence intervals. The impacts of the intervention could be detected in two ways in an interrupted time series design: level and slope. The level of the predicted values is almost identical between the pre- and post-intervention period. In contrast, the slope change is detected in the all four models.
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
 
