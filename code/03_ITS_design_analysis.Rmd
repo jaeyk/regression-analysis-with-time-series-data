@@ -303,7 +303,7 @@ ggplot(ie_processed) +
   geom_point(aes(x = date, y = budget), size = 2, alpha = 0.3) +
   geom_smooth(aes(x = date, y = budget), span = 0.1) +
   labs(x = "Date" , y = "Count",  
-       title = "The frequency of budget related terms in a Reagan related article")  
+       title = "The frequency of budget related terms in Reagan related articles")  
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/dic_newspaper.png", width = 10)
 
