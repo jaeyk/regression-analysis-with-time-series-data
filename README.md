@@ -76,22 +76,22 @@ I also created a [dashboard](https://rpubs.com/jaeyeonkim/581083) based on the o
 
 There is a reason why it is useful to plot time series data using both point and line plots but not bar plot. Point plot is useful to show which data points are missing. Line plot is useful to trace the overall trend. Bar plot is not useful because it does not care whether we have overlapping observations at a particular temporal point. In that case, bar plot shows the sum of these numerical elements. Time series plot should match each temporal unit with each observation. Violation of this assumption is hard to be detected by bar plot.
 
-**Figure 1**
-
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/org_founding_year.png)
+
+**Figure 1**
 
 Figure 1 shows that the founding rate (the slope of line plot) of community-based organizations (CBOs, those organizations that focus on providing social services) both in Asian American and Latino communities increased before the budget cut (red dashed line) and decreased after the budget cut. We cannot find a similar trend from advocacy organizations or hybrid organizations (organizations active both in advocacy and service delivery). This evidence is consistnet with the theory as CBOs are most dependnet on the outside financial support than the other two types of organizations. However, the evidence is only suggestive as the change could also have been influenced by other factors and the data includes noises as well as signals.
 
 
 ## 3. Statistical modeling of time series data (interrupted time series design) [[Code](https://github.com/jaeyk/regression-analysis-with-time-series-data/blob/master/code/03_ITS_design_analysis.Rmd)]
 
-**Figure 2**
-
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/reagan_budget_cut.png)
 
-**Figure 3**
+**Figure 2**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/dic_newspaper.png)
+
+**Figure 3**
 
 Before moving into a more serious statistical analysis, I checked some assumptions I made about the research design. Figure 2 shows that percentage of the federal budget for education, employment, and social service seriously decreased after the Reagan intervention. It showed a slightl decrease during the Carter administration due to the budget constraint. Reagan made the low budget priority for social programs consistent throughout the 1980s and which continued even in the 1990s. A more specific analysis of the budget change showed that programs empowering minority communities were critically hurt by the budget cut. I did not include a more detailed analysis here for spatial constraints. This evidence is important to take the budget cut as a major intervention.
 
