@@ -206,10 +206,10 @@ year[i] <- 1970 + i}
 
 ### 3.3. Correct standard errors
 
-So far, we have examined how the reduced treatment (reduced budget) influenced the DV. In this section, I focus on the first half of the previous analysis: the relationship between the increasing budget and the increasing organizational fouding rate. We saw that they are correlated but is the relationship statisticall significant? In Figure 7, we saw that the regression coefficients are all overzero. However, the confidence intervals are wide and close to zero. To check that, I ran the model with the subset of the data that included observations up to the year 1980. Then, I employed various methods to calculate corrrect standard errors.
+So far, we have examined how the reduced treatment (reduced budget) influenced the DV. In this subsection, I focus on the first half of the previous analysis: the relationship between the increasing budget and the increasing organizational fouding rate. We saw that they are correlated, but is the relationship statisticall significant? In Figure 7, we saw that the regression coefficients are all over zero before the intervention. However, the confidence intervals are wide and close to zero. To check statistical significance, I ran the model with the subset of the data that included observations up to the year 1980. Then, I employed various methods to calculate corrrect standard errors.
 
-- Heteroskedasticity: I ran studentized Breusch-Pagan test to check the presence of heteroskedasticity. The null hypothesis of the test is the the variance of residuals is constant (homoscedasticity). The p-vaue of the test result is 0.04. Thus, we reject the null hypothesis.
-- Autocorrelation: Autocorrelation test (ACF) (Figure 8) shows the correlation between the time series and its lagged values. It appears none of the correlation coefficients are statistically significant. Thus, we worry about heteroskedasticity but not autocorrelation.
+- Heteroskedasticity: I ran studentized Breusch-Pagan test to check the presence of heteroskedasticity. This is problem because OLS assumes constant variance (homoscedasticity). Otherwise, p-values become instable. The null hypothesis of the test is the the variance of residuals is constant (homoscedasticity). The p-vaue of the test result is 0.04. Thus, we reject the null hypothesis.
+- Autocorrelation: Autocorrelation test (ACF) (Figure 8) shows the correlation between the time series and its lagged values. It appears none of the correlation coefficients are statistically significant. I also ran the Durbin-Watson test, which checks the autocorrelation of residuals. The test fails to reject the null hypothesis. Therefore, we worry about heteroskedasticity but not autocorrelation.
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/acf_test.png)
 
@@ -219,17 +219,18 @@ So far, we have examined how the reduced treatment (reduced budget) influenced t
 
 **Table 1. Standard errors corrected for heteroskedasticity and outliers**
 
+In Table 1, the first model is a simple OLS. The second model is also a OLS but it uses the Newey-West variance estimator, a robust variance estimator, to account for heteroskedasticity. In this case, we expect that standard errors could be different from the base model. The third model is based on a robust regression model to account for unusual observations. In this case, we expect that both regression coefficients and standard errors could be different from the base model. As expected, they are different but only marginally. The statistical signifiance of federal funding (p.value < 0.01) does not change across three models. In model 3, the coefficient increased by 0.002. Note that the dependent variable is logged. Thus, the regression coefficient of 0.3 is close to 2. In substantive terms, we can interprete one percent increase in the federal funding is associated with the increase of two CBOs among Asian American and Latino communities in the 1960s and 1970s.
 
-### 3.4. Sensitivity analysis`
+### 3.4. Sensitivity analysis
 
-the absolute value of the effect size by 100 % at the significance level of alpha = 0.05 . Conversely, unobserved confounders that do not explain more than 10.34% of the residual variance of both the treatment and the outcome are not strong enough to reduce the absolute value of the effect size by 100% at the significance level of alpha = 0.05 .
+However, we cannot take the regression coefficient at their face value. There could be still confounders. If a model is misspecified, then the regression coefficient is not un unbiased estimator. I ran a sensitivity test using the `sensemakr` package in R. The result providese two key summaries.
 
-An extreme confounder (orthogonal to the covariates) that explains 100% of the residual variance of the outcome, would need to explain at least 15.53% of the residual variance of the treatment to fully account for the observed estimated effect.
+1. "Unobserved confounders that do not explain more than **10.34%** of the residual variance of both the treatment and the outcome are not strong enough to reduce the absolute value of the effect size by 100%".
+2. In addition, "an extreme confounder (orthogonal to the covariates) that explains 100% of the residual variance of the outcome, would need to explain **at least 15.53%** of the residual variance of the treatment to fully account for the observed estimated effect."
+
+I suspect that philanthropic giving could be one of those unobserved confounders. It is very difficult to find a systematic data on philanthropic giving, especially in a historical context. I collected the Ford Foundation grant data and found that the Ford allocated grants selectively. Only few Asian American and Latino community-based and advocacy organizations received support from the Ford Foundation. Yet, as this evidence is only partial information of the philanthropic giving, I suggest that one should take the above regression coefficient with a caution.
+
 
 ## 4. Conclusions
 
-1.
-
-![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/state_county_maps.png)
-
-**Figure 9. US county map of Asian American and Latino community-based and advocacy organizations**
+Small and wide data need serious care to analyze it properly. 
