@@ -354,23 +354,15 @@ reagan_org$Type[reagan_org$Type == "Hybrid"] <- "CBO"
 
 ols.model <- ols_its(reagan_org) + ggtitle("OLS") + labs(y = "Organizational founding") 
 
-logged.ols.model <- ols_its(reagan_org %>% mutate(Freq = log(Freq))) + ggtitle("OLS + ln(DV)") + labs(y = "Organizational founding ") 
+logged.ols.model <- ols_its(reagan_org %>% mutate(Freq = log(Freq))) + ggtitle("OLS with logged DV") + labs(y = "Organizational founding ") 
   
-ggarrange(ols.model, logged.ols.model)
-
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/ols_plots.png", width = 10)
-
-```
-
-```{r}
-
 poisson.model <- ps_its(reagan_org) + ggtitle("Poisson") 
 
-nb.model <- ps_its(reagan_org) + ggtitle("NB") 
+nb.model <- ps_its(reagan_org) + ggtitle("Negative binominal") 
 
-ggarrange(poisson.model, nb.model)
+ggarrange(ols.model, logged.ols.model, poisson.model, nb.model)
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/non_ols_plots.png")
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_plots.png")
 
 ```
 

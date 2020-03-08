@@ -21,7 +21,7 @@ theme_Publication <- function(base_size) {
             axis.ticks = element_line(),
             panel.grid.major = element_line(colour="#f0f0f0"),
             panel.grid.minor = element_blank(),
-            legend.key = element_re+ct(colour = NA),
+            legend.key = element_rect(colour = NA),
             legend.position = "bottom",
             legend.direction = "horizontal",
             legend.title = element_text(),
