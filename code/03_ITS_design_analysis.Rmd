@@ -623,14 +623,7 @@ lm_new <- coeftest(lm_log.out, vcov = NeweyWest, prewhite = F, adjust = T)
 
 lmrobfit <- lmrob(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org, Year <= 1980))
 
-stargazer(lm_log.out, lm_new, lmrobfit, type = "text")
-
-bind_rows(mutate(lm_log.out %>% tidy(), Type = "lm"), 
-          mutate(lm_new %>% tidy(), Type = "HAC"))
-
-          mutate(lmrobfit %>% tidy(), Type = "lmrob"))
-
-lmrobfit %>% unlist() %>% select(contains("coefficients"))
+stargazer(lm_log.out, lm_new, lmrobfit, type = "html")
 
 ```
 
