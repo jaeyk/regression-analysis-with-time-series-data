@@ -557,7 +557,6 @@ fed_boot <- boot_merged %>%
   geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +          
   annotate("rect", xmin = 1964, xmax = 2010, ymin = -2, ymax = 0, alpha = .2)
   
-
 pop_boot <- boot_merged %>%
   ggplot(aes(x = Year, y = Pop_growth, 
              ymax = Pop_growth + 2*Pop_SE, 
@@ -610,7 +609,7 @@ lmtest::dwtest(lm_log.out)
 
 ```{r}
 
-acf(residuals(lm_log.out))
+ggAcf(residuals(lm_log.out))
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/acf_test.png")
 

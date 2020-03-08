@@ -12,17 +12,9 @@ As Andrew Ng said, [artificial intelligence, especially machine learning, is the
 
 **Figure 1**
 
-![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/asian_latino_orgs_n.png)
-
-**Figure 1**
-
-![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/asian_latino_orgs_n.png)
-
-**Figure 2**
-
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/org_founding_year.png.png)
 
-**Figure 3**
+**Figure 2**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/state_county_maps.png)
 
@@ -58,9 +50,6 @@ As Andrew Ng said, [artificial intelligence, especially machine learning, is the
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/acf_test.png)
 
-**Figure 12**
-
-![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
 
 ## Conclusions 
 
