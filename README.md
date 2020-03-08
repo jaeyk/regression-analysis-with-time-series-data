@@ -72,9 +72,13 @@ org_to_ts <- function(data){
 
 ## 2. Descriptive data analysis
 
+There is a reason why it is useful to plot time series data using both point and line plots but not bar plot. Point plot is useful to show which data points are missing. Line plot is useful to trace the overall trend. Bar plot is not useful because it does not care whether we have overlapping observations at a particular temporal point. In that case, bar plot shows the sum of these numerical elements. Time series plot should match each temporal unit with each observation. Violation of this assumption is hard to be detected by bar plot.
+
 **Figure 1**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/org_founding_year.png)
+
+Figure 1 shows that the founding rate of community-based organizations (CBOs, those organizations that focus on providing social services) both in Asian American and Latino communities increased before the budget cut (red dashed line) and decreased after the budget cut. We cannot find a similar trend from advocacy organizations or hybrid organizations (organizations active both in advocacy and service delivery). This evidence is consistnet with the theory as CBOs are most dependnet on the outside financial support than the other two types of organizations. However, the evidence is only suggestive as the change could also have been influenced by other factors and the data includes noises as well as signals.
 
 **Figure 2**
 
