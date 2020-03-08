@@ -9,7 +9,7 @@
 
 This project is part of my dissertation research. The main motivation of this project is to understand why Asian American and Latino community-based and advocacy organizations started to emerge in the 1960s and 1970s. Until the 1950s, Asian American and Latino communities were divided along national origin lines. Chinese, Japanese, and Filipino communities only minded their business. This is also true for the relationship between Mexicans, Cubans, and Puerto Ricans. However, in the 1960s and 1970s, these fragmented communities started to build organizations which represent their united voice. In my dissertation, I argued that this new trend emerged during this particulary time period because Asian American and Latino activists were in competition with their African American counterparts in the federal grants market. Uniting their group helped them to increase their visibility and, thus, draw support from the War on Poverty programs (e.g., Community Action Programs, Community Development Centers, Community Health Clinics, etc.).
 
-- Check out [this Git repository](https://github.com/jaeyk/content-analysis-for-evaluating-ML-performances) to learn about my another dissertation chapter which leverages machine learning to study political opinion among minority groups in historical contexts. 
+- Check out [this Git repository](https://github.com/jaeyk/content-analysis-for-evaluating-ML-performances) to learn about my another dissertation chapter which leverages machine learning to study political opinion among minority groups in historical contexts.
 
 ## Research design
 
@@ -32,39 +32,39 @@ I have collectede a wide range of original data for this project.
 
 ## Workflow
 
+1. Data cleaning, wrangling, and merging
+2. Descriptive data anlaysis
+3. Statistical modeling of time series data (interrupted time series design)
+
 **Figure 1**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/org_founding_year.png)
 
 **Figure 2**
 
-![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/state_county_maps.png)
-
-**Figure 4**
-
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/reagan_budget_cut.png)
 
-**Figure 5**
+**Figure 3**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/dic_newspaper.png)
 
-**Figure 6**
+**Figure 4**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/outliers_detected.png)
 
-**Figure 7**
+**Figure 5**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/pred_plots.png)
 
-**Figure 8**
+**Figure 6**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
 
-**Figure 9**
+**Figure 7**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/boot_cis.png)
 
-**Figure 10**
+**Figure 8**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/acf_test.png)
 
@@ -72,3 +72,7 @@ I have collectede a wide range of original data for this project.
 ## Conclusions
 
 1.
+
+**Figure 9**
+
+![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/state_county_maps.png)
