@@ -43,7 +43,7 @@ The original organization dataset I collected contains founding year variable, b
 ```{r}
 org_to_ts <- function(data){
 
-  # Create the full years
+  # Create the year sequence
 
   all_years <- seq(min(data$F.year), max(data$F.year))
 
