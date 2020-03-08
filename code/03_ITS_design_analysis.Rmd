@@ -47,7 +47,8 @@ pacman::p_load(
         zoo, # for time series objects 
         forecast, # for ARIMA modeling
         tseries, # for stat tests for time series data 
-        nlme # for GLS
+        nlme, # for GLS
+        changepoint # for change point detection
         )
 
 ```
@@ -58,9 +59,9 @@ pacman::p_load(
 ```{r include=FALSE}
 
 # Asian American and Latino communit-based and advocacy organizations 
-asian_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv")
+asian_year <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv")
 
-latino_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv")
+latino_year <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv")
 
 # Administrative data 
 reagan <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_budget.csv")
@@ -95,7 +96,7 @@ source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions
 ## For custom ggtheme 
 source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/theme_publications.r")
 
-theme_set(theme_Publication())
+theme_set(theme_Publication(14))
 
 # Set preferred packages for conflicted functions 
 conflicted::conflict_prefer("select", "dplyr")
@@ -111,7 +112,7 @@ conflicted::conflict_prefer("annotate", "ggplot2")
 ```{r}
 
 # Merge CBO and advocacy org data 
-org_freq <- merge_by_group(asian_org, latino_org) %>% 
+org_freq <- merge_by_group(asian_year, latino_year) %>% 
   count(F.year, Type, category) %>% 
   rename(Year = F.year, 
          Freq = n)
@@ -283,6 +284,16 @@ ie_dic <- dfm(corpus(ie_processed),
 # Add to the original data  
 ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
 
+# Fill in 0 dates
+all_dates <- seq(as.Date("1976/1/1"), as.Date("1987/12/31"), "day")
+
+# Turn it into a dataframe 
+all_dates <- data.frame(date = all_dates)
+  
+# Count by year and type
+ie_processed %>% right_join(all_dates, by = "date")
+ie_processed[is.na(ie_processed$budget)] <- 0
+
 # Plot
 ggplot(ie_processed) +
   geom_histogram(aes(x = date), binwidth = 0.1) + 
@@ -303,7 +314,7 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/d
 
 model <- lm(Freq ~ intervention + Percentage + pop_percentage + factor(category) + Type + presidency + senate + house, data = reagan_org)
 
-  ols_plot_cooksd_bar(model)
+ols_plot_cooksd_bar(model)
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/outliers_detected.png")
   
@@ -341,7 +352,7 @@ reagan_org$Type[reagan_org$Type == "Hybrid"] <- "CBO"
 
 ols.model <- ols_its(reagan_org) + ggtitle("OLS") + labs(y = "Organizational founding") + ylim(c(-1,9))
 
-logged.ols.model <- ols_its(reagan_org %>% mutate(Freq = log(Freq))) + ggtitle("OLS with logged DV") + labs(y = "Organizational founding (logged)") + ylim(c(-1, 4))
+logged.ols.model <- ols_its(reagan_org %>% mutate(Freq = log(Freq))) + ggtitle("OLS with logged DV") + labs(y = "Organizational founding (logged)") + ylim(c(-1, 3))
 
 ols.model + logged.ols.model
 

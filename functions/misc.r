@@ -17,8 +17,6 @@ org_to_ts <- function(data){
   
   # Count by year and type
   
-  # Count by year and type
-  
   data_year <- data %>%
     count(F.year, States, Type) %>%
     rename(Freq = n) %>%

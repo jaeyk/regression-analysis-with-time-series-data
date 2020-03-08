@@ -155,6 +155,8 @@ freq_sum <- merged %>%
   group_by(F.year, group, Type) %>%
   summarize(freq_sum = sum(Freq))
 
+write_csv(freq_sum, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/freq_sum.csv")
+
 freq_sum %>%
   ggplot(aes(x = F.year, y = freq_sum)) +
     geom_point() +
