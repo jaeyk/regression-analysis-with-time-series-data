@@ -78,7 +78,7 @@ There is a reason why it is useful to plot time series data using both point and
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/org_founding_year.png)
 
-**Figure 1**
+**Figure 1. Organizational trend**
 
 Figure 1 shows that the founding rate (the slope of line plot) of community-based organizations (CBOs, those organizations that focus on providing social services) both in Asian American and Latino communities increased before the budget cut (red dashed line) and decreased after the budget cut. We cannot find a similar trend from advocacy organizations or hybrid organizations (organizations active both in advocacy and service delivery). This evidence is consistnet with the theory as CBOs are most dependnet on the outside financial support than the other two types of organizations. However, the evidence is only suggestive as the change could also have been influenced by other factors and the data includes noises as well as signals.
 
@@ -89,11 +89,11 @@ Figure 1 shows that the founding rate (the slope of line plot) of community-base
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/reagan_budget_cut.png)
 
-**Figure 2**
+**Figure 2. Budget trend**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/dic_newspaper.png)
 
-**Figure 3**
+**Figure 3. Dictionary-based methods analysis**
 
 Before moving into a more serious statistical analysis, I checked some assumptions I made about the research design. Figure 2 shows that percentage of the federal budget for education, employment, and social service seriously decreased after the Reagan intervention. It showed a slightl decrease during the Carter administration due to the budget constraint. Reagan made the low budget priority for social programs consistent throughout the 1980s and which continued even in the 1990s. A more specific analysis of the budget change showed that programs empowering minority communities were critically hurt by the budget cut. I did not include a more detailed analysis here for spatial constraints. This evidence is important to take the budget cut as a major intervention.
 
@@ -119,7 +119,7 @@ ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/outliers_detected.png)
 
-**Figure 4**
+**Figure 4. Outlier detection**
 
 
 ### 3.2. Interrupted time series design
@@ -127,7 +127,7 @@ ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/pred_plots.png)
 
-**Figure 5**
+**Figure 5. Interrupted time series design analysis**
 
 ```{r}
 ols_its <- function(input){
@@ -172,7 +172,7 @@ ols_its <- function(input){
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
 
-**Figure 6**
+**Figure 6. Model performance comparisons**
 
 ```{r}
 
@@ -209,7 +209,7 @@ year[i] <- 1970 + i
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/boot_cis.png)
 
-**Figure 7**
+**Figure 7. Changes in coefficients with bootstrapped CIs**
 
 ```{r}
 # Initilization vars
@@ -263,11 +263,11 @@ result}
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/acf_test.png)
 
-**Figure 8**
+**Figure 8. Autocorrelation test**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/se_table.png)
 
-**Figure 9**
+**Figure 9. Standard errors corrected for heteroskedasticity and outliers**
 
 
 ### 3.4. Sensitivity analysis`
@@ -282,4 +282,4 @@ An extreme confounder (orthogonal to the covariates) that explains 100% of the r
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/state_county_maps.png)
 
-**Figure 10**
+**Figure 10. US County map of Asian American and Latino community-based and advocacy organizations**
