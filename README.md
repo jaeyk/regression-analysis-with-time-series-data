@@ -103,10 +103,6 @@ Figure 3 shows how minority community members reacted to the budget crisis. The 
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/pred_plots.png)
 
-**Figure 5**
-
-![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
-
 ```{r}
 ols_its <- function(input){
 
@@ -148,9 +144,90 @@ ols_its <- function(input){
 }
 ```
 
+**Figure 5**
+
+![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
+
+```{r}
+lm.AIC <-NA
+lm_log.AIC <-NA
+poisson.AIC <- NA
+nb.AIC <- NA
+year <-NA
+for (i in c(0:38)){
+lm.out <- lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
+lm_log.out <- lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
+
+poisson.out <- glm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i), family = "poisson")
+nb.out <- glm.nb(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
+lm.AIC[i] <- AIC(lm.out)
+lm_log.AIC[i] <- AIC(lm_log.out)
+poisson.AIC[i] <- AIC(poisson.out)
+nb.AIC[i] <- AIC(nb.out)
+
+year[i] <- 1970 + i
+}
+AICs <- data.frame("OLS" = lm.AIC,
+                       "Logged_OLS" = lm_log.AIC,
+                       "Poisson" = poisson.AIC,
+                       "Negative_Binominal" = nb.AIC,
+                       "Year" = year)
+AICs %>%
+  gather(Models, values, OLS:Negative_Binominal) %>%
+  ggplot(aes(x = Year, y = values, col = Models)) +
+  scale_color_brewer(type = "div", palette = "Set1") +
+  geom_point() +
+  geom_line() +
+  labs(y = "AIC scores")
+```
+
 **Figure 6**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/boot_cis.png)
+
+```{r}
+fed <- NA
+pop <- NA
+year <- NA
+for (i in c(0:38)){
+model <- lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
+fed[i] <- model$coefficients[3] %>% as.numeric()
+pop[i] <- model$coefficients[4] %>% as.numeric()
+year[i] <- 1970 + i}
+for_loop <- data.frame("Fed_funding" = fed,
+                       "Pop_growth" = pop,
+                       "Year" = year)
+fed_coef <- for_loop %>%
+  ggplot(aes(x = Year, y = Fed_funding)) +
+  geom_point() +
+  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
+  labs(title = "Federal funding",
+       subtitle = "Only included CBOs", y = "OLS coefficients")
+pop_coef <- for_loop %>%
+  ggplot(aes(x = Year, y = Pop_growth)) +
+  geom_point() +
+  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
+  labs(title = "Population growth",
+       subtitle = "Only included CBOs", y = "OLS coefficients")
+fed_coef + pop_coef
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/reg_coeffs.png",
+              height = 6, width = 10)
+```
+
+```{r}
+boot_ci <- function(i){
+set.seed(1234)
+stat = data.frame()
+result = data.frame()
+year = data.frame()
+m = Boot(lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i)), R = 500)
+stat = rbind(stat, summary(m) %>% data.frame() %>% select(bootSE))
+Year = rep(c(1970 + i), nrow(stat))
+Names = c("Intercept", "Fed_SE", "Pop_SE", "Latino_SE")
+result = cbind(stat, Year, Names)
+rownames(result) <- NULL
+result}
+```
 
 **Figure 7**
 
