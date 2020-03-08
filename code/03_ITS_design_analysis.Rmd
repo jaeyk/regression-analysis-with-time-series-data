@@ -315,7 +315,7 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/d
 ```{r}
 
 model <- lm(Freq ~ intervention + Percentage + pop_percentage + factor(category) + Type + presidency + senate + house, data = reagan_org)
-
+  
 ols_plot_cooksd_bar(model)
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/outliers_detected.png")
