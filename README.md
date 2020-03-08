@@ -36,6 +36,10 @@ I have collectede a wide range of original data for this project.
 2. Descriptive data anlaysis
 3. Statistical modeling of time series data (interrupted time series design)
 
+## 1. Data cleaning, wrangling, and merging
+
+## 2. Descriptive data analysis
+
 **Figure 1**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/org_founding_year.png)
@@ -45,6 +49,8 @@ I have collectede a wide range of original data for this project.
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/reagan_budget_cut.png)
 
 **Figure 3**
+
+## 3. Statistical modeling of time series data (interrupted time series design)
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/dic_newspaper.png)
 
