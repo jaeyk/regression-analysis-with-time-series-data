@@ -141,7 +141,7 @@ Figure 5 shows how these different models fitted to the data. The blue line plot
 
 **Figure 6. Model performance comparisons**
 
-I then checked the performances of these four models using AIC. AIC score measures the difference between the model accuracy and complexity. Lower AIC score indicates a closer fit. However, checking AIC scores of these models at one point could be not sufficient. Another concern is these models perform differently depending on the date they are fed. Some models may fit for the short-term time period and others do better for the long-term period. To address this concern, I created a for loop function and checked how AIC scores of these four models vary as I extended the data from the year 1970 to 2017. Fogire 6 demonstrates that the ordinary least square (OLS) model with logged dependent variable consistently outperforms OLS, poisson, and negative binominal models.
+I then checked the performances of these four models using AIC. AIC score measures the difference between the model accuracy and complexity. Lower AIC score indicates a closer fit. However, checking AIC scores of these models at one point could be not sufficient for a comprehensive test. Another concern is these models perform differently depending on the date they are fed. Some models may fit for the short-term time period and others do better for the long-term period. To address this concern, I created a for loop function and checked how AIC scores of these four models vary as I extended the data from the year 1970 to 2017. Fogire 6 demonstrates that the ordinary least square (OLS) model with logged dependent variable consistently outperforms OLS, poisson, and negative binominal models.
 
 ```{r}
 
