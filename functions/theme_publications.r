@@ -44,11 +44,8 @@ scale_colour_Publication <- function(...){
   
 }
 
-# I adapted theme map function from this [blog post](https://timogrossenbacher.ch/2016/12/beautiful-thematic-maps-with-ggplot2-only/).
-
-theme_map <- function(...) {
-  theme_base() +
-    theme(
+theme_map <- function(){
+      theme_Publication(14) + theme(
       axis.line = element_blank(),
       axis.text.x = element_blank(),
       axis.text.y = element_blank(),
@@ -60,8 +57,4 @@ theme_map <- function(...) {
       plot.background = element_blank(), 
       panel.background = element_blank(), 
       legend.background = element_blank(),
-      panel.border = element_blank(),
-      legend.position = "bottom",
-      ...
-    )
-}
+      panel.border = element_blank())}

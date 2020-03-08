@@ -324,8 +324,7 @@ asian_state <- ggplot(data = asian_state_map,
   geom_polygon(color = "gray10", size = 0.05) +
   labs(fill = "Number of organizations",
        title = "Asian American advocacy and CBOs",
-       subtitle = "In States (2017)")+
-  theme_map()
+       subtitle = "In States (2017)")
 
 ## County 
 
@@ -335,8 +334,7 @@ asian_county <- ggplot(data = asian_county_map,
   geom_polygon(color = "gray10", size = 0.05) +
   labs(fill = "Number of organizations",
        title = "Asian American advocacy and CBOs",
-       subtitle = "In Counties (2017)")+
-  theme_map()
+       subtitle = "In Counties (2017)")
 
 # Latinos 
 
@@ -348,8 +346,7 @@ latino_state <- ggplot(data = latino_state_map,
   geom_polygon(color = "gray10", size = 0.05) +
   labs(fill = "Number of organizations",
        subtitle = "In States (2017)",
-       title = "Latino advocacy and CBOs")+
-  theme_map()
+       title = "Latino advocacy and CBOs") 
 
 ## County 
 
@@ -359,8 +356,7 @@ latino_county <- ggplot(data = latino_county_map,
   geom_polygon(color = "gray10", size = 0.05) +
   labs(fill = "Number of organizations",
        title = "Latino advocacy and CBOs",
-       subtitle = "In Counties (2017)")+
-  theme_map()
+       subtitle = "In Counties (2017)") 
 
 ggarrange(asian_county, latino_county, common.legend = TRUE)
 
