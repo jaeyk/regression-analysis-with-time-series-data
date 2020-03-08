@@ -85,6 +85,8 @@ Figure 1 shows that the founding rate (the slope of line plot) of community-base
 
 ## 3. Statistical modeling of time series data [[Code](https://github.com/jaeyk/regression-analysis-with-time-series-data/blob/master/code/03_ITS_design_analysis.Rmd)]
 
+### Checking on independent and dependent variables 
+
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/reagan_budget_cut.png)
 
 **Figure 2**
@@ -98,6 +100,8 @@ Before moving into a more serious statistical analysis, I checked some assumptio
 Figure 3 shows how minority community members reacted to the budget crisis. The *International Examiner* (IE), a community newspaper, circulated among Asian American activists in Seattle did not mention Reagan until 1981. I crated a custom dictionary and anlyzed the frequency of budget related terms appeared in Reagan related articles from this newspaper source. The figure shows that when the newspaper first mentioned Reagan, the budget crisis received serious attention. This evidence is crucial to take the year 1981 as a critical juncture for Asian American and Latino community organizers.
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/outliers_detected.png)
+
+### Interrupted time series design
 
 **Figure 4**
 
@@ -195,12 +199,13 @@ year <- NA
 for (i in c(0:38)){
 
 # Model
-model <- lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
+model <- lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
 
 # Save iterations
 fed[i] <- model$coefficients[3] %>% as.numeric()
 pop[i] <- model$coefficients[4] %>% as.numeric()
 year[i] <- 1970 + i}
+
 ```
 
 ```{r}
@@ -215,7 +220,7 @@ result = data.frame()
 year = data.frame()
 
 # Model
-m = Boot(lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i)), R = 500)
+m = Boot(lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i)), R = 500)
 
 # Extract bootSE
 stat = rbind(stat, summary(m) %>% data.frame() %>% select(bootSE))
@@ -232,6 +237,8 @@ rownames(result) <- NULL
 result}
 ```
 
+### Correct standard errors
+
 **Figure 7**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/acf_test.png)
@@ -240,6 +247,12 @@ result}
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/se_table.png)
 
+
+### Sensitivity analysis`
+
+the absolute value of the effect size by 100 % at the significance level of alpha = 0.05 . Conversely, unobserved confounders that do not explain more than 10.34% of the residual variance of both the treatment and the outcome are not strong enough to reduce the absolute value of the effect size by 100% at the significance level of alpha = 0.05 .
+
+An extreme confounder (orthogonal to the covariates) that explains 100% of the residual variance of the outcome, would need to explain at least 15.53% of the residual variance of the treatment to fully account for the observed estimated effect.
 
 ## Conclusions
 
