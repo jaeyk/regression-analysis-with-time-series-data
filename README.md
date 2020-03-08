@@ -137,11 +137,7 @@ Did the Reagan budget cut influence the founding rate of Asian American and Lati
 
 Figure 5 illustrates how these different models fitted to the data. The blue line plot indicates the preicted values. The grey ribbons, around the line plot, display two standard errors, which are approximate to 95% confidence intervals. The impacts of the intervention could be detected in two ways in an interrupted time series design: level and slope. The level of the predicted values is almost identical between the pre- and post-intervention period. In contrast, the slope change is detected in the all four models.
 
-![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
-
-**Figure 6. Model performance comparisons**
-
-I then checked the performances of these four models using AIC. AIC score measures the difference between the model accuracy and complexity. Lower AIC score indicates a closer fit. However, checking AIC scores of these models at one point could be not sufficient for a comprehensive test. Another concern is these models perform differently depending on the period under investigation. Some models may fit for the short-term time period and others do better for the long-term period. To address this concern, I created a for loop function and checked how AIC scores of these four models vary as I extended the data from the year 1970 to 2017. Fogire 6 demonstrates that the ordinary least square model with logged dependent variable consistently outperforms OLS, poisson, and negative binominal models.
+I then checked the performances of these four models using AIC. AIC score measures the difference between the model accuracy and complexity. Lower AIC score indicates a closer fit. However, checking AIC scores of these models at one point could be not sufficient for a comprehensive test. Another concern is these models perform differently depending on the time period under investigation. Some models may fit for the short-term time period and others do better for the long-term period. To address this concern, I created a for loop function and checked how AIC scores of these four models vary as I extended the data from the year 1970 to 2017. Fogire 6 demonstrates that the ordinary least square model with logged dependent variable consistently outperforms OLS, poisson, and negative binominal models.
 
 ```{r}
 
@@ -176,9 +172,9 @@ year[i] <- 1970 + i
 
 ```
 
-![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/boot_cis.png)
+![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
 
-**Figure 7. Changes in coefficients with bootstrapped CIs**
+**Figure 6. Model performance comparisons**
 
 From now on, I use the OLS with logged DV for the analysis. We saw the slope change. Given the research question, it is important to know to what extent the federal funding contributed to the slope change as opposed to other factors. To do so, I examine how the coefficient of federal funding changed as we extended the data from the year 1970 to 2017. For instance, the 1970 data is the subset of the original data which includes observations up to the year 1970. I created point plot using the for loop. The point plot in Figure 7 shows that the coefficients of the federal funding were positive up to the cutpoint. Then, they became almost zero after the cut point. An opposite trend was found from the changes in the coefficients of population growth. They were either negative or zero before the cutpoint. Then, they became positive in the 1980s and then became almost zero or negative again.
 
@@ -200,6 +196,10 @@ pop[i] <- model$coefficients[4] %>% as.numeric()
 year[i] <- 1970 + i}
 
 ```
+
+![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/boot_cis.png)
+
+**Figure 7. Changes in coefficients with bootstrapped CIs**
 
 I also added confidence intervals using bootstrapping. Bootstrapping is resampling wiht replacement. For each regression model at a time point, I resampleed the data and ran the same analysis for 1,000 times, and created confidence intervals based on the sampling variability of regression coefficients. This informatino shwos that the coefficient change around the cutpoint is statistically significant.
 
