@@ -83,7 +83,7 @@ There is a reason why it is useful to plot time series data using both point and
 Figure 1 shows that the founding rate (the slope of line plot) of community-based organizations (CBOs, those organizations that focus on providing social services) both in Asian American and Latino communities increased before the budget cut (red dashed line) and decreased after the budget cut. We cannot find a similar trend from advocacy organizations or hybrid organizations (organizations active both in advocacy and service delivery). This evidence is consistnet with the theory as CBOs are most dependnet on the outside financial support than the other two types of organizations. However, the evidence is only suggestive as the change could also have been influenced by other factors and the data includes noises as well as signals.
 
 
-## 3. Statistical modeling of time series data (interrupted time series design) [[Code](https://github.com/jaeyk/regression-analysis-with-time-series-data/blob/master/code/03_ITS_design_analysis.Rmd)]
+## 3. Statistical modeling of time series data [[Code](https://github.com/jaeyk/regression-analysis-with-time-series-data/blob/master/code/03_ITS_design_analysis.Rmd)]
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/reagan_budget_cut.png)
 
