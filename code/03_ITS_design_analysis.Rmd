@@ -362,7 +362,7 @@ nb.model <- ps_its(reagan_org) + ggtitle("Negative binominal")
 
 ggarrange(ols.model, logged.ols.model, poisson.model, nb.model)
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_plots.png")
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_plots.png", height = 10, width = 10)
 
 ```
 
