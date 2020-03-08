@@ -121,7 +121,7 @@ ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
 
 **Figure 4. Outlier detection**
 
-Finally, I checked the presence of outliers (an observation with large residual). Outliers are particularily influential in the small data anlysis and, thus, they can change the results of a statistical analysis. I construed a multivariate regression model and detected DV values that are unsual given the predicted values of the model using Cook's distance (Cook's D). Cook's D is automatically calculated by the `ols_plot_cooksd_bar` function from the `olsrr` package. I then removed these outliers and imputed new values using k-nearest neighbors (KNN) algorithm. 
+Finally, I checked the presence of outliers (an observation with large residual). Outliers are particularily influential in the small data anlysis and, thus, they can change the results of a statistical analysis. I construed a multivariate regression model and detected DV values that are unsual given the predicted values of the model using Cook's distance (Cook's D). Cook's D is automatically calculated by the `ols_plot_cooksd_bar` function from the `olsrr` package. I then removed these outliers and imputed new values using k-nearest neighbors (KNN) algorithm.
 
 ```{r}
 model <- lm(Freq ~ intervention + Percentage + pop_percentage + factor(category) + Type + presidency + senate + house, data = reagan_org)
@@ -133,6 +133,8 @@ ols_plot_cooksd_bar(model)
 
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/pred_plots.png)
+
+Did the Reagan budget cut influence the founding rate of Asian American and Latino community-based and advocacy organizations? One difficulty to answer this question is that other factors also could have influenced the outcome. To account for these other factors, I built a multivariate statistical model. Also, we don't know which model would fit the data best. For that reason, I constructed various statistical models, fitted each of them to the data, and compared their model fit using Akaike information Criterion (AIC). 
 
 **Figure 5. Interrupted time series design analysis**
 
