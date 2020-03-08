@@ -74,7 +74,7 @@ I also created a [dashboard](https://rpubs.com/jaeyeonkim/581083) based on the o
 
 ## 2. Descriptive data analysis [[Code](https://github.com/jaeyk/regression-analysis-with-time-series-data/blob/master/code/01_descriptive_analysis.Rmd)]
 
-There is a reason why it is useful to plot time series data using both point and line plots but not bar plot. Point plot is useful to show which data points are missing. Line plot is useful to trace the overall trend. Bar plot is not useful because it does not care whether we have overlapping observations at a particular temporal point. In that case, bar plot shows the sum of these numerical elements. Time series plot should match each temporal unit with each observation. Violation of this assumption is hard to be detected by bar plot.
+There is a reason why it is useful to plot time series data using both point and line plots but not bar plot. Point plot is useful to show which data points are missing. Line plot is useful to trace the overall trend. Bar plot is not useful because it does not care whether we have overlapping observations at a particular temporal point. In that case, bar plot just shows the sum of these numerical elements. Time series plot should match each temporal unit with each observation. Violation of this assumption is hard to be detected by bar plot.
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/org_founding_year.png)
 
@@ -97,7 +97,25 @@ Figure 1 shows that the founding rate (the slope of line plot) of community-base
 
 Before moving into a more serious statistical analysis, I checked some assumptions I made about the research design. Figure 2 shows that percentage of the federal budget for education, employment, and social service seriously decreased after the Reagan intervention. It showed a slightl decrease during the Carter administration due to the budget constraint. Reagan made the low budget priority for social programs consistent throughout the 1980s and which continued even in the 1990s. A more specific analysis of the budget change showed that programs empowering minority communities were critically hurt by the budget cut. I did not include a more detailed analysis here for spatial constraints. This evidence is important to take the budget cut as a major intervention.
 
-Figure 3 shows how minority community members reacted to the budget crisis. The *International Examiner* (IE), a community newspaper, circulated among Asian American activists in Seattle did not mention Reagan until 1981. I crated a custom dictionary and anlyzed the frequency of budget related terms appeared in Reagan related articles from this newspaper source. The figure shows that when the newspaper first mentioned Reagan, the budget crisis received serious attention. This evidence is crucial to take the year 1981 as a critical juncture for Asian American and Latino community organizers.
+Figure 3 shows how minority community members reacted to the budget crisis. The *International Examiner* (IE), a community newspaper, circulated among Asian American activists in Seattle did not mention Reagan until 1981. I created a custom dictionary and anlyzed the frequency of budget related terms appeared in Reagan related articles from this newspaper source. The figure shows that when the newspaper first mentioned Reagan, the budget crisis received serious attention. This evidence is crucial to take the year 1981 as a critical juncture for Asian American and Latino community organizers.
+
+```{r}
+# Text data
+ie_processed <- ie_data[,-1] %>% # drop the first col
+  ########################## Cleaning vars ##########################
+  mutate(date = gsub(".*:", "", date) %>% str_trim(),
+         date = gsub(",", "", date),
+         date = as.Date(as.character(date), format = "%b%d%Y"),
+         source = gsub(".*:", "", source) %>% str_trim(),
+         author = gsub(".*:", "", author) %>% str_trim())
+
+# Create a document term matrix based on a custom dictionary
+ie_dic <- dfm(corpus(ie_processed),
+              dictionary = dictionary(list(budget =
+                                      c("spending","grants","grant","funding","funds","fund"))))
+# Add to the original data
+ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
+```
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/outliers_detected.png)
 
