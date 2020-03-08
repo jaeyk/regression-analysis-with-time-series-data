@@ -544,20 +544,20 @@ result}
 
 ```{r}
 
-cis <- data.frame()
-
-for (i in c(1:38)){
-  print(paste0(i, " iteration completed"))
-  cis = rbind(cis, boot_ci(i))
-}
-
-colnames(cis)[1:2] <- c("SE", "Year")
-
-cis_spread <- cis %>%
-  spread(Names, SE) %>%
-  select(-c(Intercept, Latino_SE))
-
-boot_merged <- merge(cis_spread, for_loop)
+    cis <- data.frame()
+    
+    for (i in c(1:38)){
+      print(paste0(i, " iteration completed"))
+      cis = rbind(cis, boot_ci(i))
+    }
+    
+    colnames(cis)[1:2] <- c("SE", "Year")
+    
+    cis_spread <- cis %>%
+      spread(Names, SE) %>%
+      select(-c(Intercept, Latino_SE))
+    
+    boot_merged <- merge(cis_spread, for_loop)
 
 fed_boot <- boot_merged %>%
   ggplot(aes(x = Year, y = Fed_funding, 
@@ -600,11 +600,11 @@ lm_log.out <- lm(log(Freq) ~ Percentage + pop_percentage + category + presidency
 
 #### 5.5.1. Heteroskedasticity 
 
-- Null: the variance of residuals is constant = heteroskedasticity 
+- Null: the variance of residuals is constant (homoscedasticity).
 
 ```{r}
 
-lmtest::bptest(lm_log.out)
+lmtest::bptest(lm_log.out, studentize = TRUE)
 
 ```
 
