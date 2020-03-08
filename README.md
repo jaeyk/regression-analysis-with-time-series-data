@@ -38,6 +38,38 @@ I have collectede a wide range of original data for this project.
 
 ## 1. Data cleaning, wrangling, and merging
 
+The original organization dataset I collected contains founding year variable, but it is not time series data. Time series data, by definition, has a series of temporally varying observations. Founding year variable could miss some years if in these years none of the organizations on the dataset were founded. For this reason, filling these years in is important. The following code is my custom function to perform that task.
+
+```{r}
+org_to_ts <- function(data){
+
+  # Create the full years
+
+  all_years <- seq(min(data$F.year), max(data$F.year))
+
+  # Turn it into a dataframe
+
+  all_years <- data.frame(F.year = all_years)
+
+  # Count by year and type
+
+  data_year <- data %>%
+    count(F.year, States, Type) %>%
+    rename(Freq = n) %>%
+    right_join(all_years, by = "F.year")
+
+  # Replace NA Freq with 0s
+
+  data_year$Freq[is.na(data_year$Freq)] <- 0
+
+  # Replace NA Type with unique Type
+
+  data_year$Type[is.na(data_year$Type)] <- unique(data_year$Type[!is.na(data_year$Type)])
+
+  data_year
+}
+```
+
 ## 2. Descriptive data analysis
 
 **Figure 1**
