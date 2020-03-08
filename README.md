@@ -119,11 +119,15 @@ ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/outliers_detected.png)
 
-### 3.2. Interrupted time series design
-
 **Figure 4**
 
+
+### 3.2. Interrupted time series design
+
+
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/pred_plots.png)
+
+**Figure 5**
 
 ```{r}
 ols_its <- function(input){
@@ -166,9 +170,9 @@ ols_its <- function(input){
 }
 ```
 
-**Figure 5**
-
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
+
+**Figure 6**
 
 ```{r}
 
@@ -203,9 +207,9 @@ year[i] <- 1970 + i
 
 ```
 
-**Figure 6**
-
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/boot_cis.png)
+
+**Figure 7**
 
 ```{r}
 # Initilization vars
@@ -257,13 +261,13 @@ result}
 
 ### 3.3. Correct standard errors
 
-**Figure 7**
-
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/acf_test.png)
 
 **Figure 8**
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/se_table.png)
+
+**Figure 9**
 
 
 ### 3.4. Sensitivity analysis`
@@ -276,6 +280,6 @@ An extreme confounder (orthogonal to the covariates) that explains 100% of the r
 
 1.
 
-**Figure 9**
-
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/state_county_maps.png)
+
+**Figure 10**
