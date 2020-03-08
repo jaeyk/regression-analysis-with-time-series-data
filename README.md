@@ -12,7 +12,7 @@ As Andrew Ng said, [artificial intelligence, especially machine learning, is the
 
 **Figure 1**
 
-![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/org_founding_year.png.png)
+![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/org_founding_year.png)
 
 **Figure 2**
 
