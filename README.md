@@ -131,53 +131,13 @@ ols_plot_cooksd_bar(model)
 
 ### 3.2. Interrupted time series design
 
+Did the Reagan budget cut influence the founding rate of Asian American and Latino community-based and advocacy organizations? One difficulty to answer this question is that other factors also could have influenced the outcome. To account for these other factors, I built a multivariate statistical model. Also, we don't know which model would fit the data best. For that reason, I constructed various statistical models, fitted each of them to the data, and compared their model fit using Akaike information Criterion (AIC).
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/pred_plots.png)
 
-Did the Reagan budget cut influence the founding rate of Asian American and Latino community-based and advocacy organizations? One difficulty to answer this question is that other factors also could have influenced the outcome. To account for these other factors, I built a multivariate statistical model. Also, we don't know which model would fit the data best. For that reason, I constructed various statistical models, fitted each of them to the data, and compared their model fit using Akaike information Criterion (AIC). 
-
 **Figure 5. Interrupted time series design analysis**
 
-```{r}
-ols_its <- function(input){
-
-  # Apply model
-
-  model <- lm(Freq ~ intervention + Percentage + pop_percentage + category + Type + presidency + senate + house,
-               data = input)
-
-  # Make predictions
-
-  input$pred <- predict(model, type = "response", input)
-
-  # Create confidence intervals
-
-  ilink <- family(model)$linkinv # Extracting the inverse link from parameter objects
-
-  # Combined prediction outputs
-
-  input <-predict(model, input, se.fit = TRUE)[1:2] %>%
-    bind_cols(input) %>%
-    mutate(
-      upr = ilink(fit + (2 * se.fit)),
-      lwr = ilink(fit - (2 * se.fit)))
-
-  # Visualize the outcome
-
-  input %>%
-    ggplot(aes(x = Year, y = Freq)) +
-    geom_point(alpha = 0.2) +
-    geom_line(aes(y = pred), size = 1, col = "blue") +
-    geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
-    labs(x = "Year",
-         y = "Organizational founding") +
-    geom_ribbon(aes(ymin = lwr, ymax = upr),
-                alpha = 0.3) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))  +
-  #  facet_grid(category~Type) +
-    scale_y_continuous(breaks = scales::pretty_breaks())
-}
-```
+Figure 5 shows how these different models fitted to the data. The blue line plot indicates the preicted values. The grey ribbons around the line plot displays two standard errors, which are approximate to 95% confidence intervals. The impacts of the intervention could be detected in two ways in an interrupted time series design: level and slope. The level of the DV is almost identical between the pre- and post-intervention period. The slope change is detected in all the four models. 
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
 
