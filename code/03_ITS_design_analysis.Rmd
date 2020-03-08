@@ -221,14 +221,16 @@ ggplot(reagan_org, aes(x = Year, y = Percentage)) +
   geom_vline(xintercept = c(1981), col = "red", linetype ="dashed") +
   annotate("rect", xmin = 1964, xmax = 1981, ymin = 0, ymax = 7.2, alpha = .2) +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) +
-  ylab("Budget for education, employment, and social service") +
+  labs(title = "Budget for education, employment, and social service",
+       y = "Percentage",
+       x = "Year") +
   annotate(geom="text", x=1973, y=2, label="War on Poverty",
               color="red") +
   annotate(geom="text", x=1997, y=2, label="Post-Reagan period",
               color="red") +
   xlim(c(1964,2017))
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/reagan_budget_cut.png", height = 8)
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/reagan_budget_cut.png")
 
 ```
 
