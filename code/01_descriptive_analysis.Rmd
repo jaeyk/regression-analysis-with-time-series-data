@@ -365,5 +365,5 @@ ggplot(data = latino_county_map,
 
 ggarrange(asian_county, latino_county, common.legend = TRUE)
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/state_county_maps.png", width = 8)
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/state_county_maps.png", width = 10)
 ```
