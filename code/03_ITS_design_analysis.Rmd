@@ -364,6 +364,9 @@ ggarrange(ols.model, logged.ols.model, poisson.model, nb.model)
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_plots.png", height = 10, width = 10)
 
+logged.ols.model + facet_wrap(~Type)
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_org_type.png")
+
 ```
 
 ### 5.2. Model comparisons 
@@ -382,8 +385,14 @@ poisson.out <- glm(Freq ~ intervention + Percentage + pop_percentage + category 
 
 nb.out <- glm.nb(Freq ~ intervention + Percentage + pop_percentage + category + presidency + senate + house, data = reagan_org)
 
-stargazer(lm.out, lm_log.out, poisson.out, nb.out, 
-          nb.out, type = "text")
+stargazer(lm.out, lm_log.out, poisson.out, nb.out)
+
+```
+
+```{r}
+
+ols_its_only_cbo(reagan_org %>% mutate(Freq = log(Freq))) + ggtitle("OLS with logged DV") + labs(y = "Organizational founding") + facet_wrap(~category)
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_org_group.png")
 
 ```
 
@@ -544,20 +553,20 @@ result}
 
 ```{r}
 
-    cis <- data.frame()
-    
-    for (i in c(1:38)){
-      print(paste0(i, " iteration completed"))
-      cis = rbind(cis, boot_ci(i))
-    }
-    
-    colnames(cis)[1:2] <- c("SE", "Year")
-    
-    cis_spread <- cis %>%
-      spread(Names, SE) %>%
-      select(-c(Intercept, Latino_SE))
-    
-    boot_merged <- merge(cis_spread, for_loop)
+cis <- data.frame()
+
+for (i in c(1:38)){
+  print(paste0(i, " iteration completed"))
+  cis = rbind(cis, boot_ci(i))
+}
+
+colnames(cis)[1:2] <- c("SE", "Year")
+
+cis_spread <- cis %>%
+  spread(Names, SE) %>%
+  select(-c(Intercept, Latino_SE))
+
+boot_merged <- merge(cis_spread, for_loop)
 
 fed_boot <- boot_merged %>%
   ggplot(aes(x = Year, y = Fed_funding, 
@@ -642,7 +651,7 @@ lm_new <- coeftest(lm_log.out, vcov = NeweyWest, prewhite = F, adjust = T)
 
 lmrobfit <- lmrob(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org, Year <= 1980))
 
-stargazer(lm_log.out, lm_new, lmrobfit, type = "html")
+stargazer(lm_log.out, lm_new, lmrobfit)
 
 ```
 
