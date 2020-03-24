@@ -112,7 +112,7 @@ latino_org_n <- latino_org %>%
          title = "Latino organizations (N = 519)",
          subtitle = "Sorted by organization types")
 
-aa_org_n + latino_org_n
+ggarrange(aa_org_n, latino_org_n)
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/asian_latino_orgs_n.png", width = 10)
 
@@ -294,14 +294,14 @@ state_year_map <- function(data){
 
 # Get state and county maps 
 
-asian_state_map <- state_map(asian_org)
-latino_state_map <- state_map(latino_org)
+asian_state_map <- state_map(asian_org %>% filter(F.year <= 1980))
+latino_state_map <- state_map(latino_org %>% filter(F.year <= 1980))
 
-asian_county_map <- county_map(asian_org)
-latino_county_map <- county_map(latino_org)
+asian_county_map <- county_map(asian_org %>% filter(F.year <= 1980))
+latino_county_map <- county_map(latino_org %>% filter(F.year <= 1980))
 
-asian_county_year_map <- county_year_map(asian_org)
-latino_county_year_map <- county_year_map(latino_org)
+asian_county_year_map <- county_year_map(asian_org %>% filter(F.year <= 1980))
+latino_county_year_map <- county_year_map(latino_org %>% filter(F.year <= 1980))
 
 write_rds(asian_county_map, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/asian_county_map")
 write_rds(latino_county_map, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_county_map")
@@ -323,8 +323,8 @@ asian_state <- ggplot(data = asian_state_map,
                 group = group, fill = n))+
   geom_polygon(color = "gray10", size = 0.05) +
   labs(fill = "Number of organizations",
-       title = "Asian American advocacy and CBOs",
-       subtitle = "In States (2017)") +
+       title = "Asian American community-based and advocacy organizations",
+       subtitle = "In States (1980)") +
   ditch_the_axes
 
 ## County 
@@ -334,8 +334,8 @@ asian_county <- ggplot(data = asian_county_map,
                 group = group, fill = n))+
   geom_polygon(color = "gray10", size = 0.05) +
   labs(fill = "Number of organizations",
-       title = "Asian American advocacy and CBOs",
-       subtitle = "In Counties (2017)") +
+       title = "Asian American community-based and advocacy organizations",
+       subtitle = "In Counties (1980)") +
   ditch_the_axes
 
 # Latinos 
@@ -347,8 +347,8 @@ latino_state <- ggplot(data = latino_state_map,
                 group = group, fill = n))+
   geom_polygon(color = "gray10", size = 0.05) +
   labs(fill = "Number of organizations",
-       subtitle = "In States (2017)",
-       title = "Latino advocacy and CBOs") +
+       subtitle = "In States (1980)",
+       title = "Latino community-based and advocacy organizations") +
   ditch_the_axes
 
 ## County 
@@ -359,11 +359,16 @@ ggplot(data = latino_county_map,
                 group = group, fill = n))+
   geom_polygon(color = "gray10", size = 0.05) +
   labs(fill = "Number of organizations",
-       title = "Latino advocacy and CBOs",
-       subtitle = "In Counties (2017)") +
+       title = "Latino community-based advocacy organizations",
+       subtitle = "In Counties (1980)") +
   ditch_the_axes
 
-ggarrange(asian_county, latino_county, common.legend = TRUE)
+ggarrange(asian_county, latino_county, common.legend = TRUE, ncol = 1, nrow =2)
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/state_county_maps.png", width = 10)
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/county_maps.png", width = 10, height = 15)
+
+ggarrange(asian_state, latino_state, common.legend = TRUE, ncol = 1, nrow =2)
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/state_maps.png", width = 10, height = 15)
+
 ```

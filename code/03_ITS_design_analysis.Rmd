@@ -261,7 +261,7 @@ survived <- medicare %>%
 
 cuts / survived 
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/grant_changes.png", width = 10, height = 8)
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/grant_changes.png", width = 12, height = 8)
 
 ```
 
