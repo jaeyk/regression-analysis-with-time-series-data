@@ -314,7 +314,7 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/d
 
 ```{r}
 
-model <- lm(Freq ~ intervention + Percentage + pop_percentage + factor(category) + Type + presidency + senate + house, data = reagan_org)
+model <- lm(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = reagan_org)
 
 ols_plot_cooksd_bar(model)
 
@@ -377,13 +377,13 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/p
 
 reagan_org <- subset(reagan_org, Type == "CBO")
 
-lm.out <- lm(Freq ~ intervention + Percentage + pop_percentage + category + presidency + senate + house, data = reagan_org)
+lm.out <- lm(Freq ~ Year + intervention + Year*intervention + category, data = reagan_org)
 
-lm_log.out <- lm(log(Freq) ~ intervention + Percentage + pop_percentage + category + presidency + senate + house, data = reagan_org)
+lm_log.out <- lm(log(Freq) ~ Year + intervention + Year*intervention + category, data = reagan_org)
   
-poisson.out <- glm(Freq ~ intervention + Percentage + pop_percentage + category + presidency + senate + house, data = reagan_org, family = "poisson")
+poisson.out <- glm(Freq ~ Year + intervention + Year*intervention + category, data = reagan_org, family = "poisson")
 
-nb.out <- glm.nb(Freq ~ intervention + Percentage + pop_percentage + category + presidency + senate + house, data = reagan_org)
+nb.out <- glm.nb(Freq ~ Year + intervention + Year*intervention + category, data = reagan_org)
 
 stargazer(lm.out, lm_log.out, poisson.out, nb.out)
 
@@ -392,6 +392,7 @@ stargazer(lm.out, lm_log.out, poisson.out, nb.out)
 ```{r}
 
 ols_its_only_cbo(reagan_org %>% mutate(Freq = log(Freq))) + ggtitle("OLS with logged DV") + labs(y = "Organizational founding") + facet_wrap(~category)
+
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_org_group.png")
 
 ```

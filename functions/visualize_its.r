@@ -3,7 +3,7 @@ ols_its <- function(input){
   
   # Apply model
   
-  model <- lm(Freq ~ intervention + Percentage + pop_percentage + category + Type + presidency + senate + house, 
+  model <- lm(Freq ~ Year + intervention + Year*intervention + category + Type, #+ Percentage + pop_percentage + presidency + senate + house, 
                data = input)
   
   # Make predictions 
@@ -42,7 +42,7 @@ ols_its_only_cbo <- function(input){
   
   # Apply model
   
-  model <- lm(Freq ~ intervention + Percentage + pop_percentage + category + presidency + senate + house, 
+  model <- lm(Freq ~ Year + intervention + Year*intervention + category,#+ Percentage + pop_percentage + presidency + senate + house, 
               data = input)
   
   # Make predictions 
@@ -81,8 +81,8 @@ ps_its <- function(input){
   
   # Apply poisson
   
-  model <- glm(Freq ~ intervention + Percentage + pop_percentage + category + Type + presidency + senate + house, 
-              data = input, family = "poisson")
+  model <- glm(Freq ~ Year + intervention + Year*intervention + category + Type, #+ Percentage + pop_percentage + presidency + senate + house, 
+               data = input, family = "poisson")
   
   # Make predictions 
   
@@ -120,9 +120,8 @@ nb_its <- function(input){
   
   # Apply model
   
-  model <- glm.nb(Freq ~ intervention + Percentage + pop_percentage + category + 
-                      Type + presidency + senate + house, 
-                    data = input)
+  model <- glm.nb(Freq ~ Year + intervention + Year*intervention + category + Type, #+ Percentage + pop_percentage + presidency + senate + house, 
+                  data = input)
   
   # Make predictions 
   
@@ -160,9 +159,8 @@ zerofinl_its <- function(input){
   
   # Apply model
   
-  model <- zeroinfl(Freq ~ intervention + Percentage + pop_percentage + category + 
-                      Type + presidency + senate + house | intervention + Percentage + pop_percentage + category + 
-                      Type + presidency + senate + house, dist = "negbin",
+  model <- zeroinfl(Freq ~ Year + intervention + Year*intervention + category + Type| 
+                      Year + intervention + Year*intervention + category + Type, dist = "negbin",
                data = input)
   
   # Make predictions 
