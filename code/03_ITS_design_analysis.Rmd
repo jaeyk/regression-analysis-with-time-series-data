@@ -534,7 +534,7 @@ result = data.frame()
 year = data.frame()
 
 # Model 
-m = Boot(lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i)), R = 1000)
+m = Boot(lm(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org, Year <= 1970 + i)), R = 1000)
 
 # Extract bootSE
 stat = rbind(stat, summary(m) %>% data.frame() %>% select(bootSE))
