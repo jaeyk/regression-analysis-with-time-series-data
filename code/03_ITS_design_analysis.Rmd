@@ -315,21 +315,31 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/d
 ```{r}
 
 model <- lm(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = reagan_org)
-
-ols_plot_cooksd_bar(model)
-
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/outliers_detected.png")
   
-```
-
-```{r}
-
 # Detecting outliers 
 
 cooksd <- cooks.distance(model)
 
 influential <- as.numeric(names(cooksd)[(cooksd > 4*mean(cooksd, na.rm = TRUE))])
 
+# Visualizing outliers
+
+cooksd_df <- data.frame(Index = seq(1:220),
+                        CookD = cooksd)
+
+cooksd_df %>%
+  ggplot(aes(x = Index, y = CookD)) +
+  geom_col() +
+  labs(x = "Index", y = "Cook's Distance") +
+  geom_hline(yintercept = 4*mean(cooksd, na.rm=T), col="red",
+             linetype = "dashed") +
+  annotate(geom = "text", x = 100, y = 0.05, label="Threshold: 0.02", color="red")
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/outliers_detected.png")
+
+```
+
+```{r}
 # Replace with NAs
 
 reagan_org$Freq[influential] <- NA
@@ -577,7 +587,7 @@ fed_boot <- boot_merged %>%
   labs(x = "Year", y = "OLS coefficients", 
        title = "Federal funding",
        subtitle = "With bootstrapped CIs") +
-  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +          
+  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +  
   annotate("rect", xmin = 1964, xmax = 2010, ymin = -0.5, ymax = 0, alpha = .2)
   
 pop_boot <- boot_merged %>%
