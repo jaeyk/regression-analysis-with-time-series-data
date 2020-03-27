@@ -122,7 +122,7 @@ ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
 
 **Figure 4. Outlier detection**
 
-Finally, I checked the presence of outliers (an observation with a large residual). Outliers are particularly influential in small data analysis and can change the results. I construed a multivariate regression model and detected any DV values that are unusual given the predicted values of the model using Cook's distance (Cook's D). Cook's D is automatically calculated by the `ols_plot_cooksd_bar` function from the `olsrr` package. I then removed these outliers and imputed new values using the k-nearest neighbors (KNN) algorithm.
+Finally, I checked the presence of outliers (an observation with a large residual). Outliers are particularly influential in small data analysis and can change the results. I construed a multivariate regression model and detected any DV values that are unusual given the predicted values of the model using Cook's distance (Cook's D). I then removed these outliers and imputed new values using the k-nearest neighbors (KNN) algorithm.
 
 ```{r}
 model <- lm(Freq ~ intervention + Percentage + pop_percentage + factor(category) + Type + presidency + senate + house, data = reagan_org)

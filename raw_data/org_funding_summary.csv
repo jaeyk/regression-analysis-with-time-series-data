@@ -1,0 +1,11 @@
+group,type,value,percentage
+asian,total,293,100
+asian,outside_funds,146,49.82935154
+asian,both,111,37.88395904
+asian,FED,0,0
+asian,foundations,35,11.94539249
+latino,total,510,100
+latino,outside_funds,183,35.88235294
+latino,both,159,31.17647059
+latino,FED,4,0.7843137255
+latino,foundations,20,3.921568627
