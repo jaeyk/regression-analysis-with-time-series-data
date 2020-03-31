@@ -52,7 +52,7 @@ source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions
 ## For custom ggtheme 
 source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/theme_publications.r")
 
-theme_set(theme_Publication())
+theme_set(theme_Publication(14))
 
 # Set preferred packages for conflicted functions 
 conflicted::conflict_prefer("select", "dplyr")
@@ -72,8 +72,7 @@ conflicted::conflict_prefer("annotate", "ggplot2")
 
 ford_sum <- ford %>%
   rename(Foundation_name = Foundation) %>%
-  mutate(Grant_amount = as.numeric(gsub("," , "", as.character(Grant_amount))),
-         Org_name = str_trim(Org_name)) %>%
+  mutate(Grant_amount = as.numeric(gsub("," , "", as.character(Grant_amount)))) %>%
   group_by(Org_name, Type, Groups, Start_year, End_year) %>%
   summarize(sum_grant = sum(Grant_amount)) %>%
   filter(Start_year >= 1960 & Start_year < 1980)
@@ -95,7 +94,7 @@ ford_sum %>%
     scale_fill_manual(name = "Group", labels = c("Asian","Latino"), values=c("red","blue")) +
     labs(x = "Grantee names",
          y = "Total amount of grants received",
-         title = "Ford foundation grants (1968 - 1998)") +
+         title = "Ford Foundation grantees (1960 - 1980)") +
     expand_limits(x = c(0, NA), y = c(0, NA)) +
     scale_y_continuous(labels = scales::unit_format(unit = "Millions"))
 

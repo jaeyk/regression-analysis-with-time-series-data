@@ -410,6 +410,53 @@ stargazer(lm.out, lm_log.out, poisson.out, nb.out,
 
 ```
 
+```{r eval=FALSE, include=FALSE}
+
+# Models
+
+fit_ols <- function(df){
+  lm(Freq ~ Year + intervention + Year*intervention + category, data = df)
+}
+
+fit_ols_ln_dv <- function(df){
+  lm(log(Freq) ~ Year + intervention + Year*intervention + category, data = df)
+}
+
+fit_poisson <- function(df){
+  glm(Freq ~ Year + intervention + Year*intervention + category, data = df, family = "poisson")
+}
+
+fit_neg_binomial <- function(df){
+  glm.nb(Freq ~ Year + intervention + Year*intervention + category, data = df)
+}
+
+# Grouped modeling
+
+grouped_modeling <- function(df, fit_model){
+df %>%
+  group_by(Type) %>%
+  nest() %>%
+  mutate(model = map(data, fit_model),
+         tidied = map(model, tidy)) %>%
+  unnest(tidied, .drop = TRUE) %>%
+  filter(term %in% c("intervention1", "Year:intervention1"))}
+
+grouped_output <- bind_rows(grouped_modeling(reagan_org, fit_ols) %>% mutate(model = "OLS"),
+          grouped_modeling(reagan_org, fit_ols_ln_dv) %>% mutate(model = "OLS with logged DV"),
+          grouped_modeling(reagan_org, fit_poisson) %>% mutate(model = "Poisson"),
+          grouped_modeling(reagan_org, fit_neg_binomial) %>% mutate(model = "Negative binomial")) 
+
+grouped_output %>%
+  ggplot(aes(x = model, y = estimate,
+             ymin = estimate - 2*std.error,
+             ymax = estimate + 2*std.error)) +
+  geom_pointrange(position = position_dodge(width = 1)) +
+  facet_wrap(term ~ Type, scales = "free") + 
+  coord_flip()
+
+grouped_output
+```
+
 ```{r}
 
 reagan_org <- subset(reagan_org, Type == "CBO")
