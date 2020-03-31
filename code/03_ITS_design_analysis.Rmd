@@ -294,7 +294,6 @@ all_dates <- data.frame(date = all_dates)
   
 # Count by year and type
 ie_processed %>% right_join(all_dates, by = "date")
-ie_processed[is.na(ie_processed$budget)] <- 0
 
 # Plot
 ggplot(ie_processed) +
@@ -378,7 +377,12 @@ ggarrange(ols.model, logged.ols.model, poisson.model, nb.model)
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_plots.png", height = 10, width = 10)
 
-logged.ols.model + facet_wrap(~Type)
+pred_org_type <- ols_its(reagan_org %>% mutate(Freq = log(Freq))) + 
+  labs(title = "How treatment effects vary by organizational types",
+       y = "Organizational founding ") + 
+  facet_wrap(~Type)
+
+pred_org_type 
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_org_type.png")
 
@@ -410,9 +414,19 @@ stargazer(lm.out, lm_log.out, poisson.out, nb.out,
 
 reagan_org <- subset(reagan_org, Type == "CBO")
 
-ols_its_only_cbo(reagan_org %>% mutate(Freq = log(Freq))) + ggtitle("OLS with logged DV") + labs(y = "Organizational founding") + facet_wrap(~category)
+pred_org_group <- ols_its_only_cbo(reagan_org %>% mutate(Freq = log(Freq))) + 
+  labs(title = "How treatment effects vary by groups",
+       subtitle = "Only included CBOs",
+       y = "Organizational founding") + 
+  facet_wrap(~category)
+
+pred_org_group 
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_org_group.png")
+
+ggarrange(pred_org_type, pred_org_group, ncol = 1, nrow = 2)
+
+ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_subgroups.png", height = 10)
 
 ```
 
