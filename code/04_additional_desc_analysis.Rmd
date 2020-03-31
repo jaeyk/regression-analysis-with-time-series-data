@@ -40,6 +40,8 @@ pacman::p_load(
 
 ford <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/foundation.csv")
 
+ford$Org_name[ford$Org_name == "The National Urban Coalition/national Council Of La Raza"] <- "The National Urban Coalition/National Council of La Raza"
+
 ```
 
 
