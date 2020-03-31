@@ -231,8 +231,8 @@ In Table 1, the first model is a simple OLS. The second model is also an OLS but
 
 However, we cannot take the regression coefficients at their face value. There could still be confounders. If a model is misspecified, then the regression coefficient is not an unbiased estimator. I ran a sensitivity test using the `sensemakr` package in R. The result provides two key summaries.
 
-1. "Unobserved confounders that do not explain more than **10.34%** of the residual variance of both the treatment and the outcome are not strong enough to reduce the absolute value of the effect size by 100%."
-2. "An extreme confounder (orthogonal to the covariates) that explains 100% of the residual variance of the outcome would need to explain **at least 15.53%** of the residual variance of the treatment to fully account for the observed estimated effect."
+1. "Unobserved confounders that do not explain more than **27.88%** of the residual variance of both the treatment and the outcome are not strong enough to reduce the absolute value of the effect size by 100%."
+2. "An extreme confounder (orthogonal to the covariates) that explains 100% of the residual variance of the outcome would need to explain **at least 9.74%** of the residual variance of the treatment to fully account for the observed estimated effect."
 
 I suspect that philanthropic giving could be one of those unobserved confounders. It is very difficult to find systematic data on philanthropic giving, especially in a historical context. I collected the Ford Foundation grant data and found that Ford allocated grants selectively. Only a few Asian American and Latino CBOs received support from the Ford Foundation. Yet, as this evidence is only partial information of philanthropic giving, I suggest that one should take the above regression coefficient with a grain of salt.
 
