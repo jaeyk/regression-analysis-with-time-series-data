@@ -370,6 +370,10 @@ poisson.model <- ps_its(reagan_org) + ggtitle("Poisson")
 
 nb.model <- ps_its(reagan_org) + ggtitle("Negative binomial") 
 
+```
+
+```{r}
+
 ggarrange(ols.model, logged.ols.model, poisson.model, nb.model)
 
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_plots.png", height = 10, width = 10)
@@ -393,7 +397,11 @@ poisson.out <- glm(Freq ~ Year + intervention + Year*intervention + Type + categ
 
 nb.out <- glm.nb(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org)
 
-stargazer(lm.out, lm_log.out, poisson.out, nb.out)
+stargazer(lm.out, lm_log.out, poisson.out, nb.out, 
+          title = "ITS design analysis results", 
+    #      align = TRUE,
+          dep.var.labels = c("Founding rate", "Founding rate (logged)",
+                             "Founding rate", "Founding rate"))
 
 ```
 
@@ -420,10 +428,10 @@ dispersiontest(poisson.out, trafo = 1)
 #### 5.2.2. AIC 
 
 ```{r}
-cat(paste0("OLS AIC:", AIC(lm.out), "\n",
-       "Logged OLS AIC:", AIC(lm_log.out), "\n",
-       "Poisson AIC:", AIC(poisson.out), "\n",
-       "Negative binomial AIC:", AIC(nb.out)))
+cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",   
+           "Logged OLS AIC:", round(AIC(lm_log.out), 3), "\n",
+           "Poisson AIC:", round(AIC(poisson.out), 3), "\n",
+           "Negative binomial AIC:", round(AIC(nb.out), 3)))
 ```
 
 #### 5.3.2. AIC in time 
