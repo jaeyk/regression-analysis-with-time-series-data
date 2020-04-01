@@ -740,8 +740,7 @@ stargazer(lm_log.out, lm_new, lmrobfit)
 
 ```{r}
 
-lm.sense <- sensemakr(lm_log.out, treatment = "Percentage",
-                         benchmark_covariates = c("pop_percentage", "categoryLatino"))
+lm.sense <- sensemakr(lm_log.out, treatment = "Percentage")
      
 summary(lm.sense)
 
