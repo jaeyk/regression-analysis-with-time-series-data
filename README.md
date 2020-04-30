@@ -4,6 +4,7 @@
 **Regression analysis with time series data**
 
 - Big data is a buzzword. However, most research projects are still based on small- and medium-sized data (less than 10 GB). Collecting, cleaning, and merging these small and medium data requires serious effort and care because they are usually unstructured and have widely different formats. Drawing a sound inference from them is also quite challenging as the data are often small and noisy. I documented this project to demonstrate how we can tackle these small (in terms of size) and wide (in terms of formats) data and to provide insights into the dynamics of policy and behavioral changes.
+- The preprint version of this project is accessible at https://osf.io/preprints/socarxiv/n83xs/.
 
 ## Motivation
 
