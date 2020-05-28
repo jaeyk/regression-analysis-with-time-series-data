@@ -44,7 +44,7 @@ I have collected a wide range of original data for this project.
 
 The original organization dataset that I collected contains a founding year variable, but it is not time series data. Time series data, by definition, has a series of temporally varying observations. The founding year variable could miss some years if no organizations were founded in those years. For this reason, filling in these years is important. The following code is my custom function to perform that task.
 
-```{r}
+```r
 org_to_ts <- function(data){
 
   # Create the year sequence
@@ -101,7 +101,7 @@ Before moving into a more serious statistical analysis, I checked some assumptio
 
 Figure 3 shows how minority communities reacted to the budget crisis. The *International Examiner* (IE), a community newspaper circulating among Asian American activists in Seattle, did not mention Reagan until 1981. I created a custom dictionary and analyzed the frequency of budget-related terms that appeared in Reagan-related articles from this newspaper source. The figure shows that when the newspaper first mentioned Reagan, the budget crisis received serious attention. This evidence is crucial for seeing the year 1981 as a critical juncture for Asian American and Latino community organizers.
 
-```{r}
+```r
 # Text data
 ie_processed <- ie_data[,-1] %>% # drop the first col
   ########################## Cleaning vars ##########################
@@ -125,7 +125,7 @@ ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
 
 Finally, I checked the presence of outliers (an observation with a large residual). Outliers are particularly influential in small data analysis and can change the results. I construed a multivariate regression model and detected any DV values that are unusual given the predicted values of the model using Cook's distance (Cook's D). I then removed these outliers and imputed new values using the k-nearest neighbors (KNN) algorithm.
 
-```{r}
+```r
 model <- lm(Freq ~ intervention + Percentage + pop_percentage + factor(category) + Type + presidency + senate + house, data = reagan_org)
 
 ols_plot_cooksd_bar(model)
@@ -144,7 +144,7 @@ Figure 5 illustrates how these different models fitted to the data. The blue plo
 
 I then checked the performances of these four models using AIC. The AIC score measures the difference between model accuracy and complexity. A lower AIC score indicates a less overfitting model. However, checking AIC scores of these models at one point might not be sufficient for a comprehensive test. Another concern is that these models perform differently depending on the period under investigation. Some models may fit for a short-term period and others do better for a long term. To address this concern, I created a "for loop" function and checked how the AIC scores of these four models varied as I extended the data from the year 1970 to 2017. Figure 6 indicates that the OLS model with logged dependent variable consistently outperformed the OLS, Poisson, and negative binomial models.
 
-```{r}
+```r
 
 # Initilization vars
 lm.AIC <-NA
@@ -186,7 +186,7 @@ From this point on, I used the OLS with logged DV for the analysis and limited t
 To measure the certainty of the coefficient change, I added confidence intervals using bootstrapping. Bootstrapping is resampling with replacement. For each regression model at a time point, I resampled the data and ran the same analysis for 1,000 times, and created confidence intervals based on the sampling variability of regression coefficients. This information shows that the coefficient change around the cutpoint is statistically significant.
 
 
-```{r}
+```r
 # Initilization vars
 fed <- NA
 pop <- NA
