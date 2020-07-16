@@ -27,9 +27,9 @@ df <- data.frame(date = date_list,
 
 # Clean the text 
 df$text <- df$text %>%  
-    stringr::str_replace_all("[^[:alnum:]]", "") %>%
-    stringr::str_replace_all("[\\n]" , "") %>%
-    stringr::str_squish()
+    stringr::str_replace_all("[^[:alnum:]]", "") %>% # Remove special characters 
+    stringr::str_replace_all("[\\n]" , "") %>% # Remove line breaks 
+    stringr::str_squish() # Remove extra white space 
 
 # Save the df 
-data.table::fwrite(here("processed_data", "nclr_text"))
+fwrite(df, here("processed_data", "nclr_text.csv"))
