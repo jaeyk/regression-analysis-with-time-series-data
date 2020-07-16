@@ -15,17 +15,17 @@ html_document:
 
 rm(list = ls())
 
-# Import libraries (adapted from this link: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
-
-if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
         tidyverse, # for the tidyverse framework
         patchwork, # for arranging ggplots 
+        
+        ### ggplot themes 
+        ggsci,
         ggpubr, # for arranging ggplots 
         ggthemes, # for fancy ggplot themes
         
-        ### For making maps (https://geocompr.robinlovelace.net/adv-map.html#animated-maps)
-        
+        ### Spatial analysis 
+        tidygeocoder, # for geocoding 
         sf,
         raster,
         spData, 
@@ -47,8 +47,13 @@ pacman::p_load(
         gifski # for animated maps
 )
 
-```
+# devtools::install_github("jaeyk/makereproducible")
+library(makereproducible)
 
+# for publication-friendly theme 
+theme_set(theme_pubr())
+
+```
 
 ## 1. Load files
 
@@ -59,26 +64,23 @@ N of Latino orgs: 519
 
 # Load files
 
-asian_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv")
+asian_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv"))
 
-latino_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv")
+latino_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv"))
 
-reagan <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_budget.csv")
+reagan <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_budget.csv"))
 
 # Chinese service org 
 
-chinese_service_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/chinese_service_org.csv") 
+chinese_service_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/chinese_service_org.csv"))
   
 # Mexican service org 
 
-mexican_service_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/mexican_service_org.csv")
+mexican_service_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/mexican_service_org.csv"))
 
 # Set theme 
 
-source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/theme_publications.r")
 source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r")
-
-theme_set(theme_Publication(14))
 
 ```
 
