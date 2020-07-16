@@ -129,21 +129,21 @@ cd ~/analyzing-asian-american-latino-civic-infrastructure/raw_data/nclr/'Agenda-
 
 ### First 
 
-pdftk First.pdf cat 1-8 output nclr_1973_summer 
-pdftk First.pdf cat 9-32 output nclr_1973_spring 
-pdftk First.pdf cat 33-64 output nclr_1973_fall 
-pdftk First.pdf cat 66-96 output nclr_1973_winter
+pdftk First.pdf cat 1-8 output nclr_1973summer 
+pdftk First.pdf cat 9-32 output nclr_1973spring 
+pdftk First.pdf cat 33-64 output nclr_1973fall 
+pdftk First.pdf cat 66-96 output nclr_1973winter
 
 ### Second 
 
-pdftk Second.pdf cat 1-36 output nclr_1974_spring 
-pdftk Second.pdf cat 37-76 output nclr_1974_summer  
-pdftk Second.pdf cat 77-100 output nclr_1974_fall 
+pdftk Second.pdf cat 1-36 output nclr_1974spring 
+pdftk Second.pdf cat 37-76 output nclr_1974summer  
+pdftk Second.pdf cat 77-100 output nclr_1974fall 
 
 ### Last 
 
-pdftk Last.pdf cat 1-8 output nclr_1976_spring 
-pdftk Last.pdf cat 10-45 output nclr_1976_summer 
+pdftk Last.pdf cat 1-8 output nclr_1976spring 
+pdftk Last.pdf cat 10-45 output nclr_1976summer 
 
 # Copy these files to the parent directory 
 
@@ -211,4 +211,5 @@ pdftk 'Last from A Journal of Hispanic Issues 1981.pdf' cat 1-15 output nclr_198
 mv nclr* ..
 
 # Agenda became inactive during 1982-1988 and publication resumed 1989 
+
 
