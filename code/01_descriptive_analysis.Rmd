@@ -15,6 +15,7 @@ html_document:
 
 rm(list = ls())
 
+# if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
         tidyverse, # for the tidyverse framework
         patchwork, # for arranging ggplots 
