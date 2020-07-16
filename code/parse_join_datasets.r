@@ -8,11 +8,15 @@ pacman::p_load(tidyverse,
 # Import files 
 cap <- read.dta13(here("raw_data", "cap.dta"))
 census_conunty <- read_csv(here("processed_data", "historical_census_county.csv"))
+asian_latino_pop_county <- read_csv(here("processed_data", "asian_latino_pop_county.csv")) %>%
+    rename(State = "States",
+           County = "County_names",
+           City = "City_names")
 
 # Add foreign key 
 cap$FIPS <- paste0(cap$stfips_f, cap$cofips_f) %>% as.numeric()
 
-# Join
+# Left join
 cap_census <- left_join(cap, census_conunty) %>%
     select(-contains("fips_f")) %>%
     filter(!is.na(State)) %>%
@@ -21,3 +25,4 @@ cap_census <- left_join(cap, census_conunty) %>%
 # Export 
 write_csv(cap_census, here("processed_data", "cap_census.csv"))
 
+# Full join 
