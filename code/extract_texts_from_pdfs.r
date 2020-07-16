@@ -21,6 +21,6 @@ text_list <- list(filename) %>%
 # Put them together as a dataframe 
 df <- data.frame(date = date_list,
                  text = text_list %>% unlist() %>% paste(collapse = ""))
-
+    
 # Save the df 
 write_rds(df, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/nclr_text.rds")
