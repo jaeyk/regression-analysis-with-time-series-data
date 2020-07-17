@@ -50,7 +50,7 @@ excel2df <- function(filename){
     
     p1 <- sum(str_detect(var1, "1960"), na.rm = TRUE) + sum(str_detect(var1, "1970"), na.rm = TRUE)
     
-    # The most of city names 
+    # Most of the city names 
     var2 <- list()
     
     p2 <- list()

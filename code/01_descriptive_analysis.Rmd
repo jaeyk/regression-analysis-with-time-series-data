@@ -3,11 +3,12 @@ title: "Descriptive analysis"
 author: "Jae Yeon Kim"
 output:
 html_document: 
-  toc: true
+  toc: True
   theme: united
+  number_sections: True 
 ---
 
-## 0. Setup 
+## Setup 
 
 ```{r}
 
@@ -18,7 +19,10 @@ rm(list = ls())
 # if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
         tidyverse, # for the tidyverse framework
+        data.table, 
         patchwork, # for arranging ggplots 
+        here, # for reproducibility 
+        rvest, # for parsing html 
         
         ### ggplot themes 
         ggsci,
@@ -51,12 +55,20 @@ pacman::p_load(
 # devtools::install_github("jaeyk/makereproducible")
 library(makereproducible)
 
+# Import R scripts 
+source(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r"))
+
+script_list <- list(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r"),
+     here("functions", "data_viz.r"))
+
+for (i in 1:length(script_list))
+    {source(script_list[[i]])}
+
 # for publication-friendly theme 
 theme_set(theme_pubr())
-
 ```
 
-## 1. Load files
+## Load files
 
 N of Asian orgs: 299
 N of Latino orgs: 519 
@@ -79,15 +91,11 @@ chinese_service_org <- read_csv(make_here("/home/jae/analyzing-asian-american-la
 
 mexican_service_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/mexican_service_org.csv"))
 
-# Set theme 
-
-source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r")
-
 ```
 
-## 2. Descriptive analysis
+## Descriptive analysis
 
-### 2.1. Cross-sectional analysis
+### Cross-sectional analysis
 
 ```{r}
 
@@ -115,14 +123,14 @@ latino_org_n <- latino_org %>%
          title = "Latino organizations (N = 519)",
          subtitle = "Sorted by organization types")
 
-ggarrange(aa_org_n, latino_org_n)
+aa_org_n + latino_org_n
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/asian_latino_orgs_n.png", width = 10)
+ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/asian_latino_orgs_n.png"), width = 10)
 
 ```
-### 2.2. Time-series analysis
+### Time-series analysis
 
-#### 2.2.1. Turning into time-series data 
+#### Turning into time-series data 
 
 ```{r}
 
@@ -143,7 +151,7 @@ write_csv(asian_year, "/home/jae/analyzing-asian-american-latino-civic-infrastru
 write_csv(latino_year, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_year.csv")
 ```
 
-#### 2.2.2. Plotting
+#### Plotting
 
 ```{r}
 
@@ -177,7 +185,7 @@ freq_sum %>%
               color="red") +
     scale_y_continuous(breaks = scales::pretty_breaks()) # integers
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year.png", height = 7, width = 12)
+ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year.png"), height = 7, width = 12)
 
 ```
 
@@ -225,11 +233,74 @@ panethnic / ethnic
 ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year_combined.png", height = 12, width = 13)
 ```
 
-### 2.3. Geospatial analysis 
+### Geospatial analysis 
 
 I adapted code from [this](https://github.com/Robinlovelace/Creating-maps-in-R), [this](https://geocompr.robinlovelace.net/adv-map.html#animated-maps) and [this](https://d4tagirl.com/2017/05/how-to-plot-animated-maps-with-gganimate) site.
 
-#### 2.3.1. Geocoding
+#### Geocoding
+
+```{r}
+
+# Subset data 
+## Asian 
+asian_org_dt <- data.table(asian_org)
+
+asian_address <- asian_org_dt[F.year <= 1981, .(Address, F.year), ] %>% as.data.frame()
+
+## Latino 
+latino_org_dt <- data.table(latino_org) 
+
+latino_address <- asian_org_dt[F.year <= 1981, .(Address, F.year), ] %>% as.data.frame()
+
+# Geocode the address 
+asian_lat_longs <- asian_address %>% 
+        tidygeocoder::geocode(Address, 
+        method = "cascade", # Mix of geo methods 
+        lat = latitude, 
+        long = longtitude)
+
+latino_lat_longs <- latino_address %>% 
+        tidygeocoder::geocode(Address, 
+        method = "cascade", # Mix of geo methods 
+        lat = latitude, 
+        long = longtitude)
+
+# Check whether there exists NAs
+sum(is.na(asian_lat_longs$latitude)) # 10 missing addresses 
+sum(is.na(latino_lat_longs$latitude)) # 26 missing addresses 
+
+# Fix the problematic addresses using Google maps 
+
+asian_NA_list <- asian_lat_longs$Address[which(is.na(asian_lat_longs$latitude))]
+
+asian_NA_list[1]
+
+url <- paste("https://www.google.com/search?q=asus")
+
+first_page <- read_html(url)
+
+titles <- html_nodes(first_page, xpath = "//div/div/div/a/div[not(div)]") %>% 
+          html_text()
+
+titles
+
+url <- "https://www.google.com/search?q=%22101+8th+Street%2C+Suite+101+Oakland%2C+CA+94607%22&oq=%22101+8th+Street%2C+Suite+101+Oakland%2C+CA+94607%22&aqs=chrome..69i57j35i39.34360j0j4&sourceid=chrome&ie=UTF-8"
+
+first_page <- read_html(url)
+
+test1 <- first_page %>% html_nodes("div") %>% html_text()
+first_page %>% html_nodes("span.desktop-title-subconten") 
+
+new_address <- nodes[html_attr(nodes, "style") == "display:inline-block;float:right;padding-left:5px;padding-top:20px"] 
+
+first_page %>% html_text()
+
+<div style="min-width:100%"><div class="Uekwlc" style="display:inline-block;float:right;padding-left:5px;padding-top:20px"></div><div style="display:inline"><b><div><div style="padding-top:18px" class="vk_sh vk_bk"><div class="desktop-title-content">101 8th St #101</div> <span class="desktop-title-subcontent">Oakland, CA 94607</span></div></div></b> </div><div class="Uekwlc QzqPSc" style="display:block"><!--n--></div></div>
+
+gsub("Open in Maps","", test[26])
+
+first_page %>% html_nodes("div") %>% html_text()
+```
 
 ```{r}
 
@@ -311,9 +382,9 @@ write_rds(latino_county_map, "/home/jae/analyzing-asian-american-latino-civic-in
 
 ```
 
-#### 2.3.2. Plotting  
+#### Plotting  
 
-##### 2.3.2.1. Maps 
+##### Maps 
 
 ```{r}
 
@@ -327,8 +398,7 @@ asian_state <- ggplot(data = asian_state_map,
   geom_polygon(color = "gray10", size = 0.05) +
   labs(fill = "Number of organizations",
        title = "Asian American community-based and advocacy organizations",
-       subtitle = "In States (1980)") +
-  ditch_the_axes
+       subtitle = "In States (1980)")
 
 ## County 
 
