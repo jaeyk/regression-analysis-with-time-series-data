@@ -25,7 +25,7 @@ excel2df <- function(filename){
 
     # Save objs 
 
-    # Extract city names  
+    # Extract city names
     colnames(census)[1] <- "Index"
 
     census$Index <- census$Index %>%
@@ -39,7 +39,7 @@ excel2df <- function(filename){
 
     message(paste("The number of cities in the State:", length(city_names)))
     
-    # Identify p (each parameter in the sep() function)
+    # Identify p (for each argument in the sep() function)
     Index <- census$Index[-c(1:12)] %>% as.character()
 
     # Use NA as a breaker between each city info 
@@ -67,15 +67,14 @@ excel2df <- function(filename){
     
     p2 <- map_df(p2, enframe)[,2]$value %>% as.integer()
     
-    # The last city names 
-    
+    # The last city name
     var3 <- Index[na_index[length(na_index)]+1:length(Index)]
     
     p3 <- sum(str_detect(var3, "1960"), na.rm = TRUE) + sum(str_detect(var3, "1970"), na.rm = TRUE)
 
     p_list <- c(p1, p2, p3)[!(c(p1, p2, p3) == 0)]
     
-    # Replication
+    # Another for loop
     City <- list()
     
     for (i in 1:length(p_list)){
