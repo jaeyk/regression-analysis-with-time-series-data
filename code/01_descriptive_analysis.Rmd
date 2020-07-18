@@ -2,13 +2,13 @@
 title: "Descriptive analysis"
 author: "Jae Yeon Kim"
 output:
-html_document: 
+html_document:
   toc: True
   theme: united
-  number_sections: True 
+  number_sections: True
 ---
 
-## Setup 
+## Setup
 
 ```{r}
 
@@ -19,21 +19,21 @@ rm(list = ls())
 # if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
         tidyverse, # for the tidyverse framework
-        data.table, 
-        patchwork, # for arranging ggplots 
-        here, # for reproducibility 
-        rvest, # for parsing html 
-        
-        ### ggplot themes 
+        data.table,
+        patchwork, # for arranging ggplots
+        here, # for reproducibility
+        rvest, # for parsing html
+
+        ### ggplot themes
         ggsci,
-        ggpubr, # for arranging ggplots 
+        ggpubr, # for arranging ggplots
         ggthemes, # for fancy ggplot themes
-        
-        ### Spatial analysis 
-        tidygeocoder, # for geocoding 
+
+        ### Spatial analysis
+        tidygeocoder, # for geocoding
         sf,
         raster,
-        spData, 
+        spData,
         ggmap,
         maps,
         mapdata,
@@ -41,13 +41,13 @@ pacman::p_load(
         leaflet,  # for interactive maps
         mapview,  # for interactive maps
         shiny,    # for web applications
-        openintro, # for abbr2state function 
-        
-        ### Time series analysis 
+        openintro, # for abbr2state function
+
+        ### Time series analysis
         ggseas, # for seasonality adjustment
-        fpp2, # for detecting seasonality in data 
-        
-        ### Interactiev maps 
+        fpp2, # for detecting seasonality in data
+
+        ### Interactiev maps
         gganimate, # for animated maps
         gifski # for animated maps
 )
@@ -55,7 +55,7 @@ pacman::p_load(
 # devtools::install_github("jaeyk/makereproducible")
 library(makereproducible)
 
-# Import R scripts 
+# Import R scripts
 source(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r"))
 
 script_list <- list(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r"),
@@ -64,14 +64,14 @@ script_list <- list(make_here("/home/jae/analyzing-asian-american-latino-civic-i
 for (i in 1:length(script_list))
     {source(script_list[[i]])}
 
-# for publication-friendly theme 
+# for publication-friendly theme
 theme_set(theme_pubr())
 ```
 
 ## Load files
 
 N of Asian orgs: 299
-N of Latino orgs: 519 
+N of Latino orgs: 519
 
 ```{r include=FALSE}
 
@@ -83,11 +83,11 @@ latino_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civi
 
 reagan <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_budget.csv"))
 
-# Chinese service org 
+# Chinese service org
 
 chinese_service_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/chinese_service_org.csv"))
-  
-# Mexican service org 
+
+# Mexican service org
 
 mexican_service_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/mexican_service_org.csv"))
 
@@ -97,31 +97,33 @@ mexican_service_org <- read_csv(make_here("/home/jae/analyzing-asian-american-la
 
 ### Cross-sectional analysis
 
+- [] Turn this into stacked bar plot. 
+
 ```{r}
 
 aa_org_n <- asian_org %>%
-  dplyr::select(City, Type) %>%
-  group_by(Type) %>%
-  summarize(n = n()) %>%
-  arrange(desc(n)) %>%
-  ggplot(aes(x = reorder(Type, -n), y = n)) +
-    geom_col() +
-    theme_base() +
-    labs(x = "Type", y = "Count", 
-         title = "Asian organizations (N = 299)",
-         subtitle = "Sorted by organization types")
+    dplyr::select(City, Type) %>%
+    group_by(Type) %>%
+    summarize(n = n()) %>%
+    arrange(desc(n)) %>%
+    ggplot(aes(x = reorder(Type, -n), y = n)) +
+        geom_col() +
+        theme_base() +
+        labs(x = "Type", y = "Count",
+             title = "Asian organizations (N = 299)",
+             subtitle = "Sorted by organization types")
 
 latino_org_n <- latino_org %>%
-  dplyr::select(City, Type) %>%
-  group_by(Type) %>%
-  summarize(n = n()) %>%
-  arrange(desc(n)) %>%
-  ggplot(aes(x = reorder(Type, -n), y = n)) +
-    geom_col() +
-    theme_base() +
-    labs(x = "Type", y = "Count", 
-         title = "Latino organizations (N = 519)",
-         subtitle = "Sorted by organization types")
+    dplyr::select(City, Type) %>%
+    group_by(Type) %>%
+    summarize(n = n()) %>%
+    arrange(desc(n)) %>%
+    ggplot(aes(x = reorder(Type, -n), y = n)) +
+        geom_col() +
+        theme_base() +
+        labs(x = "Type", y = "Count",
+             title = "Latino organizations (N = 519)",
+             subtitle = "Sorted by organization types")
 
 aa_org_n + latino_org_n
 
@@ -130,11 +132,11 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 ```
 ### Time-series analysis
 
-#### Turning into time-series data 
+#### Turning into time-series data
 
 ```{r}
 
-# Fill 0 years to each subset  
+# Fill 0 years to each subset
 asian_cbo_year <- org_to_ts(asian_org %>% filter(Type == "CBO"))
 asian_advo_year <- org_to_ts(asian_org %>% filter(Type == "Advocacy"))
 asian_hybrid_year <- org_to_ts(asian_org %>% filter(Type == "Hybrid"))
@@ -143,12 +145,14 @@ latino_cbo_year <- org_to_ts(latino_org %>% filter(Type == "CBO"))
 latino_advo_year <- org_to_ts(latino_org %>% filter(Type == "Advocacy"))
 latino_hybrid_year <- org_to_ts(latino_org %>% filter(Type == "Hybrid"))
 
-# Bind them 
+# Bind them
 asian_year <- bind_rows(asian_cbo_year, asian_advo_year, asian_hybrid_year)
 latino_year <- bind_rows(latino_cbo_year, latino_advo_year, latino_hybrid_year)
 
-write_csv(asian_year, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/asian_year.csv")
-write_csv(latino_year, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_year.csv")
+write_csv(asian_year, make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/asian_year.csv"))
+
+write_csv(latino_year, make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_year.csv"))
+
 ```
 
 #### Plotting
@@ -163,27 +167,27 @@ merged <- bind_rows(mutate(asian_year, group = "Asian Americans"),
 # Plot
 
 freq_sum <- merged %>%
-  group_by(F.year, group, Type) %>%
-  summarize(freq_sum = sum(Freq))
+    group_by(F.year, group, Type) %>%
+    summarize(freq_sum = sum(Freq))
 
-write_csv(freq_sum, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/freq_sum.csv")
+write_csv(freq_sum, make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/freq_sum.csv"))
 
 freq_sum %>%
-  ggplot(aes(x = F.year, y = freq_sum)) +
-    geom_point() +
-    geom_line() +
-    stat_stl(frequency = 4, s.window = "periodic", col = "blue", size = 1) +
-    labs(title = " Grey: Raw trend \n Blue: Seaonality adjusted trend",
-         x = "Year", 
-         y = "Number of organizations founded in each year") +
-    facet_grid(Type~group) +
-    xlim(c(1960,2017)) +
-    geom_vline(xintercept = c(1980), linetype = "dashed", col = "red") +
-    annotate(geom="text", x = 1972, y = 13, label="War on Poverty",
-              color="red") +
-    annotate(geom="text", x = 1990, y = 13, label="Post-Reagan period",
-              color="red") +
-    scale_y_continuous(breaks = scales::pretty_breaks()) # integers
+    ggplot(aes(x = F.year, y = freq_sum)) +
+        geom_point() +
+        geom_line() +
+        stat_stl(frequency = 4, s.window = "periodic", col = "blue", size = 1) +
+        labs(title = " Grey: Raw trend \n Blue: Seaonality adjusted trend",
+             x = "Year",
+             y = "Number of organizations founded in each year") +
+        facet_grid(Type~group) +
+        xlim(c(1960,2017)) +
+        geom_vline(xintercept = c(1980), linetype = "dashed", col = "red") +
+        annotate(geom="text", x = 1972, y = 13, label="War on Poverty",
+                  color="red") +
+        annotate(geom="text", x = 1990, y = 13, label="Post-Reagan period",
+                  color="red") +
+        scale_y_continuous(breaks = scales::pretty_breaks()) # integers
 
 ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year.png"), height = 7, width = 12)
 
@@ -192,114 +196,84 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 ```{r}
 
 panethnic <- freq_sum %>%
-  filter(Type == "CBO") %>%
-  ggplot(aes(x = F.year, y = freq_sum)) +
-    geom_point() +
-    geom_line() +
-    labs(x = "Year", y = "Number of organizations founded in each year",
-         title = "Panethnic organizations",
-         subtitle = "Only included CBOs") +
-    facet_grid(~group) +
-    xlim(c(1960,2017))  +
-    geom_vline(xintercept = c(1980), linetype = "dashed", col = "red") +
-    annotate(geom="text", x = 1972, y = 13, label="War on Poverty",
-              color="red") +
-    annotate(geom="text", x = 1990, y = 13, label="Post-Reagan period",
-              color="red") +
-    scale_y_continuous(breaks = scales::pretty_breaks()) +
-    ylim(c(0,20))
+    filter(Type == "CBO") %>%
+    ggplot(aes(x = F.year, y = freq_sum)) +
+        geom_point() +
+        geom_line() +
+        labs(x = "Year", y = "Number of organizations founded in each year",
+             title = "Panethnic organizations",
+             subtitle = "Only included CBOs") +
+        facet_grid(~group) +
+        xlim(c(1960,2017))  +
+        geom_vline(xintercept = c(1980), linetype = "dashed", col = "red") +
+        annotate(geom="text", x = 1972, y = 13, label="War on Poverty",
+                  color="red") +
+        annotate(geom="text", x = 1990, y = 13, label="Post-Reagan period",
+                  color="red") +
+        scale_y_continuous(breaks = scales::pretty_breaks()) +
+        ylim(c(0,20))
 
 ethnic <- bind_rows(mutate(chinese_service_org[,c("Name", "F.year")], group = "Chinese"),
-          mutate(mexican_service_org[,c("Name", "F.year")], group = "Mexicans")) %>% 
-  count(F.year, group) %>%
-  ggplot(aes(x = F.year, y = n)) +
-    geom_point() +
-    geom_line() +
-    labs(x = "Year", y = "Number of organizations founded in each year",
-         title = "Ethnic organizations",
-         subtitle = "Only included CBOs") +     
-    facet_grid(~group) +
-    xlim(c(1960,2017))  +
-    geom_vline(xintercept = c(1980), linetype = "dashed", col = "red") +
-    annotate(geom="text", x = 1972, y = 13, label="War on Poverty",
-              color="red") +
-    annotate(geom="text", x = 1990, y = 13, label="Post-Reagan period",
-              color="red") +
-    scale_y_continuous(breaks = scales::pretty_breaks()) +
-    ylim(c(0,20))
+          mutate(mexican_service_org[,c("Name", "F.year")], group = "Mexicans")) %>%
+    count(F.year, group) %>%
+    ggplot(aes(x = F.year, y = n)) +
+        geom_point() +
+        geom_line() +
+        labs(x = "Year", y = "Number of organizations founded in each year",
+             title = "Ethnic organizations",
+             subtitle = "Only included CBOs") +
+        facet_grid(~group) +
+        xlim(c(1960,2017))  +
+        geom_vline(xintercept = c(1980), linetype = "dashed", col = "red") +
+        annotate(geom="text", x = 1972, y = 13, label="War on Poverty",
+                  color="red") +
+        annotate(geom="text", x = 1990, y = 13, label="Post-Reagan period",
+                  color="red") +
+        scale_y_continuous(breaks = scales::pretty_breaks()) +
+        ylim(c(0,20))
 
 panethnic / ethnic
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year_combined.png", height = 12, width = 13)
+ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year_combined.png"), height = 12, width = 13)
 ```
 
-### Geospatial analysis 
+## Geospatial analysis
 
-I adapted code from [this](https://github.com/Robinlovelace/Creating-maps-in-R), [this](https://geocompr.robinlovelace.net/adv-map.html#animated-maps) and [this](https://d4tagirl.com/2017/05/how-to-plot-animated-maps-with-gganimate) site.
-
-#### Geocoding
+### Geocoding
 
 ```{r}
 
-# Subset data 
-## Asian 
+# Subset data
+## Asian
 asian_org_dt <- data.table(asian_org)
 
 asian_address <- asian_org_dt[F.year <= 1981, .(Address, F.year), ] %>% as.data.frame()
 
-## Latino 
-latino_org_dt <- data.table(latino_org) 
+## Latino
+latino_org_dt <- data.table(latino_org)
 
 latino_address <- asian_org_dt[F.year <= 1981, .(Address, F.year), ] %>% as.data.frame()
 
-# Geocode the address 
-asian_lat_longs <- asian_address %>% 
-        tidygeocoder::geocode(Address, 
-        method = "cascade", # Mix of geo methods 
-        lat = latitude, 
+# Geocode the address
+asian_lat_longs <- asian_address %>%
+        tidygeocoder::geocode(Address,
+        method = "cascade", # Mix of geo methods
+        lat = latitude,
         long = longtitude)
 
-latino_lat_longs <- latino_address %>% 
-        tidygeocoder::geocode(Address, 
-        method = "cascade", # Mix of geo methods 
-        lat = latitude, 
+latino_lat_longs <- latino_address %>%
+        tidygeocoder::geocode(Address,
+        method = "cascade", # Mix of geo methods
+        lat = latitude,
         long = longtitude)
 
 # Check whether there exists NAs
-sum(is.na(asian_lat_longs$latitude)) # 10 missing addresses 
-sum(is.na(latino_lat_longs$latitude)) # 26 missing addresses 
+sum(is.na(asian_lat_longs$latitude)) # 10 missing addresses
+sum(is.na(latino_lat_longs$latitude)) # 26 missing addresses
 
-# Fix the problematic addresses using Google maps 
+# Fix the problematic addresses using Bing (done in Python)
 
-asian_NA_list <- asian_lat_longs$Address[which(is.na(asian_lat_longs$latitude))]
 
-asian_NA_list[1]
-
-url <- paste("https://www.google.com/search?q=asus")
-
-first_page <- read_html(url)
-
-titles <- html_nodes(first_page, xpath = "//div/div/div/a/div[not(div)]") %>% 
-          html_text()
-
-titles
-
-url <- "https://www.google.com/search?q=%22101+8th+Street%2C+Suite+101+Oakland%2C+CA+94607%22&oq=%22101+8th+Street%2C+Suite+101+Oakland%2C+CA+94607%22&aqs=chrome..69i57j35i39.34360j0j4&sourceid=chrome&ie=UTF-8"
-
-first_page <- read_html(url)
-
-test1 <- first_page %>% html_nodes("div") %>% html_text()
-first_page %>% html_nodes("span.desktop-title-subconten") 
-
-new_address <- nodes[html_attr(nodes, "style") == "display:inline-block;float:right;padding-left:5px;padding-top:20px"] 
-
-first_page %>% html_text()
-
-<div style="min-width:100%"><div class="Uekwlc" style="display:inline-block;float:right;padding-left:5px;padding-top:20px"></div><div style="display:inline"><b><div><div style="padding-top:18px" class="vk_sh vk_bk"><div class="desktop-title-content">101 8th St #101</div> <span class="desktop-title-subcontent">Oakland, CA 94607</span></div></div></b> </div><div class="Uekwlc QzqPSc" style="display:block"><!--n--></div></div>
-
-gsub("Open in Maps","", test[26])
-
-first_page %>% html_nodes("div") %>% html_text()
 ```
 
 ```{r}
@@ -309,14 +283,14 @@ first_page %>% html_nodes("div") %>% html_text()
 us_states <- map_data("state")
 us_county <- map_data("county")
 
-# Get state names 
+# Get state names
 
 asian_org$region <- tolower(abbr2state(asian_org$States))
 latino_org$region <- tolower(abbr2state(latino_org$States))
 
-# Create fuctions 
+# Create fuctions
 
-## No year 
+## No year
 
 county_map <- function(data){
   data_county<- count(data, County)
@@ -332,12 +306,12 @@ county_map <- function(data){
 
 state_map <- function(data){
   data_state<- count(data, region)
-  
+
   colnames(data_state)[1] <- "region"
-  
+
   data_state$region <- as.character(data_state$region)
   data_state$region <- tolower(data_state$region)
-  
+
   us_state_data <- left_join(us_states, data_state)
   return(us_state_data)
 }
@@ -356,17 +330,17 @@ county_year_map <- function(data){
 
 state_year_map <- function(data){
   data_state<- count(data, region, F.year)
-  
+
   colnames(data_state)[1] <- "region"
-  
+
   data_state$region <- as.character(data_state$region)
   data_state$region <- tolower(data_state$region)
-  
+
   us_state_data <- left_join(us_states, data_state)
   return(us_state_data)
 }
 
-# Get state and county maps 
+# Get state and county maps
 
 asian_state_map <- state_map(asian_org %>% filter(F.year <= 1980))
 latino_state_map <- state_map(latino_org %>% filter(F.year <= 1980))
@@ -382,9 +356,7 @@ write_rds(latino_county_map, "/home/jae/analyzing-asian-american-latino-civic-in
 
 ```
 
-#### Plotting  
-
-##### Maps 
+### Making maps
 
 ```{r}
 
@@ -400,7 +372,7 @@ asian_state <- ggplot(data = asian_state_map,
        title = "Asian American community-based and advocacy organizations",
        subtitle = "In States (1980)")
 
-## County 
+## County
 
 asian_county <- ggplot(data = asian_county_map,
             aes(x = long, y = lat,
@@ -411,7 +383,7 @@ asian_county <- ggplot(data = asian_county_map,
        subtitle = "In Counties (1980)") +
   ditch_the_axes
 
-# Latinos 
+# Latinos
 
 ## State
 
@@ -424,9 +396,9 @@ latino_state <- ggplot(data = latino_state_map,
        title = "Latino community-based and advocacy organizations") +
   ditch_the_axes
 
-## County 
+## County
 
-latino_county <- 
+latino_county <-
 ggplot(data = latino_county_map,
             aes(x = long, y = lat,
                 group = group, fill = n))+
