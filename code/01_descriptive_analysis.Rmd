@@ -33,7 +33,10 @@ pacman::p_load(
         ### Spatial analysis
         tidygeocoder, # for geocoding
         tigris, # for shape files 
-        maps, # maps 
+        usmap, 
+        maps, # maps
+        mapproj, 
+        ggsn, 
         tmap, 
         tmaptools, 
         sf, 
@@ -56,7 +59,8 @@ library(makereproducible)
 source(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r"))
 
 script_list <- list(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r"),
-     here("functions", "data_viz.r"))
+     here("functions", "data_viz.r"),
+     here("functions", "plot_us_heatmap.r"))
 
 for (i in 1:length(script_list))
     {source(script_list[[i]])}
@@ -259,8 +263,12 @@ org_address <- merge_by_group(asian_address, latino_address)
 # Export 
 write_csv(org_address, here("processed_data", "org_address.csv"))
 
-# EDA
+org_address <- read_csv(here("processed_data", "org_address.csv"))
 
+```
+
+### EDA
+```{r}
 org_address %>%
     count(States, sort = TRUE) 
 # California = 79, DC = 11, NY = 11
@@ -288,13 +296,9 @@ lat_longs <- read_csv(here("processed_data", "org_lat_logs_fixed.csv"))[,-1]
 
 ### Making maps
 
-#### Dots (individual level)
+#### Bubble map 
 
 ```{r}
-
-# Geocoded US counties 
-us_counties <- map_data("county")
-
 
 # Join the two data 
 df <- left_join(org_address, lat_longs)
@@ -315,7 +319,7 @@ sites <- sf::st_as_sf(df,
 # Import Bay Area shape file
 
 bay_area_sf <- tigris::tracts(state = "CA",
-                              county = c("San Francisco", "Alameda"))
+                              county = c("San Francisco"))
 
 # Crop the coordinates
 cropped_sf <- st_crop(bay_area_sf, 
@@ -323,7 +327,6 @@ cropped_sf <- st_crop(bay_area_sf,
                       xmax = -122.34, 
                       ymin = 37.76, 
                       ymax = 37.83)
-
 
 # For the test 
 # ggplot(bay_area_sf) + 
@@ -338,11 +341,11 @@ cropped_sf <- st_set_crs(cropped_sf, 4326)
 # tmap approach 
 bay_tmap <- 
     tm_shape(cropped_sf) + 
-      tm_borders() +
+        tm_borders() +
     tm_shape(sites) +
-      tm_bubbles(size = 1,
-              shapeNA = NA,
-              col = "Type") +
+        tm_bubbles(size = 1,
+                shapeNA = NA,
+                col = "Type") +
     tm_layout(title = "Asian American organizations in San Francisco") 
 
 # to change color palette  tmaptools::palette_explorer()    
@@ -360,57 +363,35 @@ mapshot(lf, file = here("outputs", "asian_org_map_interactive.png"),
         remove_controls = c("homeButton", "layersControl"))
 
 ```
-#### Ranges (county level) 
+
+#### Heatmap 
 
 ```{r}
 
-# Join the two data 
-df_county <- left_join(org_address, lat_longs_county)
+# Load usmap 
+us_map <- usmap::us_map()
 
-# Transform 
-df_county <- df_county %>%
-    group_by(County, category, Type, latitude, longtitude) %>%
-    count()
+# Wrangle data 
+org_addr_rn <- org_address %>%
+    rename(state = States,
+           county = County) %>%
+    group_by(state, category) %>%
+           count() 
 
-# Turn df_county into sf object
-counties_sf <- sf::st_as_sf(df_county, 
-                      coords = c("longtitude", 
-                                 "latitude"),
-                      crs = 4326, 
-                      agr = "identity")
+asian_map_df <- org_addr_rn %>% filter(category == "Asian")
 
-# Import US county shape files
+latino_map_df <-org_addr_rn %>% filter(category != "Asian")
 
-us_counties <- tigris::counties()
-
-# Set the CRS
-us_counties <- st_transform(us_counties, 4326)
-
-joined_sf <- st_join(us_counties, counties_sf)
-
-# tmap approach 
-tm_shape(us_counties) +
-    tm_borders() +
-tm_shape(counties_sf) +
-    tm_fill("n")
-
-us_counties$geometry
 ```
 
 ```{r}
-# to change color palette  tmaptools::palette_explorer()    
+# Map 
+asian_org_plot <- plot_us_heatmap(asian_map_df) + labs(title = "Asian American organizations")
 
-# Static mode 
-tmap_mode("plot")
+latino_org_plot <- plot_us_heatmap(latino_map_df) + labs(title = "Latino organizations")
 
-tmap_save(bay_tmap, file = here("outputs", "asian_org_map.png"))
+asian_org_plot + latino_org_plot 
 
-# Interactive mode (leaflet)
-lf <- tmap_leaflet(bay_tmap) %>%
-  addTiles()
-
-mapshot(lf, file = here("outputs", "asian_org_map_interactive.png"),
-        remove_controls = c("homeButton", "layersControl"))
-
+ggsave(here("outputs", "heatmaps.png"), width = 14,
+      height = 7)
 ```
-
