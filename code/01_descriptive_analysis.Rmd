@@ -284,8 +284,6 @@ org_address %>%
 # Fix the problematic addresses using Bing (done in Python)
 lat_longs <- read_csv(here("processed_data", "org_lat_logs_fixed.csv"))[,-1]
 
-lat_longs_county <- read_csv(here("processed_data", "org_lat_logs_county.csv"))[,-1]
-
 ```
 
 ### Making maps
@@ -293,6 +291,10 @@ lat_longs_county <- read_csv(here("processed_data", "org_lat_logs_county.csv"))[
 #### Dots (individual level)
 
 ```{r}
+
+# Geocoded US counties 
+us_counties <- map_data("county")
+
 
 # Join the two data 
 df <- left_join(org_address, lat_longs)
