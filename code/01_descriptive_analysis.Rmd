@@ -32,15 +32,14 @@ pacman::p_load(
         
         ### Spatial analysis
         tidygeocoder, # for geocoding
-        USAboundaries, # for shape files 
-        ggspatial, # for spatial data framework 
+        tigris, # for shape files 
         maps, # maps 
-#       ggmap, # for static maps
+        ggspatial, 
+        ggmap, 
         tmap,
         tmaptools, 
-        spData,
         sf, 
-#       leaflet, # for interactive maps
+        leaflet, # for interactive maps
 
         ### Time series analysis
         ggseas, # for seasonality adjustment
@@ -286,186 +285,58 @@ org_address %>%
 # Fix the problematic addresses using Bing (done in Python)
 lat_longs <- read_csv(here("processed_data", "org_lat_logs_fixed.csv"))[,-1]
 
-glimpse(lat_longs)
+lat_longs_county <- read_csv(here("processed_data", "org_lat_logs_county.csv"))[,-1]
 
 ```
 
 ### Making maps
 
-#### State level 
+#### Dots (individual level)
 
 ```{r}
 
+# Join the two data 
+df <- left_join(org_address, lat_longs)
+
 # Filter; Data ready 
-df <- lat_longs %>%
+df <- df %>%
+    filter(category == "Asian") %>%
     filter(!is.na(Address)) %>%
-    filter(!str_detect(Address, "Honolu"))
+    filter(City == toupper("San Francisco"))
 
-# Prepare US map layout 
-
-## Remove Hawaii and Alaska from the state name list
-state_names <- state.name[!(state.name %in% c("Hawaii", "Alaska"))]
-
-## Extract the boundaries 
-historical_us <- us_counties("1981-12-31",
-                             states = state_names,
-                             resolution = "high")
-
-# Data points 
+# Turn df into sf objec
 sites <- sf::st_as_sf(df, 
                       coords = c("longtitude", 
                                  "latitude"),
                       crs = 4326, 
                       agr = "identity")
 
-# Map
-tmap::tm_shape(historical_us, projection = 2163) +
-    tm_polygons() +
+# Import Bay Area shape file
+
+bay_area_sf <- tigris::tracts(state = "CA",
+                              county = c("San Francisco", "Alameda"))
+
+cropped_sf <- st_crop(bay_area_sf, 
+                      xmin = -122.5, 
+                      xmax = -122.34, 
+                      ymin = 37.76, 
+                      ymax = 37.83)
+
+# For the test 
+ggplot(bay_area_sf) + 
+    geom_sf() + 
+    ggplot2::coord_sf(xlim = c(-122.42, -122.34), 
+                      ylim = c(37.76, 37.83)) +
+    theme_bw()
+
+tm_shape(cropped_sf) + 
+    tm_borders() +
     tm_shape(sites) +
-    tm_dots(size = 1)
-
-```
-#### County level 
-
-#### City level 
-
-
-```{r}
-
-# Base map
-
-us_states <- map_data("state")
-us_county <- map_data("county")
-
-# Get state names
-
-asian_org$region <- tolower(abbr2state(asian_org$States))
-latino_org$region <- tolower(abbr2state(latino_org$States))
-
-# Create fuctions
-
-## No year
-
-county_map <- function(data){
-  data_county<- count(data, County)
-
-  colnames(data_county)[1] <- "subregion"
-
-  data_county$subregion <- as.character(data_county$subregion)
-  data_county$subregion <- tolower(data_county$subregion)
-
-  us_county_data <- left_join(us_county, data_county)
-  return(us_county_data)
-}
-
-state_map <- function(data){
-  data_state<- count(data, region)
-
-  colnames(data_state)[1] <- "region"
-
-  data_state$region <- as.character(data_state$region)
-  data_state$region <- tolower(data_state$region)
-
-  us_state_data <- left_join(us_states, data_state)
-  return(us_state_data)
-}
-
-county_year_map <- function(data){
-  data_county<- count(data, County, F.year)
-
-  colnames(data_county)[1] <- "subregion"
-
-  data_county$subregion <- as.character(data_county$subregion)
-  data_county$subregion <- tolower(data_county$subregion)
-
-  us_county_data <- left_join(us_county, data_county)
-  return(us_county_data)
-}
-
-state_year_map <- function(data){
-  data_state<- count(data, region, F.year)
-
-  colnames(data_state)[1] <- "region"
-
-  data_state$region <- as.character(data_state$region)
-  data_state$region <- tolower(data_state$region)
-
-  us_state_data <- left_join(us_states, data_state)
-  return(us_state_data)
-}
-
-# Get state and county maps
-
-asian_state_map <- state_map(asian_org %>% filter(F.year <= 1980))
-latino_state_map <- state_map(latino_org %>% filter(F.year <= 1980))
-
-asian_county_map <- county_map(asian_org %>% filter(F.year <= 1980))
-latino_county_map <- county_map(latino_org %>% filter(F.year <= 1980))
-
-asian_county_year_map <- county_year_map(asian_org %>% filter(F.year <= 1980))
-latino_county_year_map <- county_year_map(latino_org %>% filter(F.year <= 1980))
-
-write_rds(asian_county_map, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/asian_county_map")
-write_rds(latino_county_map, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_county_map")
+    tm_dots(size = 1, col = "Type") +
+    tm_symbols(col = "black", border.col = "white", size = 0.5, alpha = 0.5) +
+    tm_facets(by = c("category"),
+              free.coords = FALSE)
 
 ```
 
-```{r}
-
-# Asian Americans
-
-## State
-
-asian_state <- ggplot(data = asian_state_map,
-            aes(x = long, y = lat,
-                group = group, fill = n))+
-  geom_polygon(color = "gray10", size = 0.05) +
-  labs(fill = "Number of organizations",
-       title = "Asian American community-based and advocacy organizations",
-       subtitle = "In States (1980)")
-
-## County
-
-asian_county <- ggplot(data = asian_county_map,
-            aes(x = long, y = lat,
-                group = group, fill = n))+
-  geom_polygon(color = "gray10", size = 0.05) +
-  labs(fill = "Number of organizations",
-       title = "Asian American community-based and advocacy organizations",
-       subtitle = "In Counties (1980)") +
-  ditch_the_axes
-
-# Latinos
-
-## State
-
-latino_state <- ggplot(data = latino_state_map,
-            aes(x = long, y = lat,
-                group = group, fill = n))+
-  geom_polygon(color = "gray10", size = 0.05) +
-  labs(fill = "Number of organizations",
-       subtitle = "In States (1980)",
-       title = "Latino community-based and advocacy organizations") +
-  ditch_the_axes
-
-## County
-
-latino_county <-
-ggplot(data = latino_county_map,
-            aes(x = long, y = lat,
-                group = group, fill = n))+
-  geom_polygon(color = "gray10", size = 0.05) +
-  labs(fill = "Number of organizations",
-       title = "Latino community-based advocacy organizations",
-       subtitle = "In Counties (1980)") +
-  ditch_the_axes
-
-ggarrange(asian_county, latino_county, common.legend = TRUE, ncol = 1, nrow =2)
-
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/county_maps.png", width = 10, height = 15)
-
-ggarrange(asian_state, latino_state, common.legend = TRUE, ncol = 1, nrow =2)
-
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/state_maps.png", width = 10, height = 15)
-
-```
+#### Ranges (county level) 
