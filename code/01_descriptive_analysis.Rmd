@@ -14,27 +14,24 @@ html_document:
 
 # Clean up the environment
 
-rm(list = ls())
+# rm(list = ls())
 
 # if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
         tidyverse, # for the tidyverse framework
-        data.table,
+        data.table, # for fast data wrangling 
         patchwork, # for arranging ggplots
         here, # for reproducibility
         rvest, # for parsing html
 
         ### ggplot themes
-        ggsci,
+        ggsci, # for pub-ready ggplots 
         ggpubr, # for arranging ggplots
         ggthemes, # for fancy ggplot themes
-
+        ggrepel, # for annotations 
+        
         ### Spatial analysis
         tidygeocoder, # for geocoding
-        sf,
-        raster,
-        spData,
-        ggmap,
         maps,
         mapdata,
         tmap,     # for static and interactive maps
@@ -245,15 +242,23 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 
 # Subset data
 ## Asian
+
 asian_org_dt <- data.table(asian_org)
 
-asian_address <- asian_org_dt[F.year <= 1981, .(Address, F.year), ] %>% as.data.frame()
+asian_address <- asian_org_dt[F.year <= 1981, .(Address, F.year, Name, Type), ] %>% as.data.frame()
 
 ## Latino
 latino_org_dt <- data.table(latino_org)
 
-latino_address <- asian_org_dt[F.year <= 1981, .(Address, F.year), ] %>% as.data.frame()
+latino_address <- latino_org_dt[F.year <= 1981, .(Address, F.year, Name, Type), ] %>% as.data.frame()
 
+# org_address <- merge_by_group(asian_address, latino_address)
+# 
+# glimpse(org_address)
+
+```
+
+```{r}
 # Geocode the address
 asian_lat_longs <- asian_address %>%
         tidygeocoder::geocode(Address,
@@ -267,13 +272,26 @@ latino_lat_longs <- latino_address %>%
         lat = latitude,
         long = longtitude)
 
-# Check whether there exists NAs
-sum(is.na(asian_lat_longs$latitude)) # 10 missing addresses
-sum(is.na(latino_lat_longs$latitude)) # 26 missing addresses
+# Check whether there exists NAs. The specific number of NAs would change from time to time due to how the APIs work. 
 
+paste("The number of missing addresses in the Asian org list" ,sum(is.na(asian_lat_longs$latitude))) # 27 missing addresses
+
+paste("The number of missing addresses in the Latino org list", sum(is.na(latino_lat_longs$latitude))) # 31 missing addresses
+
+# Export the data 
+org_lat_logs <- merge_by_group(asian_lat_longs, latino_lat_longs)
+
+glimpse(org_lat_logs)
+
+write_csv(org_lat_logs, here("processed_data", "org_lat_logs.csv"))
+
+```
+
+```{r}
 # Fix the problematic addresses using Bing (done in Python)
+lat_longs <- read_csv(here("processed_data", "org_lat_logs_fixed.csv"))[,-1]
 
-
+glimpse(lat_longs)
 ```
 
 ```{r}
@@ -357,6 +375,14 @@ write_rds(latino_county_map, "/home/jae/analyzing-asian-american-latino-civic-in
 ```
 
 ### Making maps
+
+```{r}
+ggplot(lat_longs, aes(longtitude, latitude), color = "grey99") +
+    border("state") + geom_point() +
+    geom_label_repel(aes(label = name)) + 
+    theme_void()
+
+```
 
 ```{r}
 
