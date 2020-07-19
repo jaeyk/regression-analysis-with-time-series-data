@@ -32,13 +32,15 @@ pacman::p_load(
         
         ### Spatial analysis
         tidygeocoder, # for geocoding
-        maps,
-        mapdata,
-        tmap,     # for static and interactive maps
-        leaflet,  # for interactive maps
-        mapview,  # for interactive maps
-        shiny,    # for web applications
-        openintro, # for abbr2state function
+        USAboundaries, # for shape files 
+        ggspatial, # for spatial data framework 
+        maps, # maps 
+#       ggmap, # for static maps
+        tmap,
+        tmaptools, 
+        spData,
+        sf, 
+#       leaflet, # for interactive maps
 
         ### Time series analysis
         ggseas, # for seasonality adjustment
@@ -236,63 +238,97 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 
 ## Geospatial analysis
 
-### Geocoding
+### Prep data 
 
 ```{r}
+
+# register_google(key = "google api key")
 
 # Subset data
 ## Asian
 
 asian_org_dt <- data.table(asian_org)
 
-asian_address <- asian_org_dt[F.year <= 1981, .(Address, F.year, Name, Type), ] %>% as.data.frame()
+asian_address <- asian_org_dt[F.year <= 1981, .(Address, F.year, Name, Type, States, County, City), ] %>% as.data.frame()
 
 ## Latino
 latino_org_dt <- data.table(latino_org)
 
-latino_address <- latino_org_dt[F.year <= 1981, .(Address, F.year, Name, Type), ] %>% as.data.frame()
+latino_address <- latino_org_dt[F.year <= 1981, .(Address, F.year, Name, Type, States, County, City), ] %>% as.data.frame()
 
-# org_address <- merge_by_group(asian_address, latino_address)
-# 
-# glimpse(org_address)
+org_address <- merge_by_group(asian_address, latino_address)
 
+# Export 
+write_csv(org_address, here("processed_data", "org_address.csv"))
+
+# EDA
+
+org_address %>%
+    count(States, sort = TRUE) 
+# California = 79, DC = 11, NY = 11
+
+org_address %>%
+    count(States, category, sort = TRUE) 
+# California - Asian = 43, California - Latino = 36
+
+org_address %>%
+    count(County, sort = TRUE)
+# San Francisco 25, Los Angeles 19, Alameda 10, Sacramento 7
+
+org_address %>%
+    count(County, category, sort = TRUE)
+# San Francisco - Asian = 20, Los Angeles - Asian = 10, Alameda - Asian = 5, Los Angeles - Latino = 9, Alameda - Asian 5, Alameda - Latino 5
 ```
 
-```{r}
-# Geocode the address
-asian_lat_longs <- asian_address %>%
-        tidygeocoder::geocode(Address,
-        method = "cascade", # Mix of geo methods
-        lat = latitude,
-        long = longtitude)
-
-latino_lat_longs <- latino_address %>%
-        tidygeocoder::geocode(Address,
-        method = "cascade", # Mix of geo methods
-        lat = latitude,
-        long = longtitude)
-
-# Check whether there exists NAs. The specific number of NAs would change from time to time due to how the APIs work. 
-
-paste("The number of missing addresses in the Asian org list" ,sum(is.na(asian_lat_longs$latitude))) # 27 missing addresses
-
-paste("The number of missing addresses in the Latino org list", sum(is.na(latino_lat_longs$latitude))) # 31 missing addresses
-
-# Export the data 
-org_lat_logs <- merge_by_group(asian_lat_longs, latino_lat_longs)
-
-glimpse(org_lat_logs)
-
-write_csv(org_lat_logs, here("processed_data", "org_lat_logs.csv"))
-
-```
+### Import geocodes 
 
 ```{r}
 # Fix the problematic addresses using Bing (done in Python)
 lat_longs <- read_csv(here("processed_data", "org_lat_logs_fixed.csv"))[,-1]
 
 glimpse(lat_longs)
+
 ```
+
+### Making maps
+
+#### State level 
+
+```{r}
+
+# Filter; Data ready 
+df <- lat_longs %>%
+    filter(!is.na(Address)) %>%
+    filter(!str_detect(Address, "Honolu"))
+
+# Prepare US map layout 
+
+## Remove Hawaii and Alaska from the state name list
+state_names <- state.name[!(state.name %in% c("Hawaii", "Alaska"))]
+
+## Extract the boundaries 
+historical_us <- us_counties("1981-12-31",
+                             states = state_names,
+                             resolution = "high")
+
+# Data points 
+sites <- sf::st_as_sf(df, 
+                      coords = c("longtitude", 
+                                 "latitude"),
+                      crs = 4326, 
+                      agr = "identity")
+
+# Map
+tmap::tm_shape(historical_us, projection = 2163) +
+    tm_polygons() +
+    tm_shape(sites) +
+    tm_dots(size = 1)
+
+```
+#### County level 
+
+#### City level 
+
 
 ```{r}
 
@@ -371,16 +407,6 @@ latino_county_year_map <- county_year_map(latino_org %>% filter(F.year <= 1980))
 
 write_rds(asian_county_map, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/asian_county_map")
 write_rds(latino_county_map, "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_county_map")
-
-```
-
-### Making maps
-
-```{r}
-ggplot(lat_longs, aes(longtitude, latitude), color = "grey99") +
-    border("state") + geom_point() +
-    geom_label_repel(aes(label = name)) + 
-    theme_void()
 
 ```
 
