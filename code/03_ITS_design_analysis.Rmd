@@ -371,6 +371,7 @@ reagan_plot <- ggplot(reagan_n, aes(x = year)) +
     xlim(c(1976, 1982))
 
 ie_plot + reagan_plot
+
 ggsave(here("outputs", "dic_analysis.png"),
        height = 5)
 ```
