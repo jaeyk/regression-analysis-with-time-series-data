@@ -2,21 +2,15 @@
 title: "Interrupted time series design analysis"
 author: "Jae Yeon Kim"
 output:
-  html_document:
-    toc: yes
-  pdf_document:
-    toc: yes
+html_document:
+  toc: True
+  theme: united
+  number_sections: True
 ---
 
-## 0. Setup 
+# Setup 
 
 ```{r}
-
-# Clean up the environment
-
-rm(list = ls())
-
-# Import libraries (adapted from this link: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
@@ -48,55 +42,54 @@ pacman::p_load(
         forecast, # for ARIMA modeling
         tseries, # for stat tests for time series data 
         nlme, # for GLS
-        changepoint # for change point detection
+        changepoint, # for change point detection
+        here # for reproducibility 
         )
 
+# devtools::install_github("jaeyk/makereproducible")
+library(makereproducible)
+
+# Import R scripts
+
+script_list <- list(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r"),
+     here("functions", "data_viz.r"),
+     here("functions", "plot_us_heatmap.r"),
+     here("functions", "visualize_its.r"),
+     here("functions", "span_loess.r"))
+
+for (i in 1:length(script_list))
+    {source(script_list[[i]])}
+
+# for publication-friendly theme
+theme_set(theme_pubr())
 ```
 
 
-## 1. Load files
+# Load files
 
 ```{r include=FALSE}
 
-# Asian American and Latino communit-based and advocacy organizations 
-asian_year <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv")
+# Asian American and Latino community-based and advocacy organizations 
+asian_year <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv"))
 
-latino_year <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv")
+latino_year <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv"))
 
 # Administrative data 
-reagan <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_budget.csv")
+reagan <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_budget.csv"))
 
-asian_latino_census <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_latino_census.csv")                     
+asian_latino_census <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_latino_census.csv"))                     
 
-reagan_funding_1982 <- read.csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_funding_1982.csv")
+reagan_funding_1982 <- read.csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/reagan_funding_1982.csv"))
 
-medicare <- read.csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/medicare.csv")
+medicare <- read.csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/medicare.csv"))
 
 # Party control data 
-basic_party_covariates <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/basic_party_covariates.csv") 
+basic_party_covariates <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/basic_party_covariates.csv"))
 
-# Community newspaper 
-ie_data <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/ie_data.csv")
+# Newspaper data 
+ie_data <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/ie_data.csv"))
 
-```
-
-
-```{r include=FALSE}
-# Set theme 
-
-## Custom functions 
-source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r")
-
-## For ITS analysis
-source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/visualize_its.r")
-
-## For optimizing span parameter in loess 
-source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/span_loess.r")
-
-## For custom ggtheme 
-source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/theme_publications.r")
-
-theme_set(theme_Publication(14))
+agenda <- read_rds(here("processed_data", "nclr_text.rds"))
 
 # Set preferred packages for conflicted functions 
 conflicted::conflict_prefer("select", "dplyr")
@@ -105,28 +98,28 @@ conflicted::conflict_prefer("annotate", "ggplot2")
 
 ```
 
-## 2. Wrangle data 
+# Wrangle data 
 
-### 2.1. Merge Asian American and Latino CBO and advocacy org 
+## Merge Asian American and Latino CBO and advocacy org 
 
 ```{r}
 
 # Merge CBO and advocacy org data 
 org_freq <- merge_by_group(asian_year, latino_year) %>% 
-  count(F.year, Type, category) %>% 
-  rename(Year = F.year, 
-         Freq = n)
+    count(F.year, Type, category) %>% 
+    rename(Year = F.year, 
+           Freq = n)
 
 ```
 
-### 2.2. Census data 
+## Census data 
 
 ```{r}
 
 # Rename vars 
 asian_latino_census <- asian_latino_census %>%
-  rename(category = Group,
-         pop_percentage = Percentage)
+   rename(category = Group,
+          pop_percentage = Percentage)
 
 # Subset 
 asian_latino_census <- subset(asian_latino_census, category != "Total")
@@ -143,13 +136,13 @@ all_years <- data.frame(Year = all_years) # Turn it into a dataframe
 ## Merge year sequence with the data 
 
 org_freq <- all_years %>%
-  merge(org_freq, by = "Year", all.x = TRUE)
+    merge(org_freq, by = "Year", all.x = TRUE)
 
 asian_census <- all_years %>%
-  merge(asian_census, by = "Year", all.x = TRUE)
+    merge(asian_census, by = "Year", all.x = TRUE)
 
 latino_census <- all_years %>%
-  merge(latino_census, by = "Year", all.x = TRUE)
+    merge(latino_census, by = "Year", all.x = TRUE)
 
 # Recode 
 
@@ -172,7 +165,7 @@ asian_latino_census <- merge_by_group(asian_census, latino_census)
 
 ```
 
-### 2.3. Add covariates 
+## Add covariates 
 
 ```{r}
 
@@ -186,109 +179,111 @@ reagan_org <- merge(reagan_org, basic_party_covariates, by = "Year")
 
 ```
 
-### 2.4. Additional tidying  
+## Additional tidying  
 
 ```{r}
 
 # Mutate 
 
 reagan_org <- reagan_org %>%
-  mutate(intervention = ifelse(reagan_org$Year >= 1981, 1, 0),
-         intervention = factor(intervention),
-         category = factor(category),
-         Type = factor(Type),
-         Freq = as.integer(Freq))
+    mutate(intervention = ifelse(reagan_org$Year >= 1981, 1, 0),
+           intervention = factor(intervention),
+           category = factor(category),
+           Type = factor(Type),
+           Freq = as.integer(Freq))
 
 # Select
 
 reagan_org <- reagan_org %>% 
-  select(Year, category, Type, Freq, Percentage, pop_percentage, presidency, senate, house, intervention)
+   select(Year, category, Type, Freq, Percentage, pop_percentage, presidency, senate, house, intervention)
 
 ```
 
 
-## 3. Descriptive analysis 
+# Descriptive analysis 
 
-### 3.1. Intervention 
+## Intervention 
 
-#### 3.1.1. Overall trend 
+### Overall trend 
 
 ```{r}
 
 ggplot(reagan_org, aes(x = Year, y = Percentage)) +
-  geom_point() +
-  geom_line() +   
-  geom_vline(xintercept = c(1981), col = "red", linetype ="dashed") +
-  annotate("rect", xmin = 1964, xmax = 1981, ymin = 0, ymax = 7.2, alpha = .2) +
-  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
-  labs(title = "Budget for education, employment, and social service",
-       y = "Percentage",
-       x = "Year") +
-  annotate(geom="text", x=1973, y=2, label="War on Poverty",
-              color="red") +
-  annotate(geom="text", x=1997, y=2, label="Post-Reagan period",
-              color="red") +
-  xlim(c(1964,2017))
+    geom_point() +
+    geom_line() +   
+    geom_vline(xintercept = c(1981), col = "red", linetype ="dashed") +
+    annotate("rect", xmin = 1964, xmax = 1981, ymin = 0, ymax = 7.2, alpha = .2) +
+    scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+    labs(title = "Budget for education, employment, and social service",
+         y = "Percentage",
+         x = "Year") +
+    annotate(geom="text", x=1973, y=2, label="War on Poverty",
+                color="red") +
+    annotate(geom="text", x=1997, y=2, label="Post-Reagan period",
+                color="red") +
+    xlim(c(1964,2017))
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/reagan_budget_cut.png")
+ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/reagan_budget_cut.png"))
 
 ```
 
-#### 3.1.2. Specific programs 
+### Specific programs 
 
 ```{r}
 
 cuts <- as_tibble(reagan_funding_1982) %>%
-  ggplot(aes(x = fct_reorder(Name, -Outlays), y = Outlays*0.01)) +
-  geom_col() +
-  coord_flip() +
-  scale_y_continuous(labels = scales::percent) +
-  labs(
-    title = "The impact of Reagan budget cut on community empowerment programs",
-    subtitle = "Percentage difference between 1981 and 1982",
-    x = "Grant names", y = "Percentage")
+    ggplot(aes(x = fct_reorder(Name, -Outlays), y = Outlays*0.01)) +
+    geom_col() +
+    coord_flip() +
+    scale_y_continuous(labels = scales::percent) +
+    labs(
+        title = "The impact of Reagan budget cut on community empowerment programs",
+        subtitle = "Percentage difference between 1981 and 1982",
+        x = "Grant names", 
+        y = "Percentage")
 
 survived <- medicare %>%
-  ggplot(aes(x = factor(year), y = amount)) +
-  geom_vline(xintercept = factor(1981)) +
-  geom_col() +
-  labs(
-    title = "The impact of Reagan budget cut on indiviual assistance programs",
-    subtitle = "Total Medicare spending from 1970 to 2018 (in billion US dollars)",
-    x = "Year",
-    y = "Amount"
-  )
+    ggplot(aes(x = factor(year), y = amount)) +
+    geom_vline(xintercept = factor(1981)) +
+    geom_col() +
+    labs(
+       title = "The impact of Reagan budget cut on indiviual assistance programs",
+       subtitle = "Total Medicare spending from 1970 to 2018 (in billion US dollars)",
+        x = "Year",
+        y = "Amount"
+    )
 
 cuts / survived 
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/grant_changes.png", width = 12, height = 8)
+ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/grant_changes.png"), width = 12, height = 8)
 
 ```
 
-### 3.2. DV
+### Newspaper analysis 
+
+- International Examiner 
+
+  - N = 2,719
 
 ```{r}
 
 # Text data 
 ie_processed <- ie_data[,-1] %>% # drop the first col
   ########################## Cleaning vars ##########################
-  mutate(date = gsub(".*:", "", date) %>% str_trim(),
-         date = gsub(",", "", date),
-         date = as.Date(as.character(date), format = "%b%d%Y"),
-         source = gsub(".*:", "", source) %>% str_trim(),
-         author = gsub(".*:", "", author) %>% str_trim())
+    mutate(date = gsub(".*:", "", date) %>% str_trim(),
+           date = gsub(",", "", date),
+           date = as.Date(as.character(date), format = "%b%d%Y"),
+           year = lubridate::year(date))
 
 # Create a document term matrix based on a custom dictionary 
 ie_dic <- dfm(corpus(ie_processed), 
-              dictionary = dictionary(list(budget = 
-                                      c("spending","grants","grant","funding","funds","fund"))))
+              dictionary = dictionary(list(budget =                                       c("spending","grants","grant","funding","funds","fund"))))
 
 # Add to the original data  
 ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
 
 # Fill in 0 dates
-all_dates <- seq(as.Date("1976/1/1"), as.Date("1987/12/31"), "day")
-
+all_years <- seq(as.Date("1976/1/1"), as.Date("1987/12/31"), "day")
 # Turn it into a dataframe 
 all_dates <- data.frame(date = all_dates)
   
@@ -296,20 +291,103 @@ all_dates <- data.frame(date = all_dates)
 ie_processed %>% right_join(all_dates, by = "date")
 
 # Plot
-ggplot(ie_processed) +
-  geom_histogram(aes(x = date), binwidth = 0.1) + 
-#  geom_vline(xintercept = c(as.Date("Jan 20, 1981", format = "%b%d%Y")), col = "red", linetype ="dashed") +
-  geom_point(aes(x = date, y = budget), size = 2, alpha = 0.3) +
-  geom_smooth(aes(x = date, y = budget), span = 0.1) +
-  labs(x = "Date" , y = "Count",  
-       title = "The frequency of budget related terms in Reagan related articles")  
+ie_n <- ie_processed %>%
+    mutate(year = as.numeric(year)) %>%
+    group_by(year) %>% 
+    summarise(n = n(),
+              count = sum(budget))
 
-ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/dic_newspaper.png", width = 10)
+# Fill in 0 years
+all_years <- seq(min(ie_processed$year), max(ie_processed$year))
+
+# Turn it into a dataframe 
+all_years <- data.frame(year = all_years)
+  
+# Count by year and type
+ie_n <- ie_n %>% right_join(all_years, by = "year")
+
+# reagan_plot 
+
+ie_plot <- ggplot(ie_n, aes(x = year)) +
+    geom_col(aes(y = n), alpha = 0.3) +
+    geom_point(aes(y = count), col = "black") +
+    geom_line(data = (ie_n[!is.na(ie_n$count), ]),
+              aes(y = count), col = "red") +
+    labs(x = "Year", y = "Count",
+         title = "International Examiner") +
+    xlim(c(1976, 1982))
 
 ```
 
+- Agenda 
 
-## 4. Treating outliers 
+  - N: 1,249
+
+```{r}
+
+# Create a year variable 
+
+agenda$year <- str_sub(agenda$date, 1, 4)
+
+# Create a document term matrix based on a custom dictionary 
+
+# Set a condition and use it to filter the data 
+agenda$reagan <- str_detect(agenda$value, "reagan|Reagan")
+
+agenda_reagan <- agenda %>% filter(reagan == TRUE)
+  
+agenda_dic <- dfm(corpus(agenda_reagan$value), 
+              dictionary = dictionary(list(budget = 
+              c("spending","grants","grant","funding","funds","fund"))))
+
+# Add to the original data  
+agenda_reagan$budget <- convert(agenda_dic, to = "data.frame")[,2]
+
+# Plot
+reagan_n <- agenda_reagan %>%
+    mutate(year = as.numeric(year)) %>%
+    group_by(year) %>% 
+    summarise(n = n(),
+              count = sum(budget))
+
+# Fill in 0 years
+all_years <- seq(min(agenda_reagan$year), max(agenda_reagan$year))
+
+# Turn it into a dataframe 
+all_years <- data.frame(year = all_years)
+  
+# Count by year and type
+reagan_n <- reagan_n %>% right_join(all_years, by = "year")
+
+# reagan_plot 
+
+reagan_plot <- ggplot(reagan_n, aes(x = year)) +
+    geom_col(aes(y = n), alpha = 0.3) +
+    geom_point(aes(y = count), col = "black") +
+    geom_line(data = (reagan_n[!is.na(reagan_n$count), ]),
+              aes(y = count), col = "red") +
+    labs(x = "Year", y = "Count",
+         title = "Agenda (NCLR newsletter)") +
+    xlim(c(1976, 1982))
+
+ie_plot + reagan_plot
+ggsave(here("outputs", "dic_analysis.png"))
+```
+
+```{r}
+agenda_pattern <- ggplot(agenda_reagan) +
+  
+   # geom_histogram(aes(x = year), stat = "count") + 
+  #  geom_vline(xintercept = c(as.Date("Jan 20, 1981", format = "%b%d%Y")), col = "red", linetype ="dashed") +
+    geom_point(aes(x = year, y = budget), size = 2, alpha = 0.3) +
+    geom_smooth(aes(x = year, y = budget), span = 0.1) +
+    labs(x = "Year" , y = "Count",  
+         title = "The frequency of budget related terms in Reagan related articles")  
+
+#ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/dic_newspaper.png"), width = 10)
+```
+
+# Treating outliers 
 
 ```{r}
 
@@ -353,9 +431,9 @@ reagan_org$Freq <- round(knnOutput$Freq, 0)
 reagan_org$Freq <- as.integer(reagan_org$Freq)
 ```
 
-## 5. Statistical modeling 
+# Statistical modeling 
 
-### 5.1. Prediction comparisons 
+## Prediction comparisons 
 
 ```{r}
 
@@ -388,7 +466,7 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/p
 
 ```
 
-### 5.2. Model comparisons 
+## Model comparisons 
 
 ```{r}
 
@@ -477,7 +555,7 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/p
 
 ```
 
-#### 5.2.1. Overdispersion test
+### Overdispersion test
 
 - Alpha is positive. Dispersion present.
 
@@ -487,7 +565,7 @@ dispersiontest(poisson.out, trafo = 1)
 
 ```
 
-#### 5.2.2. AIC 
+### AIC 
 
 ```{r}
 cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",   
@@ -496,7 +574,7 @@ cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",
            "Negative binomial AIC:", round(AIC(nb.out), 3)))
 ```
 
-#### 5.3.2. AIC in time 
+### AIC in time 
 
 ```{r}
 
@@ -550,9 +628,9 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/A
 
 ```
 
-### 5.3. Discontinuity in time
+## Discontinuity in time
 
-### 5.3.2. Coefficients 
+### Coefficients 
 
 ```{r}
 
@@ -599,7 +677,7 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/r
 
 ```
 
-### 5.4. Bootstrapping 
+### Bootstrapping 
 
 ```{r}
 
@@ -678,7 +756,7 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/b
 
 ```
 
-### 5.5. Standard errors 
+## Standard errors 
 
 I adated some code from [this post](https://www.brodrigues.co/blog/2018-07-08-rob_stderr/).
 
@@ -688,7 +766,7 @@ lm_log.out <- lm(log(Freq) ~ Percentage + pop_percentage + category + presidency
 
 ```
 
-#### 5.5.1. Heteroskedasticity 
+### Heteroskedasticity 
 
 - Null: the variance of residuals is constant (homoscedasticity).
 
@@ -698,7 +776,7 @@ lmtest::bptest(lm_log.out, studentize = TRUE)
 
 ```
 
-#### 5.5.2. Autocorrelation test 
+### Autocorrelation test 
 
 - Null: the autocorrelation of residuals is 0. 
 
@@ -726,7 +804,7 @@ lm_new <- coeftest(lm_log.out, vcov = NeweyWest, prewhite = F, adjust = T)
   
 ```
 
-#### 5.5.3. Outliers 
+### Outliers 
 
 ```{r include=FALSE}
 
@@ -736,7 +814,7 @@ stargazer(lm_log.out, lm_new, lmrobfit)
 
 ```
 
-### 5.6. Sensitivity analysis 
+## Sensitivity analysis 
 
 ```{r}
 

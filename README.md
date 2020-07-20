@@ -92,31 +92,15 @@ Figure 1 shows that the founding rate (the slope of the line plot) of community-
 
 **Figure 2. Budget trend**
 
-![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/dic_newspaper.png)
+![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/dic_analysis.png)
 
 **Figure 3. Dictionary-based methods analysis**
+
+- [ ] This subsection needs to be updated as the figure now includes information on the Agenda (NCLR newsletter).
 
 Before moving into a more serious statistical analysis, I checked some assumptions I made about the research design. Figure 2 shows that the percentage of the federal budget for education, employment, and social service plunged after the Reagan cuts. (This amount shows a slight decrease during the Carter administration, as he was forced to reduce social programs due to budget constraints.) Reagan made these reductions more dramatic and consistent throughout the 1980s. A more specific analysis of the budget change shows that programs empowering minority communities, such as the Comprehensive Employment Training Act, were critically hurt by the budget cuts. I did not include a more detailed analysis of these policies owing to spatial constraints. This evidence is important for seeing the budget cut as a major intervention.
 
 Figure 3 shows how minority communities reacted to the budget crisis. The *International Examiner* (IE), a community newspaper circulating among Asian American activists in Seattle, did not mention Reagan until 1981. I created a custom dictionary and analyzed the frequency of budget-related terms that appeared in Reagan-related articles from this newspaper source. The figure shows that when the newspaper first mentioned Reagan, the budget crisis received serious attention. This evidence is crucial for seeing the year 1981 as a critical juncture for Asian American and Latino community organizers.
-
-```r
-# Text data
-ie_processed <- ie_data[,-1] %>% # drop the first col
-  ########################## Cleaning vars ##########################
-  mutate(date = gsub(".*:", "", date) %>% str_trim(),
-         date = gsub(",", "", date),
-         date = as.Date(as.character(date), format = "%b%d%Y"),
-         source = gsub(".*:", "", source) %>% str_trim(),
-         author = gsub(".*:", "", author) %>% str_trim())
-
-# Create a document term matrix based on a custom dictionary
-ie_dic <- dfm(corpus(ie_processed),
-              dictionary = dictionary(list(budget =
-                                      c("spending","grants","grant","funding","funds","fund"))))
-# Add to the original data
-ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
-```
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/outliers_detected.png)
 

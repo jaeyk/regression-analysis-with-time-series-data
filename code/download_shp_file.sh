@@ -8,4 +8,4 @@ e/raw_data
 wget http://spatial.lib.berkeley.edu/public/ark28722-s7hs4j/data.zip | unzip
 
 # Remove the file
-rm data.zip 
+rm data.zip

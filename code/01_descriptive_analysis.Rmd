@@ -56,7 +56,6 @@ pacman::p_load(
 library(makereproducible)
 
 # Import R scripts
-source(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r"))
 
 script_list <- list(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r"),
      here("functions", "data_viz.r"),
