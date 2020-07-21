@@ -96,7 +96,7 @@ Figure 1 shows that the founding rate (the slope of the line plot) of community-
 
 **Figure 3. Dictionary-based methods analysis**
 
-- [ ] Update this subsection as Figure 3 now includes information on the Agenda (National Council of La Raza newsletter).
+- **TBD: Update this subsection as Figure 3 now includes information on the Agenda (National Council of La Raza newsletter).**
 
 Before moving into a more serious statistical analysis, I checked some assumptions I made about the research design. Figure 2 shows that the percentage of the federal budget for education, employment, and social service plunged after the Reagan cuts. (This amount shows a slight decrease during the Carter administration, as he was forced to reduce social programs due to budget constraints.) Reagan made these reductions more dramatic and consistent throughout the 1980s. A more specific analysis of the budget change shows that programs empowering minority communities, such as the Comprehensive Employment Training Act, were critically hurt by the budget cuts. I did not include a more detailed analysis of these policies owing to spatial constraints. This evidence is important for seeing the budget cut as a major intervention.
 
