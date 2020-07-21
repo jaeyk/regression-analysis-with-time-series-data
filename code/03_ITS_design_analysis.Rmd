@@ -195,7 +195,7 @@ reagan_org <- reagan_org %>%
 # Select
 
 reagan_org <- reagan_org %>% 
-   select(Year, category, Type, Freq, Percentage, pop_percentage, presidency, senate, house, intervention)
+   select(Year, category, Type, Freq, Percentage, pop_percentage, presidency, senate, house, intervention) 
 
 ```
 
@@ -208,7 +208,8 @@ reagan_org <- reagan_org %>%
 
 ```{r}
 
-ggplot(reagan_org, aes(x = Year, y = Percentage)) +
+reagan_org %>% 
+  ggplot(aes(x = Year, y = Percentage)) +
     geom_point() +
     geom_line() +   
     geom_vline(xintercept = c(1981), col = "red", linetype ="dashed") +

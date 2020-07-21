@@ -101,7 +101,9 @@ mexican_service_org <- read_csv(make_here("/home/jae/analyzing-asian-american-la
 ```{r}
 
 # Merge the two dfs 
-org_df <- merge_by_group(asian_org, latino_org)
+orgs <- merge_by_group(asian_org, latino_org)
+
+org_df <- orgs 
 
 # Add decade 
 org_df <- add_decade(org_df, F.year) %>%
@@ -117,7 +119,7 @@ pop_mass_plot <- org_df %>%
     theme_pubr() +
     scale_fill_npg() +
     labs(x = "Decade", 
-         y = "N of orgs founded", 
+         y = "N of organizations founded", 
          title = "Organizational founding trend (mass)")
 
 # Pop density 
@@ -145,7 +147,7 @@ pop_density_plot <- ggplot(org_count, aes(x = decade, y = ratio,
     theme_pubr() +
     scale_fill_npg() +
     labs(x = "Decade", 
-         y = "N of orgs founded (per 1 million population)", 
+         y = "N of organizations founded (per 1 million population)", 
          title = "Organizational founding trend (density)")
 
 ggarrange(pop_mass_plot, pop_density_plot, common.legend = TRUE, nrow = 2)
@@ -155,7 +157,9 @@ ggsave(here("outputs", "pop_mass_densty.png"),
 
 ```
 
-### Name and scope trend 
+### Scope and naming trends 
+
+- Setup 
 
 ```{r}
 # Mutate several vars of interest 
@@ -174,45 +178,61 @@ org_df <- org_df %>%
 org_df$national <- factor(ifelse(str_detect(org_df$Name, "National") | org_df$States == "DC", "National", "Local")) 
 ```
 
+- Scope 
+
 ```{r}
 
 org_df %>% 
   filter(!is.na(national)) %>%
-  count(decade, national, Type, category) %>%
+  count(national, Type, category) %>%
   mutate(
       prop = n / sum(n),
       prop = round(prop, 2)
     ) %>%
-  ggplot(aes(x = decade, y = prop, 
+  ggplot(aes(x = fct_reorder(Type, prop), y = prop, 
              fill = national)) +
     geom_col(position = "fill") +
-    facet_grid(Type~category, scales = "free") +
+    facet_grid(~category, scales = "free") +
     scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
     theme_pubr() +
     scale_fill_npg() +
-    labs(x = "Decade", y = "Proportion",
-         fill = "Scope of organizational activities")
+    labs(x = "Organizational type", y = "Proportion",
+         fill = "Scope of organizational activities") 
     
 ggsave(here("outputs", "national_local_trend.png"),
        height = 6, width = 8)
 
 ```
 
+- Naming 
+
 ```{r}
 org_df %>% 
-  filter(name_value == 1 & !is.na(decade)) %>% 
-  stacked_bar_plot(decade, name_type, category) +
-    facet_wrap(~category)
-
-org_df %>%
-  stacked_bar_plot(national, category) +
-    facet_wrap(~category)
-
-ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/asian_latino_orgs_n.png"), width = 10)
+  filter(name_value == 1) %>%
+  mutate(name_type = factor(name_type),
+         name_type = fct_relevel(name_type, c("panethnic", "ethnic", "unique"))) %>%
+  mutate(name_type = str_to_title(name_type)) %>%
+  count(name_type,  Type, category) %>%
+  mutate(
+      prop = n / sum(n),
+      prop = round(prop, 2)
+    ) %>%
+  ggplot(aes(x = fct_reorder(Type, prop), y = prop, 
+             fill = name_type)) +
+    geom_col(position = "fill") +
+    facet_grid(~category, scales = "free") +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    theme_pubr() +
+    scale_fill_npg() +
+    labs(x = "Type", y = "Proportion",
+         fill = "Name type")
+    
+ggsave(here("outputs", "naming_trend.png"),
+       height = 6, width = 8)
 
 ```
 
-### Time-series analysis
+### Additional desc 
 
 #### Turning into time-series data
 
@@ -236,107 +256,55 @@ write_csv(asian_year, make_here("/home/jae/analyzing-asian-american-latino-civic
 write_csv(latino_year, make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_year.csv"))
 ```
 
-#### Plotting
+#### Panethnic vs. Ethnic 
+
+- 76% of Chinese CBOs remain Chinese and 24% of them turned into PCBOs. 
+- 24% of Mexican CBOs remain Mexican and 76% of them turned into PCBOs.
 
 ```{r}
 
-# Merge
+# Org proportions  
+chinese_service_org %>% 
+  count(Panethnic) %>%
+  mutate(prop = n/sum(n),
+         prop = round(prop, 2))
 
-merged <- bind_rows(
-  mutate(asian_year, group = "Asian Americans"),
-  mutate(latino_year, group = "Latinos")
-)
+mexican_service_org %>% 
+  count(Panethnic) %>%
+  mutate(prop = n/sum(n),
+         prop = round(prop, 2))
 
-# Plot
-
-freq_sum <- merged %>%
-  group_by(F.year, group, Type) %>%
-  summarize(freq_sum = sum(Freq))
-
-write_csv(freq_sum, make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/freq_sum.csv"))
-
-freq_sum %>%
-  ggplot(aes(x = F.year, y = freq_sum)) +
-  geom_point() +
-  geom_line() +
-  stat_stl(frequency = 4, s.window = "periodic", col = "blue", size = 1) +
-  labs(
-    title = " Grey: Raw trend \n Blue: Seaonality adjusted trend",
-    x = "Year",
-    y = "Number of organizations founded in each year"
-  ) +
-  facet_grid(Type ~ group) +
-  xlim(c(1960, 2017)) +
-  geom_vline(xintercept = c(1980), linetype = "dashed", col = "red") +
-  annotate(
-    geom = "text", x = 1972, y = 13, label = "War on Poverty",
-    color = "red"
-  ) +
-  annotate(
-    geom = "text", x = 1990, y = 13, label = "Post-Reagan period",
-    color = "red"
-  ) +
-  scale_y_continuous(breaks = scales::pretty_breaks()) # integers
-
-ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year.png"), height = 7, width = 12)
 ```
 
 ```{r}
+# Plot 
 
-panethnic <- freq_sum %>%
-  filter(Type == "CBO") %>%
-  ggplot(aes(x = F.year, y = freq_sum)) +
-  geom_point() +
-  geom_line() +
-  labs(
-    x = "Year", y = "Number of organizations founded in each year",
-    title = "Panethnic organizations",
-    subtitle = "Only included CBOs"
-  ) +
-  facet_grid(~group) +
-  xlim(c(1960, 2017)) +
-  geom_vline(xintercept = c(1980), linetype = "dashed", col = "red") +
-  annotate(
-    geom = "text", x = 1972, y = 13, label = "War on Poverty",
-    color = "red"
-  ) +
-  annotate(
-    geom = "text", x = 1990, y = 13, label = "Post-Reagan period",
-    color = "red"
-  ) +
-  scale_y_continuous(breaks = scales::pretty_breaks()) +
-  ylim(c(0, 20))
+pcbo_count <- org_df %>%
+  count(category, Type, decade) %>%
+  filter(Type == "CBO") 
 
-ethnic <- bind_rows(
-  mutate(chinese_service_org[, c("Name", "F.year")], group = "Chinese"),
-  mutate(mexican_service_org[, c("Name", "F.year")], group = "Mexicans")
-) %>%
-  count(F.year, group) %>%
-  ggplot(aes(x = F.year, y = n)) +
-  geom_point() +
-  geom_line() +
-  labs(
-    x = "Year", y = "Number of organizations founded in each year",
-    title = "Ethnic organizations",
-    subtitle = "Only included CBOs"
-  ) +
-  facet_grid(~group) +
-  xlim(c(1960, 2017)) +
-  geom_vline(xintercept = c(1980), linetype = "dashed", col = "red") +
-  annotate(
-    geom = "text", x = 1972, y = 13, label = "War on Poverty",
-    color = "red"
-  ) +
-  annotate(
-    geom = "text", x = 1990, y = 13, label = "Post-Reagan period",
-    color = "red"
-  ) +
-  scale_y_continuous(breaks = scales::pretty_breaks()) +
-  ylim(c(0, 20))
+ethnic_orgs <- merge_by_group_extended(chinese_service_org[,c("F.year")], mexican_service_org[,c("F.year")])
 
-panethnic / ethnic
+ethnic_orgs <- add_decade(ethnic_orgs, F.year) %>%
+  filter(!is.na(decade))
 
-ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year_combined.png"), height = 12, width = 13)
+ecbo_count <- ethnic_orgs %>%
+  count(category, decade) 
+
+df_joined <- full_join(pcbo_count, ecbo_count) %>%
+  mutate(Group = ifelse(category %in% c("Asian", "Chinese"), "Asian or Chinese", "Latino or Mexican")) 
+
+df_joined %>%
+    ggplot(aes(x = decade, y = n, fill = category)) +
+        geom_col(position = "dodge") +
+        theme_pubr() +
+        scale_fill_npg() +
+        labs(x = "Decade", 
+             y = "N of organizations founded",
+             fill = "Type") +
+        facet_wrap(~Group)
+
+ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/org_founding_year_combined.png"), height = 5, width = 7)
 ```
 
 ## Geospatial analysis

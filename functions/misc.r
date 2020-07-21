@@ -6,6 +6,13 @@ merge_by_group <- function(x, y) {
   )
 }
 
+merge_by_group_extended <- function(x, y) {
+  bind_rows(
+    mutate(x, category = "Chinese"),
+    mutate(y, category = "Mexican")
+  )
+}
+
 org_to_ts <- function(data) {
 
   # Create the year sequence
