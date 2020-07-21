@@ -268,10 +268,8 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 ```{r}
 
 # Text data 
-ie_processed <- ie_data[,-1] %>% # drop the first col
-  ########################## Cleaning vars ##########################
-    mutate(date = gsub(".*:", "", date) %>% str_trim(),
-           date = gsub(",", "", date),
+ie_processed <- ie_data[,-1] %>% # 
+    mutate(date = str_replace_all(date, ".*:|,", "") %>% str_trim(),
            date = as.Date(as.character(date), format = "%b%d%Y"),
            year = lubridate::year(date))
 
@@ -281,14 +279,6 @@ ie_dic <- dfm(corpus(ie_processed),
 
 # Add to the original data  
 ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
-
-# Fill in 0 dates
-all_years <- seq(as.Date("1976/1/1"), as.Date("1987/12/31"), "day")
-# Turn it into a dataframe 
-all_dates <- data.frame(date = all_dates)
-  
-# Count by year and type
-ie_processed %>% right_join(all_dates, by = "date")
 
 # Plot
 ie_n <- ie_processed %>%
@@ -375,20 +365,6 @@ ie_plot + reagan_plot
 ggsave(here("outputs", "dic_analysis.png"),
        height = 5)
 ```
-
-```{r}
-agenda_pattern <- ggplot(agenda_reagan) +
-  
-   # geom_histogram(aes(x = year), stat = "count") + 
-  #  geom_vline(xintercept = c(as.Date("Jan 20, 1981", format = "%b%d%Y")), col = "red", linetype ="dashed") +
-    geom_point(aes(x = year, y = budget), size = 2, alpha = 0.3) +
-    geom_smooth(aes(x = year, y = budget), span = 0.1) +
-    labs(x = "Year" , y = "Count",  
-         title = "The frequency of budget related terms in Reagan related articles")  
-
-#ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/dic_newspaper.png"), width = 10)
-```
-
 # Treating outliers 
 
 ```{r}

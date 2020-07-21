@@ -99,21 +99,30 @@ mexican_service_org <- read_csv(make_here("/home/jae/analyzing-asian-american-la
 
 ### Cross-sectional analysis
 
-- [] Turn this into stacked bar plot. 
-
 ```{r}
 
 org_df <- merge_by_group(asian_org, latino_org)
 
 org_df <- org_df %>%
-  mutate()
-str_detect(org_df$Name, "asian|hispanic|latino|latina|raza|centro")
+  mutate(name.l = tolower(Name)) %>%
+  mutate(panethnic = str_detect(name.l, "asian|hispanic|latino|latina|raza|centro|spanish") %>% as.numeric(),
+         ethnic = str_detect(name.l, 
+                            "chinese|chinatown| japanese|filipino|mexican|chicano|chicana|puerto|cuban"),
+         unique = ifelse(panethnic == 0 & ethnic == 0, 1, 0)) %>%
+  pivot_longer(cols = c(panethnic, ethnic, unique),
+               names_to = "name_type",
+               values_to = "name_value")
 
-org_df$panethnic <- org_df %>% str_detct()
+org_df$national <- factor(ifelse(str_detect(org_df$name.l, "national") & org_df$States == "DC", 1, 0))
 
-stacked_bar_plot(org_df, category, Type)
+stacked_bar_plot(org_df, category, Type) 
+
+org_df %>% filter(name_value == 1) %>% stacked_bar_plot(category, name_type)
+
+stacked_bar_plot(org_df, category, national)
 
 ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/asian_latino_orgs_n.png"), width = 10)
+
 ```
 
 ### Time-series analysis
