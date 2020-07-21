@@ -14,6 +14,7 @@ html_document:
 
 # if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
+  magrittr,
   tidyverse, # for the tidyverse framework
   data.table, # for fast data wrangling
   patchwork, # for arranging ggplots
@@ -53,11 +54,9 @@ library(makereproducible)
 
 # Import R scripts
 
-script_list <- list(
-  make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r"),
-  here("functions", "data_viz.r"),
-  here("functions", "plot_us_heatmap.r"),
-  here("functions", "stacked_bar_plot.R")
+script_list <- list.files("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions",
+  pattern = "*.r|*.R",
+  full.names = TRUE
 )
 
 for (i in 1:length(script_list))
@@ -97,12 +96,38 @@ mexican_service_org <- read_csv(make_here("/home/jae/analyzing-asian-american-la
 
 ## Descriptive analysis
 
-### Cross-sectional analysis
+### Pop Mass 
 
 ```{r}
 
+# Merge the two dfs 
 org_df <- merge_by_group(asian_org, latino_org)
 
+# Add decade 
+org_df <- add_decade(org_df, F.year) %>%
+  filter(!is.na(decade))
+
+# Count 
+pop_mass_plot <- org_df %>%
+  count(category, Type, decade) %>%
+  ggplot(aes(x = decade, y = n, 
+             fill = Type)) +
+    geom_col(position = "dodge") +
+    facet_wrap(~category) +
+    theme_pubr() +
+    scale_fill_npg() +
+    labs(x = "Decade", 
+         y = "Count", 
+         title = "Organizational founding trend (mass)")
+
+```
+
+### Pop Density 
+
+```{r}
+# Mutate several vars of interest 
+
+## Name related 
 org_df <- org_df %>%
   mutate(name.l = tolower(Name)) %>%
   mutate(panethnic = str_detect(name.l, "asian|hispanic|latino|latina|raza|centro|spanish") %>% as.numeric(),
@@ -113,13 +138,27 @@ org_df <- org_df %>%
                names_to = "name_type",
                values_to = "name_value")
 
-org_df$national <- factor(ifelse(str_detect(org_df$name.l, "national") & org_df$States == "DC", 1, 0))
+org_df$national <- factor(ifelse(str_detect(org_df$name.l, "national") | org_df$States == "DC", 1, 0))
 
-stacked_bar_plot(org_df, category, Type) 
+## Add decade 
+org_df <- add_decade(org_df, F.year)
 
-org_df %>% filter(name_value == 1) %>% stacked_bar_plot(category, name_type)
+```
 
-stacked_bar_plot(org_df, category, national)
+```{r}
+org_df %>% 
+  filter(!is.na(decade)) %>%
+  stacked_bar_plot(decade, Type, category) + 
+  facet_wrap(~category)
+
+org_df %>% 
+  filter(name_value == 1 & !is.na(decade)) %>% 
+  stacked_bar_plot(decade, name_type, category) +
+    facet_wrap(~category)
+
+org_df %>%
+  stacked_bar_plot(national, category) +
+    facet_wrap(~category)
 
 ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/asian_latino_orgs_n.png"), width = 10)
 

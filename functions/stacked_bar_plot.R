@@ -1,14 +1,14 @@
 
-stacked_bar_plot <- function(df, var1, var2) {
+stacked_bar_plot <- function(df, var1, var2, var3) {
   df %>%
-    group_by({{ var1 }}, {{ var2 }}) %>%
+    group_by({{ var1 }}, {{ var2 }}, {{ var3 }}) %>%
     summarize(n = n()) %>%
     mutate(
       prop = n / sum(n),
       prop = round(prop, 2)
     ) %>%
     ggplot(aes(
-      x = fct_reorder({{ var1 }}, prop),
+      x = {{ var1 }},
       y = prop,
       group = 1,
       fill = {{ var2 }}
