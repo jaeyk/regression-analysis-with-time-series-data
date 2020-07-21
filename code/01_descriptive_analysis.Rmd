@@ -96,7 +96,7 @@ mexican_service_org <- read_csv(make_here("/home/jae/analyzing-asian-american-la
 
 ## Descriptive analysis
 
-### Pop Mass 
+### Overall
 
 ```{r}
 
@@ -107,22 +107,55 @@ org_df <- merge_by_group(asian_org, latino_org)
 org_df <- add_decade(org_df, F.year) %>%
   filter(!is.na(decade))
 
-# Count 
+# Pop mass 
 pop_mass_plot <- org_df %>%
   count(category, Type, decade) %>%
   ggplot(aes(x = decade, y = n, 
              fill = Type)) +
     geom_col(position = "dodge") +
-    facet_wrap(~category) +
+    facet_wrap(~category, scales = "free") +
     theme_pubr() +
     scale_fill_npg() +
     labs(x = "Decade", 
-         y = "Count", 
+         y = "N of orgs founded", 
          title = "Organizational founding trend (mass)")
+
+# Pop density 
+
+## Wrangle 
+census <- asian_latino_census %>%
+  filter(Year %in% c(1960:2020)) %>%
+  mutate(Year = as.character(Year),
+         Year = paste0(Year, "s"),
+         Year = fct_relevel(Year, c("1960s", "1970s", "1980s", "1990s", "2000s", "2010s"))) %>%
+  rename(decade = Year,
+         category = Group)
+
+## Join 
+org_count <- org_df %>%
+  count(category, Type, decade)
+
+org_count <- left_join(org_count, census) %>%
+  mutate(ratio = n/(Size/1000000))
+
+pop_density_plot <- ggplot(org_count, aes(x = decade, y = ratio, 
+             fill = Type)) +
+    geom_col(position = "dodge") +
+    facet_wrap(~category, scales = "free") +
+    theme_pubr() +
+    scale_fill_npg() +
+    labs(x = "Decade", 
+         y = "N of orgs founded (per 1 million population)", 
+         title = "Organizational founding trend (density)")
+
+ggarrange(pop_mass_plot, pop_density_plot, common.legend = TRUE, nrow = 2)
+
+ggsave(here("outputs", "pop_mass_densty.png"),
+       height =8, width = 8)
 
 ```
 
-### Pop Density 
+### Name and scope trend 
 
 ```{r}
 # Mutate several vars of interest 
@@ -138,19 +171,34 @@ org_df <- org_df %>%
                names_to = "name_type",
                values_to = "name_value")
 
-org_df$national <- factor(ifelse(str_detect(org_df$name.l, "national") | org_df$States == "DC", 1, 0))
+org_df$national <- factor(ifelse(str_detect(org_df$Name, "National") | org_df$States == "DC", "National", "Local")) 
+```
 
-## Add decade 
-org_df <- add_decade(org_df, F.year)
+```{r}
+
+org_df %>% 
+  filter(!is.na(national)) %>%
+  count(decade, national, Type, category) %>%
+  mutate(
+      prop = n / sum(n),
+      prop = round(prop, 2)
+    ) %>%
+  ggplot(aes(x = decade, y = prop, 
+             fill = national)) +
+    geom_col(position = "fill") +
+    facet_grid(Type~category, scales = "free") +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    theme_pubr() +
+    scale_fill_npg() +
+    labs(x = "Decade", y = "Proportion",
+         fill = "Scope of organizational activities")
+    
+ggsave(here("outputs", "national_local_trend.png"),
+       height = 6, width = 8)
 
 ```
 
 ```{r}
-org_df %>% 
-  filter(!is.na(decade)) %>%
-  stacked_bar_plot(decade, Type, category) + 
-  facet_wrap(~category)
-
 org_df %>% 
   filter(name_value == 1 & !is.na(decade)) %>% 
   stacked_bar_plot(decade, name_type, category) +

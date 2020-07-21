@@ -1,7 +1,7 @@
 
 stacked_bar_plot <- function(df, var1, var2, var3) {
   df %>%
-    group_by({{ var1 }}, {{ var2 }}, {{ var3 }}) %>%
+    group_by({{ var1 }}, {{ var2 }}, {{var3}}) %>%
     summarize(n = n()) %>%
     mutate(
       prop = n / sum(n),
