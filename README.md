@@ -71,7 +71,7 @@ org_to_ts <- function(data){
 
 ## 2. Descriptive data analysis [[Code](https://github.com/jaeyk/regression-analysis-with-time-series-data/blob/master/code/01_descriptive_analysis.Rmd)]
 
-![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/pop_mass_density.png)
+![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/pop_mass_densty.png)
 
 **Figure 1. Organizational trend**
 
@@ -92,7 +92,7 @@ Figure 1 shows that, when the organizational founding trend is measured density 
 
 **Figure 3. Dictionary-based methods analysis**
 
-- **TBD: Scanned, digitized, and analyzed the Agenda (National Council of La Raza newsletter) data.**
+- **Update: Scanned, digitized, and analyzed the Agenda (National Council of La Raza newsletter) data.**
 
 Before moving into a more serious statistical analysis, I checked some assumptions I made about the research design. Figure 2 shows that the percentage of the federal budget for education, employment, and social service plunged after the Reagan cuts. (This amount shows a slight decrease during the Carter administration, as he was forced to reduce social programs due to budget constraints.) Reagan made these reductions more dramatic and consistent throughout the 1980s. A more specific analysis of the budget change shows that programs empowering minority communities, such as the Comprehensive Employment Training Act, were critically hurt by the budget cuts. I did not include a more detailed analysis of these policies owing to spatial constraints. This evidence is important for seeing the budget cut as a major intervention.
 
