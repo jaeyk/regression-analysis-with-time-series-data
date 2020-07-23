@@ -150,10 +150,10 @@ pop_density_plot <- ggplot(org_count, aes(x = decade, y = ratio,
          y = "N of organizations founded (per 1 million population)", 
          title = "Organizational founding trend (density)")
 
-ggarrange(pop_mass_plot, pop_density_plot, common.legend = TRUE, nrow = 2)
+pop_mass_plot / pop_density_plot
 
 ggsave(here("outputs", "pop_mass_densty.png"),
-       height = 9, width = 8)
+       height = 12, width = 10)
 
 ```
 
