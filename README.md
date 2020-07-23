@@ -15,6 +15,8 @@ The importance of the War on Poverty on the community-building efforts among Asi
 
 ## Datasets
 
+**Update: I scanned and digitized all of the newsletters issued by the National Council of La Raza from 1973 to 1981.**
+
 I have collected a wide range of original data for this project.
 
 1. Organizational data: An original dataset traces the founding of Asian American and Latino CBOs over the last century. The dataset includes about 299 Asian American and 519 Latino CBOs. Each observation includes the organization’s title, the year of founding, the physical address, and whether the CBO’s purpose was social (i.e., charitable, educational, cultural or some other non-political function), advocacy (engaged in political or legal lobbying), or hybrid (active in both types of work). I made the dataset publicly available at [Harvard Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/FLUPBJ) and created a [dashbaord](https://rpubs.com/jaeyeonkim/581083) for easy exploration of the data.
@@ -92,7 +94,7 @@ Figure 1 shows that, when the organizational founding trend is measured density 
 
 **Figure 3. Dictionary-based methods analysis**
 
-- **Update: Scanned, digitized, and analyzed the Agenda (National Council of La Raza newsletter) data.**
+- **Update: I scanned, digitized, and analyzed all of the newsltters issued by the National Council of La Raza from 1973 to 1981.**
 
 Before moving into a more serious statistical analysis, I checked some assumptions I made about the research design. Figure 2 shows that the percentage of the federal budget for education, employment, and social service plunged after the Reagan cuts. (This amount shows a slight decrease during the Carter administration, as he was forced to reduce social programs due to budget constraints.) Reagan made these reductions more dramatic and consistent throughout the 1980s. A more specific analysis of the budget change shows that programs empowering minority communities, such as the Comprehensive Employment Training Act, were critically hurt by the budget cuts. I did not include a more detailed analysis of these policies owing to spatial constraints. This evidence is important for seeing the budget cut as a major intervention.
 
