@@ -51,14 +51,15 @@ library(makereproducible)
 
 # Import R scripts
 
-script_list <- list(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/misc.r"),
-     here("functions", "data_viz.r"),
-     here("functions", "plot_us_heatmap.r"),
-     here("functions", "visualize_its.r"),
-     here("functions", "span_loess.r"))
+script_list <- list.files("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions",
+  pattern = "*.r|*.R",
+  full.names = TRUE
+)
 
 for (i in 1:length(script_list))
-    {source(script_list[[i]])}
+{
+  source(script_list[[i]])
+}
 
 # for publication-friendly theme
 theme_set(theme_pubr())
@@ -262,55 +263,64 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 
 ### Newspaper analysis 
 
-- International Examiner 
+#### International Examiner 
 
-  - N = 2,719
+  - N = 3,120
 
 ```{r}
 
-# Text data 
-ie_processed <- ie_data[,-1] %>% # 
-    mutate(date = str_replace_all(date, ".*:|,", "") %>% str_trim(),
-           date = as.Date(as.character(date), format = "%b%d%Y"),
-           year = lubridate::year(date))
+ie_data$reagan <- str_detect(ie_data$text, "reagan|Reagan")
 
-# Create a document term matrix based on a custom dictionary 
-ie_dic <- dfm(corpus(ie_processed), 
-              dictionary = dictionary(list(budget =                                       c("spending","grants","grant","funding","funds","fund"))))
+ie_reagan <- ie_data %>% filter(reagan == TRUE)
+  
+ie_dic <- dfm(corpus(ie_reagan$text), 
+              dictionary = dictionary(list(budget = 
+              c("spending","grants","grant","funding","funds","fund"))))
 
 # Add to the original data  
-ie_processed$budget <- convert(ie_dic, to = "data.frame")[,2]
+ie_reagan$budget <- convert(ie_dic, to = "data.frame")[,2]
 
 # Plot
-ie_n <- ie_processed %>%
+ie_reagan_n <- ie_reagan %>%
     mutate(year = as.numeric(year)) %>%
     group_by(year) %>% 
     summarise(n = n(),
               count = sum(budget))
 
 # Fill in 0 years
-all_years <- seq(min(ie_processed$year), max(ie_processed$year))
+all_years <- seq(min(ie_reagan$year), max(ie_reagan$year))
 
 # Turn it into a dataframe 
 all_years <- data.frame(year = all_years)
   
 # Count by year and type
-ie_n <- ie_n %>% right_join(all_years, by = "year")
+ie_reagan_n <- ie_reagan_n %>% right_join(all_years, by = "year")
 
-# reagan_plot 
+# Add missing rows
+ie_missing_years <- c(1976:1982)[!(c(1976:1982) %in% unique(ie_reagan_n$year))]
 
-ie_plot <- ggplot(ie_n, aes(x = year)) +
-    geom_col(aes(y = n), alpha = 0.3) +
+ie_reagan_n <- ie_reagan_n %>%
+  add_row(year = ie_missing_years,
+          n = rep(0, length(ie_missing_years)),
+          count = rep(0, length(ie_missing_years)))
+
+# Filter 
+ie_reagan_n_filtered <- filter(ie_reagan_n, between(year, 1976, 1981))
+          
+# No NAs
+ie_reagan_n_filtered <- ie_reagan_n_filtered[!is.na(ie_reagan_n_filtered$count), ]
+
+# Plot
+ie_reagan_plot <- ggplot(ie_reagan_n_filtered, aes(x = year)) +
+    geom_col(aes(y = n), alpha = 0.5) +
     geom_point(aes(y = count), col = "black") +
-    geom_line(data = (ie_n[!is.na(ie_n$count), ]),
-              aes(y = count), col = "red") +
+    geom_line(aes(y = count), col = "red") +
     labs(x = "Year", y = "Count",
-         title = "International Examiner") +
-    xlim(c(1976, 1982))
+         title = "International Examiner") 
 
 ```
 
-- Agenda 
+#### Agenda 
 
   - N: 1,249
 
@@ -335,7 +345,7 @@ agenda_dic <- dfm(corpus(agenda_reagan$value),
 agenda_reagan$budget <- convert(agenda_dic, to = "data.frame")[,2]
 
 # Plot
-reagan_n <- agenda_reagan %>%
+agenda_reagan_n <- agenda_reagan %>%
     mutate(year = as.numeric(year)) %>%
     group_by(year) %>% 
     summarise(n = n(),
@@ -348,20 +358,34 @@ all_years <- seq(min(agenda_reagan$year), max(agenda_reagan$year))
 all_years <- data.frame(year = all_years)
   
 # Count by year and type
-reagan_n <- reagan_n %>% right_join(all_years, by = "year")
+agenda_reagan_n <- agenda_reagan_n %>% right_join(all_years, by = "year")
 
-# reagan_plot 
+# Add missing rows 
+agenda_missing_years <- c(1976:1982)[!(c(1976:1982) %in% unique(agenda_reagan_n$year))]
 
-reagan_plot <- ggplot(reagan_n, aes(x = year)) +
-    geom_col(aes(y = n), alpha = 0.3) +
+agenda_reagan_n <- agenda_reagan_n %>%
+  add_row(year = agenda_missing_years,
+          n = rep(0, length(agenda_missing_years)),
+          count = rep(0, length(agenda_missing_years)))
+
+agenda_reagan_n[is.na(agenda_reagan_n)] <- 0
+
+# Filter 
+agenda_reagan_n_filtered <- filter(agenda_reagan_n, between(year, 1976, 1981))
+          
+# No NAs
+agenda_reagan_n_filtered <- agenda_reagan_n_filtered[!is.na(agenda_reagan_n_filtered$count), ]
+
+# Plot
+
+agenda_reagan_plot <- ggplot(agenda_reagan_n_filtered, aes(x = year)) +
+    geom_col(aes(y = n), alpha = 0.5) +
     geom_point(aes(y = count), col = "black") +
-    geom_line(data = (reagan_n[!is.na(reagan_n$count), ]),
-              aes(y = count), col = "red") +
+    geom_line(aes(y = count), col = "red") +
     labs(x = "Year", y = "Count",
-         title = "Agenda (NCLR newsletter)") +
-    xlim(c(1976, 1982))
+         title = "Agenda (NCLR newsletter)")
 
-ie_plot + reagan_plot
+ie_reagan_plot + agenda_reagan_plot
 
 ggsave(here("outputs", "dic_analysis.png"),
        height = 5)
