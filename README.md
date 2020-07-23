@@ -9,8 +9,6 @@
 
 This project is part of my dissertation research. The main motivation of this project is to understand why Asian American and Latino community-based organizations (CBOs, those organizations that focus on providing social services) and advocacy organziations began to emerge in the 1960s and 1970s. Until the 1950s, Asian American and Latino communities were divided along lines of national origin. Chinese, Japanese, and Filipino communities minded their own business. This was also true for relationships between Mexicans, Cubans, and Puerto Ricans. However, in the 1960s and 1970s, these fragmented communities started to build organizations that represented their united voices. In my dissertation, I argue that this new trend emerged during this particular decade because Asian American and Latino activists competed with their African American counterparts in the federal grants market. Uniting their groups helped them to increase their visibility and thus draw support from the War on Poverty programs (e.g., Community Action Programs, Community Development Centers, Community Health Clinics, etc.).
 
-- Check out [this Git repository](https://github.com/jaeyk/content-analysis-for-evaluating-ML-performances) to learn about my other dissertation chapter which leverages machine learning to study political opinion among minority groups in historical contexts.
-
 ## Research design
 
 The importance of the War on Poverty on the community-building efforts among Asian Americans and Latinos has been mentioned by prior research in sociology, history, and ethnic studies. However, the evidence for this importance has mostly come from anecdotal examples. The present study provides the first systematic evidence for the influence of the War on Poverty programs on Asian American and Latino civic mobilization in the 1960s and 1970s. I focused on the difference in the founding of organizations between the time of the War on Poverty and the post-Reagan period. If my resource-driven theory is correct, I hypothesize that President Reagan's reduction in the budgets for these community support programs should have decreased the founding rate of these community organizations in the post-Reagan period. This focus on the interruption in the time series data (interrupted time series design) helps us isolate the effect of the budget change from that of other concurrent factors, such as demographic change and political activism (Cook and Campbell 1979).
@@ -73,13 +71,13 @@ org_to_ts <- function(data){
 
 ## 2. Descriptive data analysis [[Code](https://github.com/jaeyk/regression-analysis-with-time-series-data/blob/master/code/01_descriptive_analysis.Rmd)]
 
-There is a reason why it is useful to plot time series data using both point and line plots but not bar plots. A point plot enables one to see which data points are missing. A line plot is useful to trace the overall trend. A bar plot is not useful because it does not indicate whether we have overlapping observations at a particular temporal point. In that case, the bar plot just shows the sum of these numerical elements. The time series plot should match each temporal unit with each observation. Any violation of this assumption is hard to detect in a bar plot.
-
-![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/org_founding_year.png)
+![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/pop_mass_density.png)
 
 **Figure 1. Organizational trend**
 
-Figure 1 shows that the founding rate (the slope of the line plot) of community-based organizations in both Asian American and Latino communities increased before the budget cut (red dashed line) and decreased after the budget cut. and decreased after the cut. We could not find a similar trend in advocacy or hybrid organizations (organizations active both in advocacy and service delivery). This evidence is consistent with the theory that CBOs are service-oriented, and thus most dependent, and thus more dependent on outside financial support than the other two types of organizations. However, the evidence is only suggestive as the change could also have been influenced by other factors. Also, the data includes noise as well as signals.
+**Update: Used a simpler descriptive plot for easy interpretation.**
+
+Figure 1 shows that, when the organizational founding trend is measured density (number of organizations per 1 milliion population), the founding rate of community-based organizations in both Asian American and Latino communities increased before the budget cut and decreased after the budget cut. We could not find a similar trend in advocacy or hybrid organizations (organizations active both in advocacy and service delivery). This evidence is consistent with the theory that CBOs are service-oriented, and thus most dependent, and thus more dependent on outside financial support than the other two types of organizations. However, the evidence is only suggestive as the change could also have been influenced by other factors. Also, the data includes noise as well as signals.
 
 
 ## 3. Statistical modeling of time series data [[Code](https://github.com/jaeyk/regression-analysis-with-time-series-data/blob/master/code/03_ITS_design_analysis.Rmd)]
@@ -94,7 +92,7 @@ Figure 1 shows that the founding rate (the slope of the line plot) of community-
 
 **Figure 3. Dictionary-based methods analysis**
 
-- **TBD: Update this subsection as Figure 3 now includes information on the Agenda (National Council of La Raza newsletter).**
+- **TBD: Scanned, digitized, and analyzed the Agenda (National Council of La Raza newsletter) data.**
 
 Before moving into a more serious statistical analysis, I checked some assumptions I made about the research design. Figure 2 shows that the percentage of the federal budget for education, employment, and social service plunged after the Reagan cuts. (This amount shows a slight decrease during the Carter administration, as he was forced to reduce social programs due to budget constraints.) Reagan made these reductions more dramatic and consistent throughout the 1980s. A more specific analysis of the budget change shows that programs empowering minority communities, such as the Comprehensive Employment Training Act, were critically hurt by the budget cuts. I did not include a more detailed analysis of these policies owing to spatial constraints. This evidence is important for seeing the budget cut as a major intervention.
 
@@ -160,9 +158,11 @@ year[i] <- 1970 + i
 
 ![](https://github.com/jaeyk/analyzing-asian-american-latino-civic-infrastructure/blob/master/outputs/AIC_in_time.png)
 
-**Figure 6. Model performance comparisons**
+**Figure 6. Model performance comparisons*
 
-From this point on, I used the OLS with logged DV for the analysis and limited the data to CBOs. We saw the slope change. Given the research question, it is important to know to what extent the federal funding contributed to the slope change as opposed to other factors. To do so, I examined how the coefficients of federal funding changed as we extended the data from 1970 to 2017. For instance, the 1970 data is the subset of the original data which includes observations up to the year 1970. I created a point plot using a for loop. The point plot in Figure 7 shows that the coefficients of the federal funding were positive up to the cutpoint. Then they became almost zero after the cutpoint. An opposite trend was found from the changes in the coefficients of population growth. They were either negative or zero before the cutpoint. Then they became positive in the 1980s and then again became almost zero or negative afterward.
+**Update: Limited the data up to year 1990 to avoid extrapolation. This applies to all the model outcomes presented below.**
+
+From this point on, I used the OLS with logged DV for the analysis and limited the data to CBOs. We saw the slope change. Given the research question, it is important to know to what extent the federal funding contributed to the slope change as opposed to other factors. To do so, I examined how the coefficients of federal funding changed as we extended the data from 1970 to 1990. For instance, the 1970 data is the subset of the original data which includes observations up to the year 1970. I created a point plot using a for loop. The point plot in Figure 7 shows that the coefficients of the federal funding were positive up to the cutpoint. Then they became almost zero after the cutpoint. An opposite trend was found from the changes in the coefficients of population growth. They were either negative or zero before the cutpoint. Then they became positive in the 1980s and then again became almost zero or negative afterward.
 
 To measure the certainty of the coefficient change, I added confidence intervals using bootstrapping. Bootstrapping is resampling with replacement. For each regression model at a time point, I resampled the data and ran the same analysis for 1,000 times, and created confidence intervals based on the sampling variability of regression coefficients. This information shows that the coefficient change around the cutpoint is statistically significant.
 
@@ -211,10 +211,7 @@ In Table 1, the first model is a simple OLS. The second model is also an OLS but
 
 ### 3.4. Sensitivity analysis
 
-However, we cannot take the regression coefficients at their face value. There could still be confounders. If a model is misspecified, then the regression coefficient is not an unbiased estimator. I ran a sensitivity test using the `sensemakr` package in R. The result provides two key summaries.
-
-1. "Unobserved confounders that do not explain more than **34.65%** of the residual variance of both the treatment and the outcome are not strong enough to reduce the absolute value of the effect size by 100%."
-2. "An extreme confounder (orthogonal to the covariates) that explains 100% of the residual variance of the outcome would need to explain **at least 15.53%** of the residual variance of the treatment to fully account for the observed estimated effect."
+However, we cannot take the regression coefficients at their face value. There could still be confounders. If a model is misspecified, then the regression coefficient is not an unbiased estimator. I ran a sensitivity test using the `sensemakr` package in R. The result shows that "unobserved confounders (orthogonal to covariates) that do not explain more than **34.65%** of the residual variance of both the treatment and the outcome are not strong enough to reduce the absolute value of the effect size by 100%."
 
 I suspect that philanthropic giving could be one of those unobserved confounders. It is very difficult to find systematic data on philanthropic giving, especially in a historical context. I collected the Ford Foundation grant data and found that Ford allocated grants selectively. Only a few Asian American and Latino CBOs received support from the Ford Foundation. Yet, as this evidence is only partial information of philanthropic giving, I suggest that one should take the above regression coefficient with a grain of salt.
 
