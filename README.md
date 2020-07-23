@@ -1,13 +1,11 @@
 # regression-analysis-with-time-series-data
 
-
 **Regression analysis with time series data**
 
-- The preprint version of this project is accessible at https://osf.io/preprints/socarxiv/n83xs/.
+- Invited to *Revise and Resumbit* at Political Research Quarterly. As a result, **some portions of the analysis are subject to change.**
+- Preprint: https://osf.io/preprints/socarxiv/n83xs/
 
 ## Motivation
-
-This project is part of my dissertation research. The main motivation of this project is to understand why Asian American and Latino community-based and advocacy organizations started to emerge in the 1960s and 1970s. Until the 1950s, Asian American and Latino communities were divided along national origin lines. Chinese, Japanese, and Filipino communities only were only concerned about their own affairs. This is also true for the relationship between Mexicans, Cubans, and Puerto Ricans. However, beginning in the 1960s, these fragmented communities started to build organizations that represent their collective voice. In my dissertation, I argued that this new trend emerged during these particular decades because Asian American and Latino activists competed with their African American counterparts in the federal grants market. Uniting their group helped them to increase their visibility and, thus, draw support from the Great Society programs (e.g., Community Action Programs, Community Development Centers, Community Health Clinics, etc.).
 
 This project is part of my dissertation research. The main motivation of this project is to understand why Asian American and Latino community-based organizations (CBOs, those organizations that focus on providing social services) and advocacy organziations began to emerge in the 1960s and 1970s. Until the 1950s, Asian American and Latino communities were divided along lines of national origin. Chinese, Japanese, and Filipino communities minded their own business. This was also true for relationships between Mexicans, Cubans, and Puerto Ricans. However, in the 1960s and 1970s, these fragmented communities started to build organizations that represented their united voices. In my dissertation, I argue that this new trend emerged during this particular decade because Asian American and Latino activists competed with their African American counterparts in the federal grants market. Uniting their groups helped them to increase their visibility and thus draw support from the War on Poverty programs (e.g., Community Action Programs, Community Development Centers, Community Health Clinics, etc.).
 
