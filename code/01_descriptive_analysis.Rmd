@@ -54,7 +54,7 @@ library(makereproducible)
 
 # Import R scripts
 
-script_list <- list.files("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions",
+script_list <- list.files(paste0(here::here(), "/functions"),
   pattern = "*.r|*.R",
   full.names = TRUE
 )

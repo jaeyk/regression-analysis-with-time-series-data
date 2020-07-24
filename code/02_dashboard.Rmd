@@ -9,11 +9,6 @@ runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
-# Clean up the environment
-
-rm(list = ls())
-
-# Import libraries (adapted from this link: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
@@ -41,11 +36,8 @@ pacman::p_load(
         flexdashboard # fordashboard
 )
 
-# Set theme 
-
-source("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions/theme_publications.r")
-
-theme_set(theme_Publication())
+# devtools::install_github("jaeyk/makereproducible")
+library(makereproducible)
 
 ```
 
@@ -53,13 +45,13 @@ theme_set(theme_Publication())
 ```{r}
 # Import files 
 
-asian_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv")
+asian_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv"))
 
-latino_org <- read_csv("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv")
+latino_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv"))
 
-asian_county_map <- read_rds( "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/asian_county_map")
+asian_county_map <- read_rds( make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/asian_county_map"))
 
-latino_county_map<- read_rds( "/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_county_map")
+latino_county_map<- read_rds( make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_county_map"))
 ```
 
 Column {data-width=400}

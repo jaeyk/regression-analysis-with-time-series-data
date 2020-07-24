@@ -28,11 +28,11 @@ pacman::p_load(
         plotrix, # for plotting functions
         ggfortify, # extended version of ggplot
         stargazer, # for model outputs 
+        huxtable, # for model outputs 
         MASS, # for negative binomial regression
         pscl, # for zero-inflated poisson
         phenocamr, # for time series post-processing
         fANCOVA, # for nonparametric analysis of covariance
-        RColorBrewer, # for color palettes 
         robustbase, # for robust linear modeling 
         lmtest, # for robustness checks
         sensemakr, # for sensitivity analysis
@@ -43,7 +43,6 @@ pacman::p_load(
         forecast, # for ARIMA modeling
         tseries, # for stat tests for time series data 
         nlme, # for GLS
-        changepoint, # for change point detection
         here # for reproducibility 
         )
 
@@ -52,7 +51,7 @@ library(makereproducible)
 
 # Import R scripts
 
-script_list <- list.files("/home/jae/analyzing-asian-american-latino-civic-infrastructure/functions",
+script_list <- list.files(paste0(here::here(), "/functions"),
   pattern = "*.r|*.R",
   full.names = TRUE
 )
@@ -251,10 +250,11 @@ survived <- medicare %>%
     geom_col() +
     labs(
        title = "The impact of Reagan budget cut on indiviual assistance programs",
-       subtitle = "Total Medicare spending from 1970 to 2018 (in billion US dollars)",
+       subtitle = "Total Medicare spending from 1970 to 2018",
         x = "Year",
         y = "Amount"
-    )
+    ) + 
+    scale_y_continuous(labels = scales::unit_format(unit = "Millions"))
 
 cuts / survived 
 
@@ -549,15 +549,13 @@ pred_org_group
 
 ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_org_group.png"))
 
-pred_org_type + pred_org_group
+pred_org_type / pred_org_group
 
-ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_subgroups.png"), height = 7, width = 11)
+ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_subgroups.png"), height = 7, width = 6)
 
 ```
 ## Model evaluations
 
-% Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Thu, Jul 23, 2020 - 02:13:38 PM
 \begin{table}[!htbp] \centering 
   \caption{ITS design analysis results} 
   \label{} 
@@ -569,51 +567,64 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 \\[-1.8ex] & \multicolumn{2}{c}{Founding rate (logged)} \\ 
 \\[-1.8ex] & (1) & (2)\\ 
 \hline \\[-1.8ex] 
- Year & 0.053$^{**}$ & 0.057$^{**}$ \\ 
-  & (0.022) & (0.022) \\ 
+ Year & 0.052$^{***}$ & 0.056$^{***}$ \\ 
+  & (0.019) & (0.019) \\ 
   & & \\ 
- intervention1 & $-$68.525 & $-$70.179 \\ 
-  & (91.630) & (91.119) \\ 
+ intervention1 & 20.726 & 23.597 \\ 
+  & (79.585) & (79.468) \\ 
   & & \\ 
- categoryLatino &  & 0.213 \\ 
-  &  & (0.157) \\ 
+ categoryLatino &  & 0.159 \\ 
+  &  & (0.135) \\ 
   & & \\ 
- Year:intervention1 & 0.034 & 0.035 \\ 
-  & (0.046) & (0.046) \\ 
+ Year:intervention1 & $-$0.011 & $-$0.012 \\ 
+  & (0.040) & (0.040) \\ 
   & & \\ 
- Constant & $-$104.474$^{**}$ & $-$110.847$^{**}$ \\ 
-  & (42.642) & (42.659) \\ 
+ Constant & $-$101.771$^{***}$ & $-$109.353$^{***}$ \\ 
+  & (37.500) & (37.973) \\ 
   & & \\ 
 \hline \\[-1.8ex] 
-Observations & 78 & 78 \\ 
-R$^{2}$ & 0.128 & 0.149 \\ 
-Adjusted R$^{2}$ & 0.092 & 0.102 \\ 
-Residual Std. Error & 0.691 (df = 74) & 0.687 (df = 73) \\ 
-F Statistic & 3.608$^{**}$ (df = 3; 74) & 3.198$^{**}$ (df = 4; 73) \\ 
+Observations & 106 & 106 \\ 
+R$^{2}$ & 0.083 & 0.095 \\ 
+Akaike Inf. Crit. & 225.794 & 226.337 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
 \end{table} 
 
+- Without group category variable 
+  - p-value for Intervention: 0.7950635 
+  - p-value for Intervention:Year: 0.7893909
+
+- With group category variable 
+  - p-value for Intervention: 0.7950635 
+  - p-value for the interaction between Intervention and Year: 0.7893909
+
 ```{r}
 
 lm.out <- lm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
-lm_log.out <- lm(log(Freq) ~ Year + intervention + Year*intervention, data = reagan_org_fit)
+lm_log.out <- lm(log(Freq) ~ Year + intervention + Year*intervention + category, data = reagan_org_fit)
 
-lm_log.out1 <- lm(log(Freq) ~ Year + intervention + Year*intervention, data = reagan_org_fit_cbo)
-  
-lm_log.out2 <- lm(log(Freq) ~ Year + intervention + Year*intervention + category, data = reagan_org_fit_cbo)
+lm_log.out2 <- lm(log(Freq) ~ Year + intervention + Year*intervention, data = reagan_org_fit)
   
 poisson.out <- glm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit, family = "poisson")
 
 nb.out <- glm.nb(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
-stargazer(lm_log.out1, lm_log.out2, 
+add_AIC_pvalue(lm_log.out)
+
+stargazer(add_AIC_pvalue(lm_log.out2), 
+          add_AIC_pvalue(lm_log.out), 
           title = "ITS design analysis results", 
-    #      align = TRUE,
-          dep.var.labels = c("Founding rate (logged)", "Founding rate (logged)"))
+          header = FALSE, 
+          dep.var.labels = c("Founding rate (logged)", "Founding rate (logged)"),
+          keep.stat = c("AIC", "rsq", "n"))
+
+
+add_AIC_pvalue(lm_log.out2)$p.value[3:4]
+
+add_AIC_pvalue(lm_log.out)$p.value[3:4]
 
 ```
 
@@ -892,7 +903,9 @@ F Statistic & 3.589$^{**}$ (df = 4; 41) &  &  \\
 
 lmrobfit <- lmrob(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org_fit_cbo, Year <= 1980))
 
-stargazer(lm_log.out, lm_new, lmrobfit)
+stargazer(lm_log.out, lm_new, lmrobfit,
+          header = FALSE, 
+          keep.stat = c("rsq", "n"))
 
 ```
 
