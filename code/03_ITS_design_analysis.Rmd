@@ -567,64 +567,63 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 \\[-1.8ex] & \multicolumn{2}{c}{Founding rate (logged)} \\ 
 \\[-1.8ex] & (1) & (2)\\ 
 \hline \\[-1.8ex] 
- Year & 0.052$^{***}$ & 0.056$^{***}$ \\ 
-  & (0.019) & (0.019) \\ 
+ Year & 0.053$^{**}$ & 0.057$^{**}$ \\ 
+  & (0.022) & (0.022) \\ 
   & & \\ 
- intervention1 & 20.726 & 23.597 \\ 
-  & (79.585) & (79.468) \\ 
+ intervention1 & $-$68.525 & $-$70.179 \\ 
+  & (91.630) & (91.119) \\ 
   & & \\ 
- categoryLatino &  & 0.159 \\ 
-  &  & (0.135) \\ 
+ categoryLatino &  & 0.213 \\ 
+  &  & (0.157) \\ 
   & & \\ 
- Year:intervention1 & $-$0.011 & $-$0.012 \\ 
-  & (0.040) & (0.040) \\ 
+ Year:intervention1 & 0.034 & 0.035 \\ 
+  & (0.046) & (0.046) \\ 
   & & \\ 
- Constant & $-$101.771$^{***}$ & $-$109.353$^{***}$ \\ 
-  & (37.500) & (37.973) \\ 
+ Constant & $-$104.474$^{**}$ & $-$110.847$^{**}$ \\ 
+  & (42.642) & (42.659) \\ 
   & & \\ 
 \hline \\[-1.8ex] 
-Observations & 106 & 106 \\ 
-R$^{2}$ & 0.083 & 0.095 \\ 
-Akaike Inf. Crit. & 225.794 & 226.337 \\ 
+Observations & 78 & 78 \\ 
+R$^{2}$ & 0.128 & 0.149 \\ 
+Akaike Inf. Crit. & 169.575 & 169.627 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
-\end{table} 
+\end{table}  
 
 - Without group category variable 
-  - p-value for Intervention: 0.7950635 
-  - p-value for Intervention:Year: 0.7893909
+  - p-value for Intervention: 0.4569254
+  - p-value for Intervention:Year: 0.4617835
 
 - With group category variable 
-  - p-value for Intervention: 0.7950635 
-  - p-value for the interaction between Intervention and Year: 0.7893909
+  - p-value for Intervention: 0.4569254
+  - p-value for the interaction between Intervention and Year: 0.4617835
 
 ```{r}
 
-lm.out <- lm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
+lm.out <- lm(Freq ~ Year + intervention + Year*intervention + category, data = reagan_org_fit_cbo)
 
-lm_log.out <- lm(log(Freq) ~ Year + intervention + Year*intervention + category, data = reagan_org_fit)
+lm_log.out <- lm(log(Freq) ~ Year + intervention + Year*intervention + category, data = reagan_org_fit_cbo)
 
-lm_log.out2 <- lm(log(Freq) ~ Year + intervention + Year*intervention, data = reagan_org_fit)
+lm_log.out1 <- lm(log(Freq) ~ Year + intervention + Year*intervention + category, data = reagan_org_fit_cbo)
+
+lm_log.out2 <- lm(log(Freq) ~ Year + intervention + Year*intervention, data = reagan_org_fit_cbo)
   
-poisson.out <- glm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit, family = "poisson")
+poisson.out <- glm(Freq ~ Year + intervention + Year*intervention + category, data = reagan_org_fit_cbo, family = "poisson")
 
-nb.out <- glm.nb(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
-
-add_AIC_pvalue(lm_log.out)
+nb.out <- glm.nb(Freq ~ Year + intervention + Year*intervention + category, data = reagan_org_fit_cbo)
 
 stargazer(add_AIC_pvalue(lm_log.out2), 
-          add_AIC_pvalue(lm_log.out), 
+          add_AIC_pvalue(lm_log.out1), 
           title = "ITS design analysis results", 
           header = FALSE, 
           dep.var.labels = c("Founding rate (logged)", "Founding rate (logged)"),
           keep.stat = c("AIC", "rsq", "n"))
 
-
 add_AIC_pvalue(lm_log.out2)$p.value[3:4]
 
-add_AIC_pvalue(lm_log.out)$p.value[3:4]
+add_AIC_pvalue(lm_log.out1)$p.value[3:4]
 
 ```
 
@@ -635,11 +634,11 @@ add_AIC_pvalue(lm_log.out)$p.value[3:4]
 Overdispersion test
 
 data:  poisson.out
-z = 0.89108, p-value = 0.1864
+z = 1.9355, p-value = 0.02647
 alternative hypothesis: true alpha is greater than 0
 sample estimates:
     alpha 
-0.1690532 
+0.4554112 
 
 ```{r}
 
@@ -649,10 +648,10 @@ dispersiontest(poisson.out, trafo = 1)
 
 #### AIC 
 
-OLS AIC:461.78
-Logged OLS AIC:225.794
-Poisson AIC:411.314
-Negative binomial AIC:408.847
+OLS AIC:360.487
+Logged OLS AIC:169.627
+Poisson AIC:335.942
+Negative binomial AIC:330.525
 
 ```{r}
 cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",   

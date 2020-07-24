@@ -21,8 +21,9 @@ pacman::p_load(
         ggpubr, # for arranging ggplots 
         ggthemes, # for fancy ggplot themes
         broom, # for modeling
-        here) # for reproducibility 
-
+        here, # for reproducibility 
+        USAboundaries) # USA cities, counties, and states 
+        
 # devtools::install_github("jaeyk/makereproducible")
 library(makereproducible)
 
@@ -45,48 +46,14 @@ theme_set(theme_pubr())
 # Load files
 
 ```{r}
+# Load files
 
-ford <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/foundation.csv"))
+asian_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv"))
 
-ford$Org_name[ford$Org_name == "The National Urban Coalition/national Council Of La Raza"] <- "The National Urban Coalition/National Council of La Raza"
+latino_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv"))
 
-```
+historical_asian_latino_pop <- read_csv(here("processed_data", "historical_asian_latino_pop.csv"))
 
-# Wrangle data
-
-```{r}
-
-# Clean, mutate, group by, summarize, filter, and recode
-
-ford_sum <- ford %>%
-  rename(Foundation_name = Foundation) %>%
-  mutate(Grant_amount = as.numeric(gsub("," , "", as.character(Grant_amount)))) %>%
-  group_by(Org_name, Type, Groups, Start_year, End_year) %>%
-  summarize(sum_grant = sum(Grant_amount)) %>%
-  filter(Start_year >= 1960 & Start_year < 1980)
-
-ford_sum$Type[ford_sum$Type == "Service"] <- "CBO"
-ford_sum$Type[ford_sum$Type == "Mixed"] <- "Hybrid"
-
-```
-
-# Descriptive analysis
-
-```{r}
-         
-ford_sum %>%
-    mutate(sum_grant = sum_grant / 10^6) %>%
-    ggplot(aes(x= reorder(Org_name, sum_grant), y = sum_grant, fill = Groups)) +
-    geom_bar(stat="identity")+
-    coord_flip()+
-    scale_fill_manual(name = "Group", labels = c("Asian","Latino"), values=c("red","blue")) +
-    labs(x = "Grantee names",
-         y = "Total amount of grants received",
-         title = "Ford Foundation grantees (1960 - 1980)") +
-    expand_limits(x = c(0, NA), y = c(0, NA)) +
-    scale_y_continuous(labels = scales::unit_format(unit = "Millions"))
-
-ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/ford_sum_graph.png"), 
-       width = 11)
+cap_census <- read_csv(here("processed_data", "cap_census.csv"))
 
 ```
