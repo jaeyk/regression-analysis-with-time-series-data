@@ -41,35 +41,6 @@ I have collected a wide range of original data for this project.
 
 The original organization dataset that I collected contains a founding year variable, but it is not time series data. Time series data, by definition, has a series of temporally varying observations. The founding year variable could miss some years if no organizations were founded in those years. For this reason, filling in these years is important. The following code is my custom function to perform that task.
 
-```r
-org_to_ts <- function(data){
-
-  # Create the year sequence
-
-  all_years <- seq(min(data$F.year), max(data$F.year))
-
-  # Turn it into a dataframe
-
-  all_years <- data.frame(F.year = all_years)
-
-  # Count by year and type
-
-  data_year <- data %>%
-    count(F.year, States, Type) %>%
-    rename(Freq = n) %>%
-    right_join(all_years, by = "F.year")
-
-  # Replace NA Freq with 0s
-
-  data_year$Freq[is.na(data_year$Freq)] <- 0
-
-  # Replace NA Type with unique Type
-
-  data_year$Type[is.na(data_year$Type)] <- unique(data_year$Type[!is.na(data_year$Type)])
-
-  data_year
-}
-```
 
 ## 2. Descriptive data analysis [[Code](https://github.com/jaeyk/regression-analysis-with-time-series-data/blob/master/code/01_descriptive_analysis.Rmd)]
 
@@ -105,12 +76,6 @@ Figure 3 shows how minority communities reacted to the budget crisis. The *Inter
 **Figure 4. Outlier detection**
 
 Finally, I checked the presence of outliers (an observation with a large residual). Outliers are particularly influential in small data analysis and can change the results. I construed a multivariate regression model and detected any DV values that are unusual given the predicted values of the model using Cook's distance (Cook's D). I then removed these outliers and imputed new values using the k-nearest neighbors (KNN) algorithm.
-
-```r
-model <- lm(Freq ~ intervention + Percentage + pop_percentage + factor(category) + Type + presidency + senate + house, data = reagan_org)
-
-ols_plot_cooksd_bar(model)
-```
 
 ### 3.2. Interrupted time-series design
 
@@ -168,7 +133,6 @@ From this point on, I used the OLS with logged DV for the analysis and limited t
 
 To measure the certainty of the coefficient change, I added confidence intervals using bootstrapping. Bootstrapping is resampling with replacement. For each regression model at a time point, I resampled the data and ran the same analysis for 1,000 times, and created confidence intervals based on the sampling variability of regression coefficients. This information shows that the coefficient change around the cutpoint is statistically significant.
 
-
 ```r
 # Initilization vars
 fed <- NA
@@ -216,7 +180,6 @@ In Table 1, the first model is a simple OLS. The second model is also an OLS but
 However, we cannot take the regression coefficients at their face value. There could still be confounders. If a model is misspecified, then the regression coefficient is not an unbiased estimator. I ran a sensitivity test using the `sensemakr` package in R. The result shows that "unobserved confounders (orthogonal to covariates) that do not explain more than **34.65%** of the residual variance of both the treatment and the outcome are not strong enough to reduce the absolute value of the effect size by 100%."
 
 I suspect that philanthropic giving could be one of those unobserved confounders. It is very difficult to find systematic data on philanthropic giving, especially in a historical context. I collected the Ford Foundation grant data and found that Ford allocated grants selectively. Only a few Asian American and Latino CBOs received support from the Ford Foundation. Yet, as this evidence is only partial information of philanthropic giving, I suggest that one should take the above regression coefficient with a grain of salt.
-
 
 
 ## 4. Conclusions
