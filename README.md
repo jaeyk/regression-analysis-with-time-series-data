@@ -162,7 +162,7 @@ year[i] <- 1970 + i
 
 **Figure 6. Model performance comparisons*
 
-**Update: Limited the data for the bootstrapping analysis up to year 1990 to avoid too much extrapolation. This decision applies to all the model outcomes presented below.**
+**Update: Limited the data for the bootstrapping analysis up to year 1988 to avoid too much extrapolation. The breakpoint was determined by the `strucchange::breakpoints()` function`. This decision applies to all the model outcomes presented below.**
 
 From this point on, I used the OLS with logged DV for the analysis and limited the data to CBOs. We saw the slope change. Given the research question, it is important to know to what extent the federal funding contributed to the slope change as opposed to other factors. To do so, I examined how the coefficients of federal funding changed as we extended the data from 1970 to 1990. For instance, the 1970 data is the subset of the original data which includes observations up to the year 1970. I created a point plot using a for loop. The point plot in Figure 7 shows that the coefficients of the federal funding were positive up to the cutpoint. Then they became almost zero after the cutpoint. An opposite trend was found from the changes in the coefficients of population growth. They were either negative or zero before the cutpoint. Then they became positive in the 1980s and then again became almost zero or negative afterward.
 
