@@ -71,8 +71,6 @@ historical_census_county <- add_state_abb(historical_census_county) %>%
 
 names(historical_census_county)
 
-activism <- read.csv(here("processed_data", "activism.csv"))[,-1]
-
 ```
 
 # Merge data
@@ -83,28 +81,14 @@ df1 <- merge_by_group(wop_asian_city, wop_latino_city)
 
 df1$Type[df1$Type == "Hybrid"] <- "CBO"
 
-df2 <- df1 %>% left_join(activism)
+df2 <- left_join(df1, oeo_census, by = c("County" , "States" , "City"))
 
-df3 <- left_join(df2, oeo_census, by = c("County" , "States" , "City"))
 
-unique(df3$City[df3$Activism == 1])
-```
-
- [1] NA              "LOS ANGELES"  
- [3] "NEW YORK"      "OAKLAND"      
- [5] "SAN FRANCISCO" "DENVER"       
- [7] "FRESNO"        "HAYWARD"      
- [9] "HOUSTON"       "RIVERSIDE"    
-[11] "SACRAMENTO"    "SAN DIEGO"    
-[13] "SAN JOSE"      "SEATTLE"  
-
-```{r}
-
-df4 <- left_join(df3, historical_census_county %>% filter(year == 1980), 
+df3 <- left_join(df2, historical_census_county %>% filter(year == 1980), 
         by = c("County",
                "States" = "State_abb")) %>%
   filter(year == 1980) %>%
-  distinct(OEO_fund, poverty_rate, Asian_per, Latino_per, pop_size, Type, category, n, Activism)
+  distinct(OEO_fund, poverty_rate, Asian_per, Latino_per, pop_size, Type, category, n)
 
 ```
 
@@ -112,9 +96,8 @@ df4 <- left_join(df3, historical_census_county %>% filter(year == 1980),
 
 ```{r}
 
-df4 %<>%
+df3 %<>%
   mutate(category = factor(category),
-         Activism = factor(Activism),
          Asian_per = as.numeric(Asian_per),
          Latino_per = as.numeric(Latino_per),
          OEO_fund = scales::rescale(OEO_fund, to = c(0,100)),
@@ -122,19 +105,19 @@ df4 %<>%
          log_n = log(n))
 ```
 
-OLS AIC:943.463
-Logged OLS AIC:335.196
-Poisson AIC:739.121
-Negative binomial AIC:740.931
+OLS AIC:960.343
+Logged OLS AIC:359.812
+Poisson AIC:762.82
+Negative binomial AIC:762.047
 
 ```{r}
-lm.out <- lm(n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category + Activism, data = df4)
+lm.out <- lm(n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category , data = df3)
 
-lm_log.out <- lm(log_n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category  + Activism, data = df4)
+lm_log.out <- lm(log_n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category  , data = df3)
 
-poisson.out <- glm(n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category + Activism, data = df4, family = "poisson")
+poisson.out <- glm(n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category , data = df3, family = "poisson")
 
-nb.out <- MASS::glm.nb(n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category + Activism, data = df4)
+nb.out <- MASS::glm.nb(n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category , data = df3)
 
 ```
 
@@ -156,38 +139,35 @@ cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",
 \\[-1.8ex] & \multicolumn{4}{c}{log\_n} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
 \hline \\[-1.8ex] 
- OEO\_fund & 0.006$^{***}$ & 0.006$^{***}$ & 0.007$^{***}$ & 0.006$^{***}$ \\ 
+ OEO\_fund & 0.006$^{***}$ & 0.005$^{***}$ & 0.005$^{***}$ & 0.005$^{***}$ \\ 
   & (0.002) & (0.002) & (0.002) & (0.002) \\ 
   & & & & \\ 
- poverty\_rate &  & $-$0.001 & $-$0.004 & $-$0.003 \\ 
-  &  & (0.005) & (0.005) & (0.006) \\ 
+ poverty\_rate &  & 0.001 & $-$0.007 & $-$0.006 \\ 
+  &  & (0.005) & (0.006) & (0.006) \\ 
   & & & & \\ 
- Asian\_per &  &  & 0.002 & 0.002 \\ 
+ Asian\_per &  &  & 0.008$^{**}$ & 0.008$^{**}$ \\ 
   &  &  & (0.004) & (0.004) \\ 
   & & & & \\ 
- Latino\_per &  &  & 0.007$^{*}$ & 0.004 \\ 
+ Latino\_per &  &  & 0.015$^{***}$ & 0.013$^{***}$ \\ 
   &  &  & (0.004) & (0.005) \\ 
   & & & & \\ 
  pop\_size &  &  &  & 0.001 \\ 
-  &  &  &  & (0.001) \\ 
+  &  &  &  & (0.002) \\ 
   & & & & \\ 
- TypeCBO & 0.386$^{***}$ & 0.384$^{***}$ & 0.411$^{***}$ & 0.409$^{***}$ \\ 
-  & (0.078) & (0.078) & (0.079) & (0.082) \\ 
+ TypeCBO & 0.280$^{***}$ & 0.281$^{***}$ & 0.378$^{***}$ & 0.358$^{***}$ \\ 
+  & (0.083) & (0.084) & (0.084) & (0.086) \\ 
   & & & & \\ 
- categoryLatino & $-$0.349$^{***}$ & $-$0.350$^{***}$ & $-$0.336$^{***}$ & $-$0.333$^{***}$ \\ 
-  & (0.063) & (0.063) & (0.065) & (0.066) \\ 
+ categoryLatino & $-$0.389$^{***}$ & $-$0.388$^{***}$ & $-$0.330$^{***}$ & $-$0.317$^{***}$ \\ 
+  & (0.067) & (0.067) & (0.068) & (0.069) \\ 
   & & & & \\ 
- Activism1 & 0.404$^{***}$ & 0.405$^{***}$ & 0.344$^{***}$ & 0.360$^{***}$ \\ 
-  & (0.064) & (0.064) & (0.073) & (0.077) \\ 
-  & & & & \\ 
- Constant & $-$0.009 & 0.004 & $-$0.056 & $-$0.069 \\ 
-  & (0.102) & (0.121) & (0.127) & (0.129) \\ 
+ Constant & 0.235$^{**}$ & 0.225$^{*}$ & 0.012 & $-$0.001 \\ 
+  & (0.102) & (0.124) & (0.130) & (0.133) \\ 
   & & & & \\ 
 \hline \\[-1.8ex] 
 Observations & 261 & 261 & 261 & 258 \\ 
-R$^{2}$ & 0.316 & 0.316 & 0.325 & 0.325 \\ 
-Adjusted R$^{2}$ & 0.305 & 0.303 & 0.307 & 0.303 \\ 
-Akaike Inf. Crit. & 332.100 & 334.059 & 334.504 & 335.196 \\ 
+R$^{2}$ & 0.185 & 0.185 & 0.249 & 0.251 \\ 
+Adjusted R$^{2}$ & 0.176 & 0.172 & 0.232 & 0.230 \\ 
+Akaike Inf. Crit. & 375.843 & 377.824 & 360.408 & 359.812 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{4}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
@@ -196,10 +176,10 @@ Akaike Inf. Crit. & 332.100 & 334.059 & 334.504 & 335.196 \\
 
 ```{r}
 
-m1 <- lm(log_n ~ OEO_fund + Type + category + Activism, data = df4)
-m2 <- lm(log_n ~ OEO_fund + poverty_rate  + Type + category + Activism, data = df4)
-m3 <- lm(log_n ~ OEO_fund + poverty_rate + Asian_per + Latino_per  + Type + category + Activism, data = df4)
-m4 <- lm(log_n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category + Activism, data = df4)
+m1 <- lm(log_n ~ OEO_fund + Type + category , data = df3)
+m2 <- lm(log_n ~ OEO_fund + poverty_rate  + Type + category , data = df3)
+m3 <- lm(log_n ~ OEO_fund + poverty_rate + Asian_per + Latino_per  + Type + category , data = df3)
+m4 <- lm(log_n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category , data = df3)
 
 stargazer::stargazer(add_AIC(m1), add_AIC(m2), add_AIC(m3), add_AIC(m4),
                      keep.stat = c(
