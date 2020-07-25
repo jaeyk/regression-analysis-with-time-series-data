@@ -25,7 +25,7 @@ pacman::p_load(
         magrittr, # %<>%
         nlme, # GLS
         stargazer, # latex table 
-        segment) # change point analysis 
+        segmented) # change point analysis 
         
 # devtools::install_github("jaeyk/makereproducible")
 library(makereproducible)

@@ -14,37 +14,38 @@ html_document:
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
-        tidyverse, # for the tidyverse framework
-        patchwork, # for arranging ggplots 
-        ggpubr, # for arranging ggplots 
-        ggthemes, # for fancy ggplot themes
+        tidyverse, # the tidyverse framework
+        patchwork, # arranging ggplots 
+        ggpubr, # arranging ggplots 
+        ggthemes, # fancy ggplot themes
         ggsci, # pub ready themes 
-        AER, # for applied econometrics
-        olsrr, # for ols modeling
-        outliers, # for outliers
-        DMwR, # for data mining in R
-        simpleboot, # for bootstrapping 
-        broom, # for modeling
-        plotrix, # for plotting functions
+        AER, # applied econometrics
+        olsrr, # ols modeling
+        outliers, # outliers
+        DMwR, # data mining in R
+        simpleboot, # bootstrapping 
+        broom, # modeling
+        plotrix, # plotting functions
         ggfortify, # extended version of ggplot
-        stargazer, # for model outputs 
-        huxtable, # for model outputs 
-        MASS, # for negative binomial regression
-        pscl, # for zero-inflated poisson
-        phenocamr, # for time series post-processing
-        fANCOVA, # for nonparametric analysis of covariance
-        robustbase, # for robust linear modeling 
-        lmtest, # for robustness checks
-        sensemakr, # for sensitivity analysis
-        tm, # for text analysis 
-        quanteda, # for text analysis
-        xts, # for time series objects 
-        zoo, # for time series objects 
-        forecast, # for ARIMA modeling
-        tseries, # for stat tests for time series data 
-        nlme, # for GLS
-        here # for reproducibility 
-        )
+        stargazer, # model outputs 
+        huxtable, # model outputs 
+        MASS, # negative binomial regression
+        pscl, # zero-inflated poisson
+        phenocamr, # time series post-processing
+        fANCOVA, # nonparametric analysis of covariance
+        robustbase, # robust linear modeling 
+        lmtest, # robustness checks
+        sensemakr, # sensitivity analysis
+        tm, # text analysis 
+        quanteda, # text analysis
+        xts, # time series objects 
+        zoo, # time series objects 
+        forecast, # ARIMA modeling
+        tseries, # stat tests for time series data 
+        nlme, # GLS
+        here, # reproducibility 
+        strucchange, # change point analysis 
+        tree) # change point analysis 
 
 # devtools::install_github("jaeyk/makereproducible")
 library(makereproducible)
@@ -393,6 +394,8 @@ ggsave(here("outputs", "dic_analysis.png"),
 ```
 # Treating outliers 
 
+- Influential: 161 168 172 173
+
 ```{r}
 
 model <- lm(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = reagan_org)
@@ -406,6 +409,10 @@ set.seed(1234)
 
 influential <- as.numeric(names(cooksd)[(cooksd > 4*mean(cooksd, na.rm = TRUE))])
 
+influential
+```
+
+```{r}
 # Visualizing outliers
 
 cooksd_df <- data.frame(Index = seq(1:220),
@@ -497,15 +504,28 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
               height = 6, width = 10)
 
 ```
+## Segments 
 
-## Model fits 
+- Second break point: 1988 
 
 ```{r}
 
 # Reset data for modeling 
 reagan_org$Type[reagan_org$Type == "Hybrid"] <- "CBO"
 
-reagan_org_fit <- reagan_org %>% filter(between(Year, 1960, 1990))
+# Structual change approach 
+opt_breaks <- breakpoints(breakpoints(log(Freq) ~ Year, data = reagan_org), breaks = 2)
+
+reagan_org[opt_breaks$breakpoints[2],]$Year
+
+```
+
+## Model fits 
+
+
+```{r}
+
+reagan_org_fit <- reagan_org %>% filter(between(Year, 1960, 1988))
 
 ```
 
@@ -567,84 +587,77 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 \\[-1.8ex] & \multicolumn{2}{c}{Founding rate (logged)} \\ 
 \\[-1.8ex] & (1) & (2)\\ 
 \hline \\[-1.8ex] 
- Year & 0.055$^{***}$ & 0.051$^{***}$ \\ 
-  & (0.019) & (0.018) \\ 
+ Year & 0.056$^{***}$ & 0.052$^{***}$ \\ 
+  & (0.019) & (0.017) \\ 
   & & \\ 
- intervention1 & 72.412$^{*}$ & $-$1.265 \\ 
-  & (39.509) & (73.659) \\ 
+ intervention1 & 73.122$^{*}$ & 13.393 \\ 
+  & (38.333) & (94.475) \\ 
   & & \\ 
- TypeCBO & 0.598$^{***}$ & 0.601$^{***}$ \\ 
-  & (0.101) & (0.140) \\ 
+ TypeCBO & 0.596$^{***}$ & 0.536$^{***}$ \\ 
+  & (0.098) & (0.142) \\ 
   & & \\ 
- categoryLatino & 0.381$^{***}$ & 0.222$^{*}$ \\ 
-  & (0.093) & (0.125) \\ 
+ categoryLatino & 0.447$^{***}$ & 0.222$^{*}$ \\ 
+  & (0.090) & (0.127) \\ 
   & & \\ 
- Year:intervention1 & $-$0.037$^{*}$ & 0.0003 \\ 
-  & (0.020) & (0.037) \\ 
+ Year:intervention1 & $-$0.037$^{*}$ & $-$0.007 \\ 
+  & (0.019) & (0.048) \\ 
   & & \\ 
- Constant & $-$108.077$^{***}$ & $-$100.482$^{***}$ \\ 
-  & (37.778) & (35.149) \\ 
+ Constant & $-$111.282$^{***}$ & $-$101.766$^{***}$ \\ 
+  & (36.653) & (33.691) \\ 
   & & \\ 
 \hline \\[-1.8ex] 
-Observations & 220 & 106 \\ 
-R$^{2}$ & 0.253 & 0.235 \\ 
-Akaike Inf. Crit. & 463.991 & 210.530 \\ 
+Observations & 220 & 95 \\ 
+R$^{2}$ & 0.286 & 0.225 \\ 
+Adjusted R$^{2}$ & 0.270 & 0.181 \\ 
+Akaike Inf. Crit. & 450.693 & 181.052 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
-\end{table}
+\end{table} 
 
 - Full data
-  - p-value for Intervention: 6.822022e-02
-  - p-value for Intervention:Year: 1.137977e-08
   - degrees of freedom: 214
   
 - Subsetted data 
-  - p-value for Intervention: 0.7671248
-  - p-value for the interaction between Intervention and Year: 0.2399375
-  - degrees of freedom: 101
+  - degrees of freedom: 89
 
 ```{r}
 
 lm.out <- lm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
-lm_log.out <- lm(log(Freq) ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
+lm_log.out <- lm(log(Freq) ~ Year + intervention + Year*intervention + Type + category, data = reagan_org)
 
 lm_log.out1 <- lm(log(Freq) ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
-lm_log.out2 <- lm(log(Freq) ~ Year + intervention + Year*intervention + Type + category, data = reagan_org)
-  
 poisson.out <- glm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit, family = "poisson")
 
 nb.out <- glm.nb(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
-stargazer(add_AIC(lm_log.out2), 
+stargazer(add_AIC(lm_log.out),
           add_AIC(lm_log.out1), 
           title = "ITS design analysis results", 
           header = FALSE, 
           dep.var.labels = c("Founding rate (logged)", "Founding rate (logged)"),
           keep.stat = c("AIC", "rsq", "n", "adj.rsq"))
 
-add_AIC_pvalue(lm_log.out2)$p.value[3:4]
-add_AIC_pvalue(lm_log.out1)$p.value[3:4]
-
-add_df(lm_log.out2)$df
+add_df(lm_log.out)$df
 add_df(lm_log.out1)$df
+
 ```
 
 #### Overdispersion test
 
-- Alpha is positive. Dispersion present.
+- Alpha is negative. No overdispersion.
 
 Overdispersion test
 
 data:  poisson.out
-z = 1.9355, p-value = 0.02647
+z = -0.0094336, p-value = 0.5038
 alternative hypothesis: true alpha is greater than 0
 sample estimates:
-    alpha 
-0.4554112 
+       alpha 
+-0.001592525 
 
 ```{r}
 
@@ -654,10 +667,10 @@ dispersiontest(poisson.out, trafo = 1)
 
 #### AIC 
 
-OLS AIC:360.487
-Logged OLS AIC:169.627
-Poisson AIC:335.942
-Negative binomial AIC:330.525
+OLS AIC:389.473
+Logged OLS AIC:450.693
+Poisson AIC:352.022
+Negative binomial AIC:353.298
 
 ```{r}
 cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",   
@@ -678,7 +691,7 @@ pop <- NA
 year <- NA
 
 # For loop 
-for (i in c(0:20)){
+for (i in c(0:18)){
 
 # Model   
 model <- lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org_fit_cbo, Year <= 1970 + i))
@@ -752,7 +765,7 @@ result}
 
 cis <- data.frame()
 
-for (i in c(1:20)){
+for (i in c(1:18)){
   print(paste(i, "iteration completed"))
   cis = rbind(cis, boot_ci(i))
 }
@@ -777,7 +790,7 @@ fed_boot <- boot_merged %>%
        title = "Federal funding",
        subtitle = "With bootstrapped CIs") +
   geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +  
-  annotate("rect", xmin = 1970, xmax = 1990, ymin = -0.5, ymax = 0, alpha = .2)
+  annotate("rect", xmin = 1970, xmax = 1988, ymin = -0.5, ymax = 0, alpha = .2)
   
 pop_boot <- boot_merged %>%
   ggplot(aes(x = Year, y = Pop_growth, 
@@ -788,7 +801,7 @@ pop_boot <- boot_merged %>%
        title = "Population growth",
        subtitle = "With bootstrapped CIs") +
   geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
-  annotate("rect", xmin = 1970, xmax = 1990, ymin = -2, ymax = 0, alpha = .2)
+  annotate("rect", xmin = 1970, xmax = 1988, ymin = -2, ymax = 0, alpha = .2)
 
 fed_boot + pop_boot
 
@@ -803,7 +816,7 @@ I adated some code from [this post](https://www.brodrigues.co/blog/2018-07-08-ro
 
 ```{r}
 
-lm_log.out <- lm(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org_fit_cbo, Year <= 1980))
+lm_log.out <- lm(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org_fit_cbo, Year <= 1981))
 
 ```
 
@@ -814,7 +827,7 @@ lm_log.out <- lm(log(Freq) ~ Percentage + pop_percentage + category + presidency
 studentized Breusch-Pagan test
 
 data:  lm_log.out
-BP = 9.9427, df = 4, p-value = 0.0414
+BP = 10.789, df = 5, p-value = 0.05574
 
 ```{r}
 
@@ -829,7 +842,7 @@ lmtest::bptest(lm_log.out, studentize = TRUE)
 Durbin-Watson test
 
 data:  lm_log.out
-DW = 2.3122, p-value = 1
+DW = 2.3881, p-value = 0.3157
 alternative hypothesis: true autocorrelation is greater than 0
 
 ```{r}
@@ -858,7 +871,7 @@ lm_new <- coeftest(lm_log.out, vcov = NeweyWest, prewhite = F, adjust = T)
 
 ### Outliers 
 
-\begin{table}[!htbp] \centering 
+textit{OLS} & \textit{coefficient} & \textit{MM-ty\begin{table}[!htbp] \centering 
   \caption{} 
   \label{} 
 \begin{tabular}{@{\extracolsep{5pt}}lccc} 
@@ -871,33 +884,31 @@ lm_new <- coeftest(lm_log.out, vcov = NeweyWest, prewhite = F, adjust = T)
  & \textit{} & \textit{test} & \textit{linear} \\ 
 \\[-1.8ex] & (1) & (2) & (3)\\ 
 \hline \\[-1.8ex] 
- Percentage & 0.293$^{***}$ & 0.293$^{***}$ & 0.295$^{***}$ \\ 
-  & (0.107) & (0.075) & (0.076) \\ 
+ Percentage & 0.304$^{***}$ & 0.304$^{***}$ & 0.295$^{***}$ \\ 
+  & (0.106) & (0.078) & (0.076) \\ 
   & & & \\ 
- pop\_percentage & $-$0.028 & $-$0.028 & $-$0.035 \\ 
-  & (0.159) & (0.101) & (0.124) \\ 
+ pop\_percentage & $-$0.063 & $-$0.063 & $-$0.035 \\ 
+  & (0.156) & (0.104) & (0.124) \\ 
   & & & \\ 
- categoryLatino & 0.484 & 0.484 & 0.525 \\ 
-  & (0.557) & (0.367) & (0.456) \\ 
+ categoryLatino & 0.540 & 0.540 & 0.525 \\ 
+  & (0.554) & (0.364) & (0.456) \\ 
   & & & \\ 
- presidency & $-$0.020 & $-$0.020 & $-$0.012 \\ 
-  & (0.189) & (0.171) & (0.197) \\ 
+ presidency & $-$0.014 & $-$0.014 & $-$0.012 \\ 
+  & (0.188) & (0.169) & (0.197) \\ 
   & & & \\ 
- senate &  &  &  \\ 
-  &  &  &  \\ 
+ senate & 0.730 & 0.730$^{**}$ &  \\ 
+  & (0.491) & (0.323) &  \\ 
   & & & \\ 
  house &  &  &  \\ 
   &  &  &  \\ 
   & & & \\ 
- Constant & $-$0.551 & $-$0.551$^{*}$ & $-$0.560$^{*}$ \\ 
-  & (0.425) & (0.286) & (0.299) \\ 
+ Constant & $-$1.251$^{**}$ & $-$1.251$^{***}$ & $-$0.560$^{*}$ \\ 
+  & (0.611) & (0.415) & (0.299) \\ 
   & & & \\ 
 \hline \\[-1.8ex] 
-Observations & 46 &  & 46 \\ 
-R$^{2}$ & 0.259 &  & 0.250 \\ 
-Adjusted R$^{2}$ & 0.187 &  & 0.177 \\ 
-Residual Std. Error (df = 41) & 0.631 &  & 0.685 \\ 
-F Statistic & 3.589$^{**}$ (df = 4; 41) &  &  \\ 
+Observations & 49 &  & 46 \\ 
+R$^{2}$ & 0.279 &  & 0.250 \\ 
+Adjusted R$^{2}$ & 0.195 &  & 0.177 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
@@ -918,30 +929,13 @@ stargazer(lm_log.out, lm_new, lmrobfit,
 
 Sensitivity Analysis to Unobserved Confounding
 
-Model Formula: log(Freq) ~ Percentage + pop_percentage + category + presidency + 
-    senate + house
-
-Null hypothesis: q = 1 and reduce = TRUE 
--- This means we are considering biases that reduce the absolute value of the current estimate.
--- The null hypothesis deemed problematic is H0:tau = 0 
-
-Unadjusted Estimates of 'Percentage': 
-  Coef. estimate: 0.2935 
-  Standard Error: 0.1069 
-  t-value (H0:tau = 0): 2.7451 
-
-Sensitivity Statistics:
-  Partial R2 of treatment with outcome: 0.1553 
-  Robustness Value, q = 1: 0.3465 
-  Robustness Value, q = 1, alpha = 0.05: 0.1034 
-
 Verbal interpretation of sensitivity statistics:
 
--- Partial R2 of the treatment with the outcome: an extreme confounder (orthogonal to the covariates) that explains 100% of the residual variance of the outcome, would need to explain at least 15.53% of the residual variance of the treatment to fully account for the observed estimated effect.
+-- Partial R2 of the treatment with the outcome: an extreme confounder (orthogonal to the covariates) that explains 100% of the residual variance of the outcome, would need to explain at least 16.02% of the residual variance of the treatment to fully account for the observed estimated effect.
 
--- Robustness Value, q = 1: unobserved confounders (orthogonal to the covariates) that explain more than 34.65% of the residual variance of both the treatment and the outcome are strong enough to bring the point estimate to 0 (a bias of 100% of the original estimate). Conversely, unobserved confounders that do not explain more than 34.65% of the residual variance of both the treatment and the outcome are not strong enough to bring the point estimate to 0.
+-- Robustness Value, q = 1: unobserved confounders (orthogonal to the covariates) that explain more than 35.17% of the residual variance of both the treatment and the outcome are strong enough to bring the point estimate to 0 (a bias of 100% of the original estimate). Conversely, unobserved confounders that do not explain more than 35.17% of the residual variance of both the treatment and the outcome are not strong enough to bring the point estimate to 0.
 
--- Robustness Value, q = 1, alpha = 0.05: unobserved confounders (orthogonal to the covariates) that explain more than 10.34% of the residual variance of both the treatment and the outcome are strong enough to bring the estimate to a range where it is no longer 'statistically different' from 0 (a bias of 100% of the original estimate), at the significance level of alpha = 0.05. Conversely, unobserved confounders that do not explain more than 10.34% of the residual variance of both the treatment and the outcome are not strong enough to bring the estimate to a range where it is no longer 'statistically different' from 0, at the significance level of alpha = 0.05.
+-- Robustness Value, q = 1, alpha = 0.05: unobserved confounders (orthogonal to the covariates) that explain more than 11.78% of the residual variance of both the treatment and the outcome are strong enough to bring the estimate to a range where it is no longer 'statistically different' from 0 (a bias of 100% of the original estimate), at the significance level of alpha = 0.05. Conversely, unobserved confounders that do not explain more than 11.78% of the residual variance of both the treatment and the outcome are not strong enough to bring the estimate to a range where it is no longer 'statistically different' from 0, at the significance level of alpha = 0.05.
 
 ```{r}
 
