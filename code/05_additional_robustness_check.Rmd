@@ -24,8 +24,7 @@ pacman::p_load(
         here, # reproducibility 
         magrittr, # %<>%
         nlme, # GLS
-        stargazer, # latex table 
-        segmented) # change point analysis 
+        stargazer) # latex table 
         
 # devtools::install_github("jaeyk/makereproducible")
 library(makereproducible)

@@ -15,21 +15,21 @@ html_document:
 # if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
   magrittr,
-  tidyverse, # for the tidyverse framework
-  data.table, # for fast data wrangling
-  patchwork, # for arranging ggplots
-  here, # for reproducibility
-  rvest, # for parsing html
+  tidyverse, # the tidyverse framework
+  data.table, # fast data wrangling
+  patchwork, # arranging ggplots
+  here, # reproducibility
+  rvest, # parsing html
 
   ### ggplot themes
-  ggsci, # for pub-ready ggplots
-  ggpubr, # for arranging ggplots
-  ggthemes, # for fancy ggplot themes
-  ggrepel, # for annotations
+  ggsci, # pub-ready ggplots
+  ggpubr, # arranging ggplots
+  ggthemes, # fancy ggplot themes
+  ggrepel, # annotations
 
   ### Spatial analysis
-  tidygeocoder, # for geocoding
-  tigris, # for shape files
+  tidygeocoder, # geocoding
+  tigris, # shape files
   usmap,
   maps, # maps
   mapproj,
@@ -37,16 +37,16 @@ pacman::p_load(
   tmap,
   tmaptools,
   sf,
-  leaflet, # for interactive maps
+  leaflet, # interactive maps
   mapview, # to view and save map objects
 
   ### Time series analysis
-  ggseas, # for seasonality adjustment
-  fpp2, # for detecting seasonality in data
+  ggseas, # seasonality adjustment
+  fpp2, # detecting seasonality in data
 
   ### Interactiev maps
-  gganimate, # for animated maps
-  gifski # for animated maps
+  gganimate, # animated maps
+  gifski # animated maps
 )
 
 # devtools::install_github("jaeyk/makereproducible")
