@@ -12,7 +12,9 @@ census <- readxl::read_xlsx(here("raw_data", "Poverty-Rates-by-County-1960-2010.
 ) # Cell range
 
 # Filter data
-census <- census[-1, c(2, 3, 4, 5, 6, 11, 12)] # Skip the USA row and select only 1960 and 1970 data
+census <- census[-1, c(2, 3, 4, 
+                       5, 6, 7,
+                       11, 12, 13)] # Skip the USA row and select only 1960 and 1970 data
 
 # Pivot longer
 census_county <- census %>%
