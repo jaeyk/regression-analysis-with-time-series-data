@@ -16,15 +16,16 @@ html_document:
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
-        tidyverse, # for the tidyverse framework
-        patchwork, # for arranging ggplots 
-        ggpubr, # for arranging ggplots 
-        ggthemes, # for fancy ggplot themes
-        broom, # for modeling
-        here, # for reproducibility 
-        magrittr, 
-        nlme, # for GLS
-        stargazer) 
+        tidyverse, # the tidyverse framework
+        patchwork, # arranging ggplots 
+        ggpubr, # arranging ggplots 
+        ggthemes, # fancy ggplot themes
+        broom, # modeling
+        here, # reproducibility 
+        magrittr, # %<>%
+        nlme, # GLS
+        stargazer, # latex table 
+        segment) # change point analysis 
         
 # devtools::install_github("jaeyk/makereproducible")
 library(makereproducible)
