@@ -506,15 +506,15 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 ```
 ## Segments 
 
-- Second break point: 1988 
+- Second break point: 2003
 
 ```{r}
 
 # Reset data for modeling 
 reagan_org$Type[reagan_org$Type == "Hybrid"] <- "CBO"
 
-# Structual change approach 
-opt_breaks <- breakpoints(breakpoints(log(Freq) ~ Year, data = reagan_org), breaks = 2)
+# Structural change approach 
+opt_breaks <- breakpoints(breakpoints(log(Freq) ~ Year*intervention, data = reagan_org), breaks = 2)
 
 reagan_org[opt_breaks$breakpoints[2],]$Year
 
@@ -525,7 +525,7 @@ reagan_org[opt_breaks$breakpoints[2],]$Year
 
 ```{r}
 
-reagan_org_fit <- reagan_org %>% filter(between(Year, 1960, 1988))
+reagan_org_fit <- reagan_org %>% filter(between(Year, 1960, 2003))
 
 ```
 
@@ -587,40 +587,37 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 \\[-1.8ex] & \multicolumn{2}{c}{Founding rate (logged)} \\ 
 \\[-1.8ex] & (1) & (2)\\ 
 \hline \\[-1.8ex] 
- Year & 0.056$^{***}$ & 0.052$^{***}$ \\ 
-  & (0.019) & (0.017) \\ 
+ Year & 0.060$^{***}$ & 0.064$^{***}$ \\ 
+  & (0.014) & (0.015) \\ 
   & & \\ 
- intervention1 & 73.122$^{*}$ & 13.393 \\ 
-  & (38.333) & (94.475) \\ 
+ intervention1 & 61.815$^{*}$ & 98.600$^{***}$ \\ 
+  & (31.994) & (30.143) \\ 
   & & \\ 
- TypeCBO & 0.596$^{***}$ & 0.536$^{***}$ \\ 
-  & (0.098) & (0.142) \\ 
+ TypeCBO & 1.062$^{***}$ & 0.986$^{***}$ \\ 
+  & (0.094) & (0.083) \\ 
   & & \\ 
- categoryLatino & 0.447$^{***}$ & 0.222$^{*}$ \\ 
-  & (0.090) & (0.127) \\ 
+ TypeHybrid & $-$0.063 & $-$0.118 \\ 
+  & (0.105) & (0.096) \\ 
   & & \\ 
- Year:intervention1 & $-$0.037$^{*}$ & $-$0.007 \\ 
-  & (0.019) & (0.048) \\ 
+ categoryLatino & 0.229$^{***}$ & 0.393$^{***}$ \\ 
+  & (0.079) & (0.071) \\ 
   & & \\ 
- Constant & $-$111.282$^{***}$ & $-$101.766$^{***}$ \\ 
-  & (36.653) & (33.691) \\ 
+ Year:intervention1 & $-$0.031$^{*}$ & $-$0.050$^{***}$ \\ 
+  & (0.016) & (0.015) \\ 
+  & & \\ 
+ Constant & $-$117.466$^{***}$ & $-$126.291$^{***}$ \\ 
+  & (28.258) & (28.789) \\ 
   & & \\ 
 \hline \\[-1.8ex] 
-Observations & 220 & 95 \\ 
-R$^{2}$ & 0.286 & 0.225 \\ 
-Adjusted R$^{2}$ & 0.270 & 0.181 \\ 
-Akaike Inf. Crit. & 450.693 & 181.052 \\ 
+Observations & 172 & 220 \\ 
+R$^{2}$ & 0.583 & 0.570 \\ 
+Adjusted R$^{2}$ & 0.568 & 0.557 \\ 
+Akaike Inf. Crit. & 264.167 & 344.842 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
 \end{table} 
-
-- Full data
-  - degrees of freedom: 214
-  
-- Subsetted data 
-  - degrees of freedom: 89
 
 ```{r}
 
@@ -628,21 +625,18 @@ lm.out <- lm(Freq ~ Year + intervention + Year*intervention + Type + category, d
 
 lm_log.out <- lm(log(Freq) ~ Year + intervention + Year*intervention + Type + category, data = reagan_org)
 
-lm_log.out1 <- lm(log(Freq) ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
+lm_log.out1 <- lm(log(Freq) ~ Year*intervention + Type + category, data = reagan_org_fit)
 
 poisson.out <- glm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit, family = "poisson")
 
 nb.out <- glm.nb(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
-stargazer(add_AIC(lm_log.out),
-          add_AIC(lm_log.out1), 
+stargazer(add_AIC(lm_log.out1),
+          add_AIC(lm_log.out), 
           title = "ITS design analysis results", 
           header = FALSE, 
           dep.var.labels = c("Founding rate (logged)", "Founding rate (logged)"),
           keep.stat = c("AIC", "rsq", "n", "adj.rsq"))
-
-add_df(lm_log.out)$df
-add_df(lm_log.out1)$df
 
 ```
 
@@ -653,11 +647,11 @@ add_df(lm_log.out1)$df
 Overdispersion test
 
 data:  poisson.out
-z = -0.0094336, p-value = 0.5038
+z = -4.0415, p-value = 1
 alternative hypothesis: true alpha is greater than 0
 sample estimates:
-       alpha 
--0.001592525 
+     alpha 
+-0.3245116 
 
 ```{r}
 
@@ -667,10 +661,10 @@ dispersiontest(poisson.out, trafo = 1)
 
 #### AIC 
 
-OLS AIC:389.473
-Logged OLS AIC:450.693
-Poisson AIC:352.022
-Negative binomial AIC:353.298
+OLS AIC:712.282
+Logged OLS AIC:344.842
+Poisson AIC:612.795
+Negative binomial AIC:614.797
 
 ```{r}
 cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",   
@@ -691,7 +685,7 @@ pop <- NA
 year <- NA
 
 # For loop 
-for (i in c(0:18)){
+for (i in c(0:33)){
 
 # Model   
 model <- lm(log(Freq) ~ Percentage + pop_percentage + category, data = subset(reagan_org_fit_cbo, Year <= 1970 + i))
@@ -765,7 +759,7 @@ result}
 
 cis <- data.frame()
 
-for (i in c(1:18)){
+for (i in c(1:33)){
   print(paste(i, "iteration completed"))
   cis = rbind(cis, boot_ci(i))
 }
@@ -790,7 +784,7 @@ fed_boot <- boot_merged %>%
        title = "Federal funding",
        subtitle = "With bootstrapped CIs") +
   geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +  
-  annotate("rect", xmin = 1970, xmax = 1988, ymin = -0.5, ymax = 0, alpha = .2)
+  annotate("rect", xmin = 1970, xmax = 2003, ymin = -0.5, ymax = 0, alpha = .2)
   
 pop_boot <- boot_merged %>%
   ggplot(aes(x = Year, y = Pop_growth, 
@@ -801,7 +795,7 @@ pop_boot <- boot_merged %>%
        title = "Population growth",
        subtitle = "With bootstrapped CIs") +
   geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
-  annotate("rect", xmin = 1970, xmax = 1988, ymin = -2, ymax = 0, alpha = .2)
+  annotate("rect", xmin = 1970, xmax = 2003, ymin = -2, ymax = 0, alpha = .2)
 
 fed_boot + pop_boot
 
