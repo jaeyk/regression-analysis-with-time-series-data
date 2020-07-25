@@ -6,6 +6,20 @@ merge_by_group <- function(x, y) {
   )
 }
 
+# The function below comes from Ben G
+# https://stackoverflow.com/questions/5411979/state-name-to-abbreviation
+
+add_state_abb <- function(df){
+
+  st_crosswalk <- tibble(State = state.name) %>%
+  bind_cols(tibble(State_abb = state.abb)) %>% 
+  bind_rows(tibble(State = "District of Columbia", abb = "DC"))
+
+
+  left_join(df, st_crosswalk, by = "State")
+
+}
+
 merge_by_group_extended <- function(x, y) {
   bind_rows(
     mutate(x, category = "Chinese"),

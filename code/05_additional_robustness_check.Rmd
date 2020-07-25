@@ -10,7 +10,7 @@ html_document:
 
 # Setup 
 
-```{r}
+```{r, echo=FALSE}
 
 # Import libraries 
 
@@ -22,7 +22,9 @@ pacman::p_load(
         ggthemes, # for fancy ggplot themes
         broom, # for modeling
         here, # for reproducibility 
-        USAboundaries) # USA cities, counties, and states 
+        magrittr, 
+        nlme, # for GLS
+        stargazer) 
         
 # devtools::install_github("jaeyk/makereproducible")
 library(makereproducible)
@@ -42,18 +44,141 @@ for (i in 1:length(script_list))
 # for publication-friendly theme
 theme_set(theme_pubr())
 ```
-
-# Load files
+# Load files and wrangle data 
 
 ```{r}
-# Load files
 
-asian_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/asian_orgs.csv"))
+wop_asian_city <- read_csv(here("raw_data", "asian_orgs.csv")) %>%
+  filter(F.year <= 1981) %>%
+  mutate(County = trimws(County)) %>%
+  count(City, County, States, Type) 
 
-latino_org <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/latino_orgs.csv"))
+wop_latino_city <- read_csv(here("raw_data", "latino_orgs.csv")) %>%
+  filter(F.year <= 1981) %>%
+  mutate(County = trimws(County)) %>%
+  count(City, County, States, Type) 
 
-historical_asian_latino_pop <- read_csv(here("processed_data", "historical_asian_latino_pop.csv"))
+oeo_census <- read.csv(here("processed_data" , "oeo_census.csv"))
 
-cap_census <- read_csv(here("processed_data", "cap_census.csv"))
+historical_census_county <- read_csv(here("processed_data", "historical_census_county.csv")) %>%
+  mutate(County = toupper(County)) %>%
+  filter(County != "STATE TOTAL") %>%
+  mutate(County = trimws(County))
+
+historical_census_county <- add_state_abb(historical_census_county)
 
 ```
+
+# Merge data
+
+- 183 obs
+
+```{r}
+
+df1 <- merge_by_group(wop_asian_city, wop_latino_city)
+
+df2 <- left_join(df1, oeo_census, by = c("County" , "States" , "City"))
+
+df3 <- left_join(df2, historical_census_county %>% filter(year == 1970), 
+        by = c("County",
+               "States" = "State_abb"))
+
+```
+
+# Model data 
+
+```{r}
+
+df3 %<>%
+  mutate(City = factor(City),
+         County = factor(County),
+         State = factor(State),
+         category = factor(category),
+         Asian_per = as.numeric(Asian_per),
+         Latino_per = as.numeric(Latino_per),
+         OEO_fund = scales::rescale(OEO_fund, to = c(0,100)),
+         pop_size = scales::rescale(pop_size, to = c(0,100)),
+         log_n = log(n))
+
+```
+
+OLS AIC:700.565
+Logged OLS AIC:261.729
+Poisson AIC:556.115
+Negative binomial AIC:557.903
+
+```{r}
+lm.out <- lm(n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category, data = df3)
+
+lm_log.out <- lm(log_n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category, data = df3)
+
+poisson.out <- glm(n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category, data = df3, family = "poisson")
+
+nb.out <- MASS::glm.nb(n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category, data = df3)
+
+cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",   
+           "Logged OLS AIC:", round(AIC(lm_log.out), 3), "\n",
+           "Poisson AIC:", round(AIC(poisson.out), 3), "\n",
+           "Negative binomial AIC:", round(AIC(nb.out), 3)))
+      
+```
+\begin{table}[!htbp] \centering 
+  \caption{} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lcccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{4}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-5} 
+\\[-1.8ex] & \multicolumn{4}{c}{log\_n} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
+\hline \\[-1.8ex] 
+ OEO\_fund & 0.008$^{***}$ & 0.007$^{***}$ & 0.007$^{***}$ & 0.007$^{***}$ \\ 
+  & (0.002) & (0.002) & (0.002) & (0.002) \\ 
+  & & & & \\ 
+ poverty\_rate &  & 0.002 & 0.001 & $-$0.005 \\ 
+  &  & (0.006) & (0.006) & (0.007) \\ 
+  & & & & \\ 
+ Asian\_per &  &  & 0.011$^{**}$ & 0.009$^{*}$ \\ 
+  &  &  & (0.005) & (0.005) \\ 
+  & & & & \\ 
+ Latino\_per &  &  & 0.004 & 0.013$^{**}$ \\ 
+  &  &  & (0.004) & (0.006) \\ 
+  & & & & \\ 
+ pop\_size &  &  &  & $-$0.003$^{*}$ \\ 
+  &  &  &  & (0.002) \\ 
+  & & & & \\ 
+ TypeCBO & 0.297$^{***}$ & 0.318$^{***}$ & 0.359$^{***}$ & 0.392$^{***}$ \\ 
+  & (0.098) & (0.099) & (0.099) & (0.103) \\ 
+  & & & & \\ 
+ TypeHybrid & $-$0.097 & $-$0.052 & $-$0.024 & $-$0.006 \\ 
+  & (0.124) & (0.127) & (0.126) & (0.128) \\ 
+  & & & & \\ 
+ categoryLatino & $-$0.387$^{***}$ & $-$0.417$^{***}$ & $-$0.362$^{***}$ & $-$0.383$^{***}$ \\ 
+  & (0.077) & (0.077) & (0.079) & (0.080) \\ 
+  & & & & \\ 
+ Constant & 0.202$^{*}$ & 0.189 & 0.036 & 0.073 \\ 
+  & (0.116) & (0.139) & (0.149) & (0.150) \\ 
+  & & & & \\ 
+\hline \\[-1.8ex] 
+Observations & 201 & 196 & 196 & 194 \\ 
+R$^{2}$ & 0.193 & 0.207 & 0.237 & 0.250 \\ 
+Adjusted R$^{2}$ & 0.176 & 0.186 & 0.208 & 0.217 \\ 
+Residual Std. Error & 0.478 (df = 196) & 0.469 (df = 190) & 0.463 (df = 188) & 0.462 (df = 185) \\ 
+F Statistic & 11.713$^{***}$ (df = 4; 196) & 9.931$^{***}$ (df = 5; 190) & 8.326$^{***}$ (df = 7; 188) & 7.701$^{***}$ (df = 8; 185) \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{4}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table} 
+
+```{r}
+
+m1 <- lm(log_n ~ OEO_fund + Type + category, data = df3)
+m2 <- lm(log_n ~ OEO_fund + poverty_rate  + Type + category, data = df3)
+m3 <- lm(log_n ~ OEO_fund + poverty_rate + Asian_per + Latino_per  + Type + category, data = df3)
+m4 <- lm(log_n ~ OEO_fund + poverty_rate + Asian_per + Latino_per + pop_size + Type + category, data = df3)
+
+stargazer::stargazer(m1, m2, m3, m4)
+```
+

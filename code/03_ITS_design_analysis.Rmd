@@ -567,64 +567,70 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 \\[-1.8ex] & \multicolumn{2}{c}{Founding rate (logged)} \\ 
 \\[-1.8ex] & (1) & (2)\\ 
 \hline \\[-1.8ex] 
- Year & 0.053$^{**}$ & 0.057$^{**}$ \\ 
-  & (0.022) & (0.022) \\ 
+ Year & 0.055$^{***}$ & 0.051$^{***}$ \\ 
+  & (0.019) & (0.018) \\ 
   & & \\ 
- intervention1 & $-$68.525 & $-$70.179 \\ 
-  & (91.630) & (91.119) \\ 
+ intervention1 & 72.412$^{*}$ & $-$1.265 \\ 
+  & (39.509) & (73.659) \\ 
   & & \\ 
- categoryLatino &  & 0.213 \\ 
-  &  & (0.157) \\ 
+ TypeCBO & 0.598$^{***}$ & 0.601$^{***}$ \\ 
+  & (0.101) & (0.140) \\ 
   & & \\ 
- Year:intervention1 & 0.034 & 0.035 \\ 
-  & (0.046) & (0.046) \\ 
+ categoryLatino & 0.381$^{***}$ & 0.222$^{*}$ \\ 
+  & (0.093) & (0.125) \\ 
   & & \\ 
- Constant & $-$104.474$^{**}$ & $-$110.847$^{**}$ \\ 
-  & (42.642) & (42.659) \\ 
+ Year:intervention1 & $-$0.037$^{*}$ & 0.0003 \\ 
+  & (0.020) & (0.037) \\ 
+  & & \\ 
+ Constant & $-$108.077$^{***}$ & $-$100.482$^{***}$ \\ 
+  & (37.778) & (35.149) \\ 
   & & \\ 
 \hline \\[-1.8ex] 
-Observations & 78 & 78 \\ 
-R$^{2}$ & 0.128 & 0.149 \\ 
-Akaike Inf. Crit. & 169.575 & 169.627 \\ 
+Observations & 220 & 106 \\ 
+R$^{2}$ & 0.253 & 0.235 \\ 
+Akaike Inf. Crit. & 463.991 & 210.530 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
-\end{table}  
+\end{table}
 
-- Without group category variable 
-  - p-value for Intervention: 0.4569254
-  - p-value for Intervention:Year: 0.4617835
-
-- With group category variable 
-  - p-value for Intervention: 0.4569254
-  - p-value for the interaction between Intervention and Year: 0.4617835
+- Full data
+  - p-value for Intervention: 6.822022e-02
+  - p-value for Intervention:Year: 1.137977e-08
+  - degrees of freedom: 214
+  
+- Subsetted data 
+  - p-value for Intervention: 0.7671248
+  - p-value for the interaction between Intervention and Year: 0.2399375
+  - degrees of freedom: 101
 
 ```{r}
 
-lm.out <- lm(Freq ~ Year + intervention + Year*intervention + category, data = reagan_org_fit_cbo)
+lm.out <- lm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
-lm_log.out <- lm(log(Freq) ~ Year + intervention + Year*intervention + category, data = reagan_org_fit_cbo)
+lm_log.out <- lm(log(Freq) ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
-lm_log.out1 <- lm(log(Freq) ~ Year + intervention + Year*intervention + category, data = reagan_org_fit_cbo)
+lm_log.out1 <- lm(log(Freq) ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
-lm_log.out2 <- lm(log(Freq) ~ Year + intervention + Year*intervention, data = reagan_org_fit_cbo)
+lm_log.out2 <- lm(log(Freq) ~ Year + intervention + Year*intervention + Type + category, data = reagan_org)
   
-poisson.out <- glm(Freq ~ Year + intervention + Year*intervention + category, data = reagan_org_fit_cbo, family = "poisson")
+poisson.out <- glm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit, family = "poisson")
 
-nb.out <- glm.nb(Freq ~ Year + intervention + Year*intervention + category, data = reagan_org_fit_cbo)
+nb.out <- glm.nb(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
-stargazer(add_AIC_pvalue(lm_log.out2), 
-          add_AIC_pvalue(lm_log.out1), 
+stargazer(add_AIC(lm_log.out2), 
+          add_AIC(lm_log.out1), 
           title = "ITS design analysis results", 
           header = FALSE, 
           dep.var.labels = c("Founding rate (logged)", "Founding rate (logged)"),
-          keep.stat = c("AIC", "rsq", "n"))
+          keep.stat = c("AIC", "rsq", "n", "adj.rsq"))
 
 add_AIC_pvalue(lm_log.out2)$p.value[3:4]
-
 add_AIC_pvalue(lm_log.out1)$p.value[3:4]
 
+add_df(lm_log.out2)$df
+add_df(lm_log.out1)$df
 ```
 
 #### Overdispersion test
@@ -904,7 +910,7 @@ lmrobfit <- lmrob(log(Freq) ~ Percentage + pop_percentage + category + presidenc
 
 stargazer(lm_log.out, lm_new, lmrobfit,
           header = FALSE, 
-          keep.stat = c("rsq", "n"))
+          keep.stat = c("rsq", "n", "adj.rsq"))
 
 ```
 

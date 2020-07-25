@@ -2,8 +2,7 @@
 pacman::p_load(
   tidyverse,
   here,
-  readxl, # import excel files
-  data.table
+  readxl # import excel files
 )
 
 # Import files
@@ -41,10 +40,10 @@ census_county <- census %>%
   select(-c("poverty_year")) %>%
 
   # Drop state totals
-  filter(FIPS != 1) %>%
+ # filter(FIPS != 1) %>%
 
   # Remove duplicates
-  distinct() %>%
+ #  distinct() %>%
 
   # Reorder cols
   select(FIPS, State, County, year, poverty_rate, pop_size)
