@@ -514,7 +514,7 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 reagan_org$Type[reagan_org$Type == "Hybrid"] <- "CBO"
 
 # Structural change approach 
-opt_breaks <- breakpoints(breakpoints(log(Freq) ~ Year*intervention, data = reagan_org), breaks = 2)
+opt_breaks <- breakpoints(breakpoints(log(Freq) ~ Year + intervention + Year * intervention + category + Type, data = reagan_org), breaks = 2)
 
 reagan_org[opt_breaks$breakpoints[2],]$Year
 
