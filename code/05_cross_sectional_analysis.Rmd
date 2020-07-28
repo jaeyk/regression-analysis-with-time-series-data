@@ -97,22 +97,32 @@ df3 <- left_join(df2, historical_census_county,
 
 ```{r}
 
-df3 %<>%
+df3 <- df3 %<>%
   mutate(category = factor(category),
          Asian_per = as.numeric(Asian_per),
          Latino_per = as.numeric(Latino_per),
-         OEO_per = round(OEO_fund/sum(df3$OEO_fund),4)*100,
+         OEO_per = round(df3$OEO_fund/sum(df3$OEO_fund, na.rm = TRUE),2)*100,
          pop_size = scales::rescale(pop_size, to = c(0,100)),
          log_n = log(n))
 
-df3 <- replace_na(df3, list(Asian_per = 0, Latino_per = 0, OEO_fund = 0, OEO_per = 0, pop_size = 0, poverty_rate = 0))
+```
+
+```{r}
+df3 <- replace_na(df3, 
+                  list(Asian_per = 0, 
+                       Latino_per = 0, 
+                       OEO_fund = 0, 
+                       OEO_per = 0, 
+                       pop_size = 0, 
+                       poverty_rate = 0)
+                  )
 
 ```
 
-OLS AIC:411.767
-Logged OLS AIC:167.075
-Poisson AIC:334.545
-Negative binomial AIC:335.554
+OLS AIC:413.191
+Logged OLS AIC:167.942
+Poisson AIC:336.547
+Negative binomial AIC:337.276
 
 ```{r}
 lm.out <- lm(n ~ OEO_per + poverty_rate + Asian_per + Latino_per + pop_size + Type + category, data = df3)
@@ -140,39 +150,24 @@ cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",
 \hline \\[-1.8ex] 
  & \multicolumn{4}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-5} 
-\\[-1.8ex] & \multicolumn{3}{c}{log\_n} &   \\ 
 \\[-1.8ex] & \multicolumn{3}{c}{\textit{OLS}} & \textit{coefficient} \\ 
  & \multicolumn{3}{c}{\textit{}} & \textit{test} \\ 
+ & Model 1 & Model 2 & Model 3 & Model 4 \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
+\\[-1.8ex] & m1 & m2 & m3 & lm_white\\ 
 \hline \\[-1.8ex] 
- OEO\_per & 0.141$^{**}$ & 0.138$^{**}$ & 0.134$^{**}$ & 0.134$^{*}$ \\ 
-  & (0.059) & (0.058) & (0.059) & (0.070) \\ 
-  & & & & \\ 
- TypeCBO & 0.177 & 0.207 & 0.233$^{*}$ & 0.233$^{*}$ \\ 
-  & (0.135) & (0.136) & (0.140) & (0.129) \\ 
-  & & & & \\ 
- categoryLatino & $-$0.270$^{**}$ & $-$0.215$^{**}$ & $-$0.238$^{**}$ & $-$0.238$^{*}$ \\ 
-  & (0.104) & (0.108) & (0.111) & (0.124) \\ 
-  & & & & \\ 
- Asian\_per &  & 0.011 & 0.011 & 0.011 \\ 
-  &  & (0.007) & (0.007) & (0.013) \\ 
-  & & & & \\ 
- Latino\_per &  & 0.003 & 0.008 & 0.008 \\ 
-  &  & (0.005) & (0.007) & (0.007) \\ 
-  & & & & \\ 
- poverty\_rate &  &  & $-$0.007 & $-$0.007 \\ 
-  &  &  & (0.010) & (0.010) \\ 
-  & & & & \\ 
- pop\_size &  &  & $-$0.002 & $-$0.002 \\ 
-  &  &  & (0.002) & (0.002) \\ 
-  & & & & \\ 
- Constant & 0.183 & 0.040 & 0.094 & 0.094 \\ 
-  & (0.164) & (0.185) & (0.211) & (0.202) \\ 
-  & & & & \\ 
-\hline \\[-1.8ex] 
+ OEO\_per & 0.122$^{**}$ (0.056) & 0.118$^{**}$ (0.055) & 0.116$^{**}$ (0.056) & 0.116$^{*}$ (0.060) \\ 
+  TypeCBO & 0.163 (0.135) & 0.190 (0.135) & 0.221 (0.140) & 0.221$^{*}$ (0.129) \\ 
+  categoryLatino & $-$0.262$^{**}$ (0.106) & $-$0.207$^{*}$ (0.109) & $-$0.231$^{**}$ (0.112) & $-$0.231$^{*}$ (0.124) \\ 
+  Asian\_per &  & 0.011$^{*}$ (0.007) & 0.011 (0.007) & 0.011 (0.013) \\ 
+  Latino\_per &  & 0.002 (0.005) & 0.008 (0.007) & 0.008 (0.007) \\ 
+  poverty\_rate &  &  & $-$0.006 (0.010) & $-$0.006 (0.010) \\ 
+  pop\_size &  &  & $-$0.002 (0.002) & $-$0.002 (0.002) \\ 
+  Constant & 0.213 (0.162) & 0.077 (0.183) & 0.119 (0.209) & 0.119 (0.194) \\ 
+ \hline \\[-1.8ex] 
 Observations & 111 & 111 & 111 &  \\ 
-R$^{2}$ & 0.126 & 0.154 & 0.161 &  \\ 
-Adjusted R$^{2}$ & 0.101 & 0.113 & 0.104 &  \\ 
+R$^{2}$ & 0.118 & 0.146 & 0.155 &  \\ 
+Adjusted R$^{2}$ & 0.094 & 0.105 & 0.097 &  \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{4}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
@@ -187,11 +182,19 @@ m2 <- lm(log_n ~ OEO_per + Type + category + Asian_per + Latino_per, data = df3)
 
 m3 <- lm(log_n ~ OEO_per + Type + category + Asian_per + Latino_per + poverty_rate + pop_size, data = df3)
 
-lm_white <- coeftest(m4, vcov = vcovHC(m4, type = "HC0"))
+lm_white <- coeftest(m3, vcov = vcovHC(m3, type = "HC0"))
 
 stargazer::stargazer(m1, m2, m3, lm_white,
                      keep.stat = c(
-                       "rsq", "n", "adj.rsq"))
+                       "rsq", "n", "adj.rsq"),
+                     single.row = TRUE, 
+                     object.names = TRUE, 
+                     column.labels = c("Model 1",
+                                       "Model 2",
+                                       "Model 3",
+                                       "Model 4"),
+                     dep.var.labels.include = FALSE)
+
 
 ```
 

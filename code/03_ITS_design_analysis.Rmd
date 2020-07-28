@@ -188,7 +188,7 @@ reagan_org <- merge(reagan_org, basic_party_covariates, by = "Year")
 # Mutate 
 
 reagan_org <- reagan_org %>%
-    mutate(intervention = ifelse(reagan_org$Year >= 1981, 1, 0),
+    mutate(intervention = ifelse(reagan_org$Year >= 1980, 1, 0),
            intervention = factor(intervention),
            category = factor(category),
            Type = factor(Type),
@@ -214,8 +214,8 @@ reagan_org %>%
   ggplot(aes(x = Year, y = Percentage)) +
     geom_point() +
     geom_line() +   
-    geom_vline(xintercept = c(1981), col = "red", linetype ="dashed") +
-    annotate("rect", xmin = 1964, xmax = 1981, ymin = 0, ymax = 7.2, alpha = .2) +
+    geom_vline(xintercept = c(1980), col = "red", linetype ="dashed") +
+    annotate("rect", xmin = 1964, xmax = 1980, ymin = 0, ymax = 7.2, alpha = .2) +
     scale_y_continuous(labels = scales::percent_format(scale = 1)) +
     labs(title = "Budget for education, employment, and social service",
          y = "Percentage",
@@ -305,6 +305,8 @@ ie_reagan_n <- ie_reagan_n %>%
   add_row(year = ie_missing_years,
           n = rep(0, length(ie_missing_years)),
           count = rep(0, length(ie_missing_years)))
+
+conflicted::conflict_prefer("between", "dplyr")
 
 # Filter 
 ie_reagan_n_filtered <- filter(ie_reagan_n, between(year, 1976, 1981))
@@ -460,8 +462,10 @@ poisson.AIC <- NA
 nb.AIC <- NA
 year <-NA
 
+
+
 # For loop 
-for (i in c(0:38)){
+for (i in c(0:33)){
 
 # Models 
 lm.out <- lm(Freq ~ Percentage + pop_percentage + category, data = subset(reagan_org, Year <= 1970 + i))
@@ -509,9 +513,6 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 - Second break point: 2003
 
 ```{r}
-
-# Reset data for modeling 
-reagan_org$Type[reagan_org$Type == "Hybrid"] <- "CBO"
 
 # Structural change approach 
 opt_breaks <- breakpoints(breakpoints(log(Freq) ~ Year + intervention + Year * intervention + category + Type, data = reagan_org), breaks = 2)
@@ -576,46 +577,32 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 ```
 ## Model evaluations
 
-\begin{table}[!htbp] \centering 
+\\begin{table}[!htbp] \centering 
   \caption{ITS design analysis results} 
   \label{} 
-\begin{tabular}{@{\extracolsep{5pt}}lcc} 
+\begin{tabular}{@{\extracolsep{5pt}}lccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
- & \multicolumn{2}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-3} 
-\\[-1.8ex] & \multicolumn{2}{c}{Founding rate (logged)} \\ 
-\\[-1.8ex] & (1) & (2)\\ 
+ & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-4} 
+\\[-1.8ex] & \multicolumn{3}{c}{Founding rate (logged)} \\ 
+\\[-1.8ex] & (1) & (2) & (3)\\ 
 \hline \\[-1.8ex] 
- Year & 0.060$^{***}$ & 0.064$^{***}$ \\ 
-  & (0.014) & (0.015) \\ 
-  & & \\ 
- intervention1 & 61.815$^{*}$ & 98.600$^{***}$ \\ 
-  & (31.994) & (30.143) \\ 
-  & & \\ 
- TypeCBO & 1.062$^{***}$ & 0.986$^{***}$ \\ 
-  & (0.094) & (0.083) \\ 
-  & & \\ 
- TypeHybrid & $-$0.063 & $-$0.118 \\ 
-  & (0.105) & (0.096) \\ 
-  & & \\ 
- categoryLatino & 0.229$^{***}$ & 0.393$^{***}$ \\ 
-  & (0.079) & (0.071) \\ 
-  & & \\ 
- Year:intervention1 & $-$0.031$^{*}$ & $-$0.050$^{***}$ \\ 
-  & (0.016) & (0.015) \\ 
-  & & \\ 
- Constant & $-$117.466$^{***}$ & $-$126.291$^{***}$ \\ 
-  & (28.258) & (28.789) \\ 
-  & & \\ 
-\hline \\[-1.8ex] 
-Observations & 172 & 220 \\ 
-R$^{2}$ & 0.583 & 0.570 \\ 
-Adjusted R$^{2}$ & 0.568 & 0.557 \\ 
-Akaike Inf. Crit. & 264.167 & 344.842 \\ 
+ Year & 0.066$^{***}$ (0.016) & 0.066$^{***}$ (0.016) & 0.066$^{***}$ (0.016) \\ 
+  intervention1 & 80.450$^{**}$ (33.919) & 80.450$^{**}$ (33.919) & 80.450$^{**}$ (33.919) \\ 
+  TypeCBO & 1.096$^{***}$ (0.092) & 1.096$^{***}$ (0.092) & 1.096$^{***}$ (0.092) \\ 
+  TypeHybrid & $-$0.054 (0.102) & $-$0.054 (0.102) & $-$0.054 (0.102) \\ 
+  categoryLatino & 0.247$^{***}$ (0.077) & 0.247$^{***}$ (0.077) & 0.247$^{***}$ (0.077) \\ 
+  Year:intervention1 & $-$0.041$^{**}$ (0.017) & $-$0.041$^{**}$ (0.017) & $-$0.041$^{**}$ (0.017) \\ 
+  Constant & $-$130.508$^{***}$ (31.286) & $-$130.508$^{***}$ (31.286) & $-$130.508$^{***}$ (31.286) \\ 
+ \hline \\[-1.8ex] 
+Observations & 178 & 178 & 178 \\ 
+R$^{2}$ & 0.594 & 0.594 & 0.594 \\ 
+Adjusted R$^{2}$ & 0.580 & 0.580 & 0.580 \\ 
+Akaike Inf. Crit. & 273.025 & 273.025 & 273.025 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
 \end{table} 
 
@@ -623,20 +610,24 @@ Akaike Inf. Crit. & 264.167 & 344.842 \\
 
 lm.out <- lm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
-lm_log.out <- lm(log(Freq) ~ Year + intervention + Year*intervention + Type + category, data = reagan_org)
-
 lm_log.out1 <- lm(log(Freq) ~ Year*intervention + Type + category, data = reagan_org_fit)
+
+lm_log.out2 <- lm(log(Freq) ~ Year + Year*intervention + Type + category, data = reagan_org_fit)
+
+lm_log.out3 <- lm(log(Freq) ~ Year + Year*intervention + intervention + Type + category, data = reagan_org_fit)
 
 poisson.out <- glm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit, family = "poisson")
 
 nb.out <- glm.nb(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
 stargazer(add_AIC(lm_log.out1),
-          add_AIC(lm_log.out), 
+          add_AIC(lm_log.out2),
+          add_AIC(lm_log.out3),
           title = "ITS design analysis results", 
           header = FALSE, 
           dep.var.labels = c("Founding rate (logged)", "Founding rate (logged)"),
-          keep.stat = c("AIC", "rsq", "n", "adj.rsq"))
+          keep.stat = c("AIC", "rsq", "n", "adj.rsq"), 
+          single.row = TRUE)
 
 ```
 
@@ -704,14 +695,14 @@ for_loop <- data.frame("Fed_funding" = fed,
 fed_coef <- for_loop %>%
   ggplot(aes(x = Year, y = Fed_funding)) +
   geom_point() +
-  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
+  geom_vline(xintercept = c(1981), linetype = "dashed", size = 1, color = "red") +
   labs(title = "Federal funding", 
        subtitle = "Only included CBOs", y = "OLS coefficients") 
 
 pop_coef <- for_loop %>%
   ggplot(aes(x = Year, y = Pop_growth)) +
   geom_point() +
-  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
+  geom_vline(xintercept = c(1981), linetype = "dashed", size = 1, color = "red") +
   labs(title = "Population growth", 
        subtitle = "Only included CBOs", y = "OLS coefficients") 
 
@@ -783,7 +774,7 @@ fed_boot <- boot_merged %>%
   labs(x = "Year", y = "OLS coefficients", 
        title = "Federal funding",
        subtitle = "With bootstrapped CIs") +
-  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +  
+  geom_vline(xintercept = c(1981), linetype = "dashed", size = 1, color = "red") +  
   annotate("rect", xmin = 1970, xmax = 2003, ymin = -0.5, ymax = 0, alpha = .2)
   
 pop_boot <- boot_merged %>%
@@ -794,7 +785,7 @@ pop_boot <- boot_merged %>%
   labs(x = "Year", y = "OLS coefficients", 
        title = "Population growth",
        subtitle = "With bootstrapped CIs") +
-  geom_vline(xintercept = c(1980), linetype = "dashed", size = 1, color = "red") +
+  geom_vline(xintercept = c(1981), linetype = "dashed", size = 1, color = "red") +
   annotate("rect", xmin = 1970, xmax = 2003, ymin = -2, ymax = 0, alpha = .2)
 
 fed_boot + pop_boot
@@ -810,7 +801,7 @@ I adated some code from [this post](https://www.brodrigues.co/blog/2018-07-08-ro
 
 ```{r}
 
-lm_log.out <- lm(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org_fit_cbo, Year <= 1981))
+lm_log.out <- lm(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org_fit_cbo, Year <= 1980))
 
 ```
 
@@ -915,7 +906,8 @@ lmrobfit <- lmrob(log(Freq) ~ Percentage + pop_percentage + category + presidenc
 
 stargazer(lm_log.out, lm_new, lmrobfit,
           header = FALSE, 
-          keep.stat = c("rsq", "n", "adj.rsq"))
+          keep.stat = c("rsq", "n", "adj.rsq"),
+          single.row = TRUE)
 
 ```
 
