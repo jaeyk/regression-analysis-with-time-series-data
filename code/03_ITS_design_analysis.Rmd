@@ -577,54 +577,53 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 ```
 ## Model evaluations
 
-\\begin{table}[!htbp] \centering 
+\begin{table}[!htbp] \centering 
   \caption{ITS design analysis results} 
   \label{} 
-\begin{tabular}{@{\extracolsep{5pt}}lccc} 
+\begin{tabular}{@{\extracolsep{5pt}}lcc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
- & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-4} 
-\\[-1.8ex] & \multicolumn{3}{c}{Founding rate (logged)} \\ 
-\\[-1.8ex] & (1) & (2) & (3)\\ 
+ & \multicolumn{2}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-3} 
+\\[-1.8ex] & \multicolumn{2}{c}{Founding rate (logged)} \\ 
+\\[-1.8ex] & (1) & (2)\\ 
 \hline \\[-1.8ex] 
- Year & 0.066$^{***}$ (0.016) & 0.066$^{***}$ (0.016) & 0.066$^{***}$ (0.016) \\ 
-  intervention1 & 80.450$^{**}$ (33.919) & 80.450$^{**}$ (33.919) & 80.450$^{**}$ (33.919) \\ 
-  TypeCBO & 1.096$^{***}$ (0.092) & 1.096$^{***}$ (0.092) & 1.096$^{***}$ (0.092) \\ 
-  TypeHybrid & $-$0.054 (0.102) & $-$0.054 (0.102) & $-$0.054 (0.102) \\ 
-  categoryLatino & 0.247$^{***}$ (0.077) & 0.247$^{***}$ (0.077) & 0.247$^{***}$ (0.077) \\ 
-  Year:intervention1 & $-$0.041$^{**}$ (0.017) & $-$0.041$^{**}$ (0.017) & $-$0.041$^{**}$ (0.017) \\ 
-  Constant & $-$130.508$^{***}$ (31.286) & $-$130.508$^{***}$ (31.286) & $-$130.508$^{***}$ (31.286) \\ 
+ Year & 0.059$^{***}$ (0.016) & 0.066$^{***}$ (0.016) \\ 
+  intervention1 & 65.817$^{*}$ (34.856) & 77.997$^{**}$ (34.326) \\ 
+  TypeCBO & 1.056$^{***}$ (0.095) & 1.071$^{***}$ (0.093) \\ 
+  TypeHybrid & $-$0.052 (0.107) & $-$0.047 (0.105) \\ 
+  categoryLatino &  & 0.232$^{***}$ (0.079) \\ 
+  Year:intervention1 & $-$0.033$^{*}$ (0.018) & $-$0.040$^{**}$ (0.017) \\ 
+  Constant & $-$116.355$^{***}$ (31.676) & $-$129.500$^{***}$ (31.287) \\ 
  \hline \\[-1.8ex] 
-Observations & 178 & 178 & 178 \\ 
-R$^{2}$ & 0.594 & 0.594 & 0.594 \\ 
-Adjusted R$^{2}$ & 0.580 & 0.580 & 0.580 \\ 
-Akaike Inf. Crit. & 273.025 & 273.025 & 273.025 \\ 
+Observations & 172 & 172 \\ 
+R$^{2}$ & 0.562 & 0.584 \\ 
+Adjusted R$^{2}$ & 0.549 & 0.569 \\ 
+Akaike Inf. Crit. & 270.819 & 263.997 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
 \end{table} 
 
 ```{r}
 
-lm.out <- lm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
+lm.out <- lm(Freq ~ Year + intervention + Year*intervention + Type + category, 
+             data = reagan_org_fit)
 
-lm_log.out1 <- lm(log(Freq) ~ Year*intervention + Type + category, data = reagan_org_fit)
+lm_log_out1 <- lm(log(Freq) ~ Year*intervention + Type + intervention + Year, 
+                  data = reagan_org_fit)
 
-lm_log.out2 <- lm(log(Freq) ~ Year + Year*intervention + Type + category, data = reagan_org_fit)
-
-lm_log.out3 <- lm(log(Freq) ~ Year + Year*intervention + intervention + Type + category, data = reagan_org_fit)
+lm_log_out2 <- lm(log(Freq) ~ Year*intervention + Type + category + intervention + Year, 
+                  data = reagan_org_fit)
 
 poisson.out <- glm(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit, family = "poisson")
 
 nb.out <- glm.nb(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
-stargazer(add_AIC(lm_log.out1),
-          add_AIC(lm_log.out2),
-          add_AIC(lm_log.out3),
+stargazer(add_AIC(lm_log_out1),
+          add_AIC(lm_log_out2),
           title = "ITS design analysis results", 
-          header = FALSE, 
           dep.var.labels = c("Founding rate (logged)", "Founding rate (logged)"),
           keep.stat = c("AIC", "rsq", "n", "adj.rsq"), 
           single.row = TRUE)
