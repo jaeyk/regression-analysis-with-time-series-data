@@ -157,23 +157,22 @@ cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",
  & \multicolumn{3}{c}{\textit{}} & \textit{test} \\ 
  & Model 1 & Model 2 & Model 3 & Model 4 \\ 
 \hline \\[-1.8ex] 
- OEO grants & 0.122$^{**}$ (0.056) & 0.118$^{**}$ (0.055) & 0.116$^{**}$ (0.056) & 0.116$^{*}$ (0.060) \\ 
-  CBO & 0.163 (0.135) & 0.190 (0.135) & 0.221 (0.140) & 0.221$^{*}$ (0.129) \\ 
-  Latino org & $-$0.262$^{**}$ (0.106) & $-$0.207$^{*}$ (0.109) & $-$0.231$^{**}$ (0.112) & $-$0.231$^{*}$ (0.124) \\ 
-  Asian pop &  & 0.011$^{*}$ (0.007) & 0.011 (0.007) & 0.011 (0.013) \\ 
-  Latino pop &  & 0.002 (0.005) & 0.008 (0.007) & 0.008 (0.007) \\ 
-  Poverty rate &  &  & $-$0.006 (0.010) & $-$0.006 (0.010) \\ 
-  Total population &  &  & $-$0.002 (0.002) & $-$0.002 (0.002) \\ 
-  Constant & 0.213 (0.162) & 0.077 (0.183) & 0.119 (0.209) & 0.119 (0.194) \\ 
+ OEO\_per & 0.122$^{**}$ (0.056) & 0.118$^{**}$ (0.055) & 0.117$^{**}$ (0.056) & 0.117$^{**}$ (0.059) \\ 
+  TypeCBO & 0.163 (0.135) & 0.190 (0.135) & 0.191 (0.136) & 0.191 (0.123) \\ 
+  categoryLatino & $-$0.262$^{**}$ (0.106) & $-$0.207$^{*}$ (0.109) & $-$0.215$^{*}$ (0.111) & $-$0.215$^{*}$ (0.123) \\ 
+  Asian\_per &  & 0.011$^{*}$ (0.007) & 0.011 (0.007) & 0.011 (0.013) \\ 
+  Latino\_per &  & 0.002 (0.005) & 0.004 (0.006) & 0.004 (0.005) \\ 
+  poverty\_rate &  &  & $-$0.004 (0.010) & $-$0.004 (0.009) \\ 
+  Constant & 0.213 (0.162) & 0.077 (0.183) & 0.116 (0.209) & 0.116 (0.191) \\ 
  \hline \\[-1.8ex] 
 Observations & 111 & 111 & 111 &  \\ 
-R$^{2}$ & 0.118 & 0.146 & 0.155 &  \\ 
-Adjusted R$^{2}$ & 0.094 & 0.105 & 0.097 &  \\ 
+R$^{2}$ & 0.118 & 0.146 & 0.147 &  \\ 
+Adjusted R$^{2}$ & 0.094 & 0.105 & 0.098 &  \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{4}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
-\end{table}  
+\end{table} 
 
 ```{r}
 
@@ -188,12 +187,11 @@ lm_white <- coeftest(m3, vcov = vcovHC(m3, type = "HC0"))
 stargazer(m1, m2, m3, lm_white,
           title = "Cross-sectional regression analysis results",
           covariate.labels = c("OEO grants",
-                               "CBO",
-                               "Latino org",
-                               "Asian pop",
-                               "Latino pop",
-                               "Poverty rate",
-                               "Total population"),
+                                "CBO",
+                                "Latino org",
+                                "Asian pop",
+                                "Latino pop",
+                                "Poverty rate"),
           dep.var.labels = c("Cumulative founding in 1981 (logged)"),
           keep.stat = c("rsq", "n", "adj.rsq"),
           column.labels = c("Model 1",
