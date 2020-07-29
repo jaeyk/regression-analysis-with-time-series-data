@@ -83,8 +83,6 @@ historical_census_county <- add_state_abb(historical_census_county) %>%
 
 df1 <- merge_by_group(wop_asian_city, wop_latino_city) # 67 counties 
 
-df1$Type[df1$Type == "Hybrid"] <- "CBO"
-
 df2 <- left_join(df1, oeo_census, by = c("County" , "States" , "City"))
 
 df3 <- left_join(df2, historical_census_county, 
@@ -119,10 +117,10 @@ df3 <- replace_na(df3,
 
 ```
 
-OLS AIC:413.191
-Logged OLS AIC:167.942
-Poisson AIC:336.547
-Negative binomial AIC:337.276
+OLS AIC:407.94
+Logged OLS AIC:161.444
+Poisson AIC:329.749
+Negative binomial AIC:331.296
 
 ```{r}
 lm.out <- lm(n ~ OEO_per + poverty_rate + Asian_per + Latino_per + pop_size + Type + category, data = df3)
@@ -142,8 +140,6 @@ cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",
            "Negative binomial AIC:", round(AIC(nb.out), 3)))
       
 ```
-% Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Tue, Jul 28, 2020 - 05:13:54 PM
 \begin{table}[!htbp] \centering 
   \caption{Cross-sectional regression analysis results} 
   \label{} 
@@ -157,17 +153,16 @@ cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",
  & \multicolumn{3}{c}{\textit{}} & \textit{test} \\ 
  & Model 1 & Model 2 & Model 3 & Model 4 \\ 
 \hline \\[-1.8ex] 
- OEO\_per & 0.122$^{**}$ (0.056) & 0.118$^{**}$ (0.055) & 0.117$^{**}$ (0.056) & 0.117$^{**}$ (0.059) \\ 
-  TypeCBO & 0.163 (0.135) & 0.190 (0.135) & 0.191 (0.136) & 0.191 (0.123) \\ 
-  categoryLatino & $-$0.262$^{**}$ (0.106) & $-$0.207$^{*}$ (0.109) & $-$0.215$^{*}$ (0.111) & $-$0.215$^{*}$ (0.123) \\ 
-  Asian\_per &  & 0.011$^{*}$ (0.007) & 0.011 (0.007) & 0.011 (0.013) \\ 
-  Latino\_per &  & 0.002 (0.005) & 0.004 (0.006) & 0.004 (0.005) \\ 
-  poverty\_rate &  &  & $-$0.004 (0.010) & $-$0.004 (0.009) \\ 
-  Constant & 0.213 (0.162) & 0.077 (0.183) & 0.116 (0.209) & 0.116 (0.191) \\ 
+ OEO\_per & 0.259$^{***}$ (0.078) & 0.244$^{***}$ (0.081) & 0.245$^{***}$ (0.082) & 0.245$^{***}$ (0.074) \\ 
+  categoryLatino & $-$0.431$^{***}$ (0.137) & $-$0.401$^{***}$ (0.146) & $-$0.404$^{***}$ (0.149) & $-$0.404$^{**}$ (0.184) \\ 
+  Asian\_per &  & 0.004 (0.008) & 0.004 (0.008) & 0.004 (0.015) \\ 
+  Latino\_per &  & 0.004 (0.006) & 0.004 (0.007) & 0.004 (0.007) \\ 
+  poverty\_rate &  &  & $-$0.002 (0.013) & $-$0.002 (0.011) \\ 
+  Constant & 0.477$^{***}$ (0.138) & 0.412$^{**}$ (0.161) & 0.428$^{**}$ (0.206) & 0.428$^{**}$ (0.209) \\ 
  \hline \\[-1.8ex] 
-Observations & 111 & 111 & 111 &  \\ 
-R$^{2}$ & 0.118 & 0.146 & 0.147 &  \\ 
-Adjusted R$^{2}$ & 0.094 & 0.105 & 0.098 &  \\ 
+Observations & 76 & 76 & 76 &  \\ 
+R$^{2}$ & 0.253 & 0.260 & 0.260 &  \\ 
+Adjusted R$^{2}$ & 0.232 & 0.218 & 0.207 &  \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{4}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
@@ -176,18 +171,19 @@ Adjusted R$^{2}$ & 0.094 & 0.105 & 0.098 &  \\
 
 ```{r}
 
-m1 <- lm(log_n ~ OEO_per + Type + category, data = df3)
+df3 <- df3 %>% filter(Type == "CBO")
 
-m2 <- lm(log_n ~ OEO_per + Type + category + Asian_per + Latino_per, data = df3)
+m1 <- lm(log_n ~ OEO_per + category, data = df3)
 
-m3 <- lm(log_n ~ OEO_per + Type + category + Asian_per + Latino_per + poverty_rate, data = df3)
+m2 <- lm(log_n ~ OEO_per + category + Asian_per + Latino_per, data = df3)
+
+m3 <- lm(log_n ~ OEO_per + category + Asian_per + Latino_per + poverty_rate, data = df3)
 
 lm_white <- coeftest(m3, vcov = vcovHC(m3, type = "HC0"))
 
 stargazer(m1, m2, m3, lm_white,
           title = "Cross-sectional regression analysis results",
           covariate.labels = c("OEO grants",
-                                "CBO",
                                 "Latino org",
                                 "Asian pop",
                                 "Latino pop",
