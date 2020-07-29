@@ -393,6 +393,9 @@ ie_reagan_plot + agenda_reagan_plot
 
 ggsave(here("outputs", "dic_analysis.png"),
        height = 5)
+
+
+sum(agenda_reagan_n$n)
 ```
 # Treating outliers 
 
@@ -605,7 +608,6 @@ Akaike Inf. Crit. & 270.819 & 263.997 \\
 \textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
 \end{table} 
-
 ```{r}
 
 lm.out <- lm(Freq ~ Year + intervention + Year*intervention + Type + category, 
@@ -625,8 +627,18 @@ stargazer(add_AIC(lm_log_out1),
           add_AIC(lm_log_out2),
           title = "ITS design analysis results", 
           dep.var.labels = c("Founding rate (logged)", "Founding rate (logged)"),
-          keep.stat = c("AIC", "rsq", "n", "adj.rsq"), 
-          single.row = TRUE)
+          keep.stat = c("AIC", "rsq", "n", "adj.rsq"),
+          column.labels = c("Model 1",
+                            "Model 2"),
+          covariate.labels = c("Year",
+                               "Intervention",
+                               "CBO",
+                               "Hybrid",
+                               "Latino",
+                               "Year:Intervention"),
+          model.numbers = FALSE, 
+          single.row = TRUE,
+          header = FALSE)
 
 ```
 
@@ -848,51 +860,39 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 - Using HAC standard errors 
 
 ```{r}
+
 # Coefficient summary using the Newey-West SE estimates
+
 lm_new <- coeftest(lm_log.out, vcov = NeweyWest, prewhite = F, adjust = T)
   
 ```
 
 ### Outliers 
 
-textit{OLS} & \textit{coefficient} & \textit{MM-ty\begin{table}[!htbp] \centering 
-  \caption{} 
+\begin{table}[!htbp] \centering 
+  \caption{Robustness checks} 
   \label{} 
 \begin{tabular}{@{\extracolsep{5pt}}lccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
  & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-4} 
-\\[-1.8ex] & log(Freq) &   & log(Freq) \\ 
+\\[-1.8ex] & Founding rate (logged) &   & log(Freq) \\ 
 \\[-1.8ex] & \textit{OLS} & \textit{coefficient} & \textit{MM-type} \\ 
  & \textit{} & \textit{test} & \textit{linear} \\ 
-\\[-1.8ex] & (1) & (2) & (3)\\ 
+ & Model 1 & Model 2 & Model 3 \\ 
 \hline \\[-1.8ex] 
- Percentage & 0.304$^{***}$ & 0.304$^{***}$ & 0.295$^{***}$ \\ 
-  & (0.106) & (0.078) & (0.076) \\ 
-  & & & \\ 
- pop\_percentage & $-$0.063 & $-$0.063 & $-$0.035 \\ 
-  & (0.156) & (0.104) & (0.124) \\ 
-  & & & \\ 
- categoryLatino & 0.540 & 0.540 & 0.525 \\ 
-  & (0.554) & (0.364) & (0.456) \\ 
-  & & & \\ 
- presidency & $-$0.014 & $-$0.014 & $-$0.012 \\ 
-  & (0.188) & (0.169) & (0.197) \\ 
-  & & & \\ 
- senate & 0.730 & 0.730$^{**}$ &  \\ 
-  & (0.491) & (0.323) &  \\ 
-  & & & \\ 
- house &  &  &  \\ 
-  &  &  &  \\ 
-  & & & \\ 
- Constant & $-$1.251$^{**}$ & $-$1.251$^{***}$ & $-$0.560$^{*}$ \\ 
-  & (0.611) & (0.415) & (0.299) \\ 
-  & & & \\ 
-\hline \\[-1.8ex] 
-Observations & 49 &  & 46 \\ 
-R$^{2}$ & 0.279 &  & 0.250 \\ 
-Adjusted R$^{2}$ & 0.195 &  & 0.177 \\ 
+ Federal funding & 0.325$^{***}$ (0.103) & 0.325$^{***}$ (0.086) & 0.325$^{***}$ (0.083) \\ 
+  Population growth & 0.027 (0.174) & 0.027 (0.090) & 0.022 (0.106) \\ 
+  Latino & 0.397 (0.596) & 0.397 (0.302) & 0.415 (0.419) \\ 
+  Presidency & $-$0.178 (0.187) & $-$0.178 (0.240) & $-$0.180 (0.201) \\ 
+  Senate &  &  &  \\ 
+  House &  &  &  \\ 
+  Constant & $-$0.507 (0.398) & $-$0.507 (0.445) & $-$0.493 (0.372) \\ 
+ \hline \\[-1.8ex] 
+Observations & 32 &  & 32 \\ 
+R$^{2}$ & 0.498 &  & 0.472 \\ 
+Adjusted R$^{2}$ & 0.423 &  & 0.394 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
@@ -904,9 +904,20 @@ Adjusted R$^{2}$ & 0.195 &  & 0.177 \\
 lmrobfit <- lmrob(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org_fit_cbo, Year <= 1980))
 
 stargazer(lm_log.out, lm_new, lmrobfit,
+          title = "Robustness checks",
+          dep.var.labels = c("Founding rate (logged)"),
           header = FALSE, 
           keep.stat = c("rsq", "n", "adj.rsq"),
-          single.row = TRUE)
+          column.labels = c("Model 1", "Model 2",
+                            "Model 3"),
+          single.row = TRUE,
+          covariate.labels = c("Federal funding",
+                               "Population growth",
+                               "Latino",
+                               "Presidency",
+                               "Senate",
+                               "House"),
+          model.numbers = FALSE)
 
 ```
 

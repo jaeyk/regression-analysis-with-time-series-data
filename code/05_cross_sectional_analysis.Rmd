@@ -142,27 +142,28 @@ cat(paste0("OLS AIC:", round(AIC(lm.out), 3), "\n",
            "Negative binomial AIC:", round(AIC(nb.out), 3)))
       
 ```
+% Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: Tue, Jul 28, 2020 - 05:13:54 PM
 \begin{table}[!htbp] \centering 
-  \caption{} 
+  \caption{Cross-sectional regression analysis results} 
   \label{} 
 \begin{tabular}{@{\extracolsep{5pt}}lcccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
  & \multicolumn{4}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-5} 
+\\[-1.8ex] & \multicolumn{3}{c}{Cumulative founding in 1981 (logged)} &   \\ 
 \\[-1.8ex] & \multicolumn{3}{c}{\textit{OLS}} & \textit{coefficient} \\ 
  & \multicolumn{3}{c}{\textit{}} & \textit{test} \\ 
  & Model 1 & Model 2 & Model 3 & Model 4 \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
-\\[-1.8ex] & m1 & m2 & m3 & lm_white\\ 
 \hline \\[-1.8ex] 
- OEO\_per & 0.122$^{**}$ (0.056) & 0.118$^{**}$ (0.055) & 0.116$^{**}$ (0.056) & 0.116$^{*}$ (0.060) \\ 
-  TypeCBO & 0.163 (0.135) & 0.190 (0.135) & 0.221 (0.140) & 0.221$^{*}$ (0.129) \\ 
-  categoryLatino & $-$0.262$^{**}$ (0.106) & $-$0.207$^{*}$ (0.109) & $-$0.231$^{**}$ (0.112) & $-$0.231$^{*}$ (0.124) \\ 
-  Asian\_per &  & 0.011$^{*}$ (0.007) & 0.011 (0.007) & 0.011 (0.013) \\ 
-  Latino\_per &  & 0.002 (0.005) & 0.008 (0.007) & 0.008 (0.007) \\ 
-  poverty\_rate &  &  & $-$0.006 (0.010) & $-$0.006 (0.010) \\ 
-  pop\_size &  &  & $-$0.002 (0.002) & $-$0.002 (0.002) \\ 
+ OEO grants & 0.122$^{**}$ (0.056) & 0.118$^{**}$ (0.055) & 0.116$^{**}$ (0.056) & 0.116$^{*}$ (0.060) \\ 
+  CBO & 0.163 (0.135) & 0.190 (0.135) & 0.221 (0.140) & 0.221$^{*}$ (0.129) \\ 
+  Latino org & $-$0.262$^{**}$ (0.106) & $-$0.207$^{*}$ (0.109) & $-$0.231$^{**}$ (0.112) & $-$0.231$^{*}$ (0.124) \\ 
+  Asian pop &  & 0.011$^{*}$ (0.007) & 0.011 (0.007) & 0.011 (0.013) \\ 
+  Latino pop &  & 0.002 (0.005) & 0.008 (0.007) & 0.008 (0.007) \\ 
+  Poverty rate &  &  & $-$0.006 (0.010) & $-$0.006 (0.010) \\ 
+  Total population &  &  & $-$0.002 (0.002) & $-$0.002 (0.002) \\ 
   Constant & 0.213 (0.162) & 0.077 (0.183) & 0.119 (0.209) & 0.119 (0.194) \\ 
  \hline \\[-1.8ex] 
 Observations & 111 & 111 & 111 &  \\ 
@@ -172,7 +173,7 @@ Adjusted R$^{2}$ & 0.094 & 0.105 & 0.097 &  \\
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{4}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
-\end{table} 
+\end{table}  
 
 ```{r}
 
@@ -184,17 +185,23 @@ m3 <- lm(log_n ~ OEO_per + Type + category + Asian_per + Latino_per + poverty_ra
 
 lm_white <- coeftest(m3, vcov = vcovHC(m3, type = "HC0"))
 
-stargazer::stargazer(m1, m2, m3, lm_white,
-                     keep.stat = c(
-                       "rsq", "n", "adj.rsq"),
-                     single.row = TRUE, 
-                     object.names = TRUE, 
-                     column.labels = c("Model 1",
-                                       "Model 2",
-                                       "Model 3",
-                                       "Model 4"),
-                     dep.var.labels.include = FALSE)
-
+stargazer(m1, m2, m3, lm_white,
+          title = "Cross-sectional regression analysis results",
+          covariate.labels = c("OEO grants",
+                               "CBO",
+                               "Latino org",
+                               "Asian pop",
+                               "Latino pop",
+                               "Poverty rate",
+                               "Total population"),
+          dep.var.labels = c("Cumulative founding in 1981 (logged)"),
+          keep.stat = c("rsq", "n", "adj.rsq"),
+          column.labels = c("Model 1",
+                            "Model 2",
+                            "Model 3",
+                            "Model 4"),
+          model.numbers = FALSE, 
+          single.row = TRUE)
 
 ```
 
