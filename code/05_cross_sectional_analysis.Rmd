@@ -181,7 +181,7 @@ m1 <- lm(log_n ~ OEO_per + Type + category, data = df3)
 
 m2 <- lm(log_n ~ OEO_per + Type + category + Asian_per + Latino_per, data = df3)
 
-m3 <- lm(log_n ~ OEO_per + Type + category + Asian_per + Latino_per + poverty_rate + pop_size, data = df3)
+m3 <- lm(log_n ~ OEO_per + Type + category + Asian_per + Latino_per + poverty_rate, data = df3)
 
 lm_white <- coeftest(m3, vcov = vcovHC(m3, type = "HC0"))
 

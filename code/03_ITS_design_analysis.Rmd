@@ -551,7 +551,10 @@ ggsave("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/p
 ### Heterogeneous treatment effects 
 
 ```{r}
-pred_org_type <- ols_its(reagan_org_fit %>% mutate(Freq = log(Freq))) + 
+pred_org_type <- ols_its(reagan_org_fit %>% 
+                           mutate(Freq = log(Freq)) %>%
+                           filter(Type != "Hybrid") 
+                         ) + 
   labs(title = "How treatment effects vary by organizational types",
        y = "Logged organizational founding") + 
   facet_grid(~Type) +
