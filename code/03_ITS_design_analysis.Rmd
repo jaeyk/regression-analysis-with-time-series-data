@@ -513,12 +513,12 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 ```
 ## Segments 
 
-- Second break point: 2003
+- Second break point: 2004
 
 ```{r}
 
 # Structural change approach 
-opt_breaks <- breakpoints(breakpoints(log(Freq) ~ Year + intervention + Year * intervention + category + Type, data = reagan_org), breaks = 2)
+opt_breaks <- breakpoints(breakpoints(log(Freq) ~ Year * intervention + Type + Year, data = reagan_org), breaks = 2)
 
 reagan_org[opt_breaks$breakpoints[2],]$Year
 
@@ -529,7 +529,7 @@ reagan_org[opt_breaks$breakpoints[2],]$Year
 
 ```{r}
 
-reagan_org_fit <- reagan_org %>% filter(between(Year, 1960, 2003))
+reagan_org_fit <- reagan_org %>% filter(between(Year, 1960, 2004))
 
 ```
 
@@ -592,25 +592,26 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
  & \multicolumn{2}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-3} 
 \\[-1.8ex] & \multicolumn{2}{c}{Founding rate (logged)} \\ 
-\\[-1.8ex] & (1) & (2)\\ 
+ & Model 1 & Model 2 \\ 
 \hline \\[-1.8ex] 
  Year & 0.059$^{***}$ (0.016) & 0.066$^{***}$ (0.016) \\ 
-  intervention1 & 65.817$^{*}$ (34.856) & 77.997$^{**}$ (34.326) \\ 
-  TypeCBO & 1.056$^{***}$ (0.095) & 1.071$^{***}$ (0.093) \\ 
-  TypeHybrid & $-$0.052 (0.107) & $-$0.047 (0.105) \\ 
-  categoryLatino &  & 0.232$^{***}$ (0.079) \\ 
-  Year:intervention1 & $-$0.033$^{*}$ (0.018) & $-$0.040$^{**}$ (0.017) \\ 
-  Constant & $-$116.355$^{***}$ (31.676) & $-$129.500$^{***}$ (31.287) \\ 
+  Intervention & 67.587$^{*}$ (34.569) & 80.450$^{**}$ (33.919) \\ 
+  CBO & 1.081$^{***}$ (0.094) & 1.096$^{***}$ (0.092) \\ 
+  Hybrid & $-$0.059 (0.105) & $-$0.054 (0.102) \\ 
+  Latino &  & 0.247$^{***}$ (0.077) \\ 
+  Year:Intervention & $-$0.034$^{*}$ (0.018) & $-$0.041$^{**}$ (0.017) \\ 
+  Constant & $-$116.501$^{***}$ (31.796) & $-$130.508$^{***}$ (31.286) \\ 
  \hline \\[-1.8ex] 
-Observations & 172 & 172 \\ 
-R$^{2}$ & 0.562 & 0.584 \\ 
-Adjusted R$^{2}$ & 0.549 & 0.569 \\ 
-Akaike Inf. Crit. & 270.819 & 263.997 \\ 
+Observations & 178 & 178 \\ 
+R$^{2}$ & 0.570 & 0.594 \\ 
+Adjusted R$^{2}$ & 0.557 & 0.580 \\ 
+Akaike Inf. Crit. & 281.346 & 273.025 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
 \end{table} 
+
 ```{r}
 
 lm.out <- lm(Freq ~ Year + intervention + Year*intervention + Type + category, 
@@ -789,7 +790,7 @@ fed_boot <- boot_merged %>%
        title = "Federal funding",
        subtitle = "With bootstrapped CIs") +
   geom_vline(xintercept = c(1981), linetype = "dashed", size = 1, color = "red") +  
-  annotate("rect", xmin = 1970, xmax = 2003, ymin = -0.5, ymax = 0, alpha = .2)
+  annotate("rect", xmin = 1970, xmax = 2004, ymin = -0.5, ymax = 0, alpha = .2)
   
 pop_boot <- boot_merged %>%
   ggplot(aes(x = Year, y = Pop_growth, 
@@ -800,7 +801,7 @@ pop_boot <- boot_merged %>%
        title = "Population growth",
        subtitle = "With bootstrapped CIs") +
   geom_vline(xintercept = c(1981), linetype = "dashed", size = 1, color = "red") +
-  annotate("rect", xmin = 1970, xmax = 2003, ymin = -2, ymax = 0, alpha = .2)
+  annotate("rect", xmin = 1970, xmax = 2004, ymin = -2, ymax = 0, alpha = .2)
 
 fed_boot + pop_boot
 
