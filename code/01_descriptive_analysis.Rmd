@@ -29,8 +29,8 @@ pacman::p_load(
 
   ### Spatial analysis
   tidygeocoder, # geocoding
-  tigris, # shape files
-  usmap,
+  tigris, # shape files 
+  usmap, # shape files 
   maps, # maps
   mapproj,
   ggsn,
@@ -39,10 +39,6 @@ pacman::p_load(
   sf,
   leaflet, # interactive maps
   mapview, # to view and save map objects
-
-  ### Time series analysis
-  ggseas, # seasonality adjustment
-  fpp2, # detecting seasonality in data
 
   ### Interactiev maps
   gganimate, # animated maps
@@ -400,17 +396,22 @@ sites <- sf::st_as_sf(df,
   agr = "identity"
 )
 
+chinatown <- data.frame(latitude = 37.4741,
+                        longitude = -122.2426) %>% sf::st_as_sf(coords = c("longitude", "latitude"), 
+                                                                crs = 4326, 
+                                                                agr = "identity")
+
 # Import Bay Area shape file
 
-bay_area_sf <- tigris::tracts(
-  state = "CA",
-  county = c("San Francisco")
-)
+bay_area_sf <- tigris::tracts(state = "CA",
+                              county = "San Francisco",
+                              cb = TRUE,
+                              class = "sf")
 
 # Crop the coordinates
 cropped_sf <- st_crop(bay_area_sf,
   xmin = -122.48,
-  xmax = -122.34,
+  xmax = -122.38,
   ymin = 37.76,
   ymax = 37.83
 )
@@ -425,6 +426,8 @@ cropped_sf <- st_crop(bay_area_sf,
 # Set the CRS
 cropped_sf <- st_set_crs(cropped_sf, 4326)
 
+# Add Chinatown point 
+
 # tmap approach
 bay_tmap <-
   tm_shape(cropped_sf) +
@@ -435,7 +438,9 @@ bay_tmap <-
     shapeNA = NA,
     col = "Type"
   ) +
-  tm_layout(title = "Asian American organizations in San Francisco")
+  tm_layout(title = "Asian American organizations in San Francisco") +
+  tm_shape(chinatown) +
+  tm_dots()
 
 # to change color palette  tmaptools::palette_explorer()
 
@@ -452,6 +457,7 @@ mapshot(lf,
   file = here("outputs", "asian_org_map_interactive.png"),
   remove_controls = c("homeButton", "layersControl")
 )
+
 ```
 
 #### Heatmap 
@@ -481,10 +487,11 @@ asian_org_plot <- plot_us_heatmap(asian_map_df) + labs(title = "Asian American o
 
 latino_org_plot <- plot_us_heatmap(latino_map_df) + labs(title = "Latino organizations")
 
-asian_org_plot + latino_org_plot
+heatmaps <- asian_org_plot + latino_org_plot
 
-ggsave(here("outputs", "heatmaps.png"),
+ggsave(heatmaps, here("outputs", "heatmaps.png"),
   width = 14,
   height = 7
 )
+
 ```

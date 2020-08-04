@@ -786,6 +786,7 @@ fed_boot <- boot_merged %>%
              ymax = Fed_funding + 2*Fed_SE, 
              ymin = Fed_funding - 2*Fed_SE)) +
   geom_pointrange() +
+  geom_line(col = "blue") +
   labs(x = "Year", y = "OLS coefficients", 
        title = "Federal funding",
        subtitle = "With bootstrapped CIs") +
@@ -803,7 +804,7 @@ pop_boot <- boot_merged %>%
   geom_vline(xintercept = c(1981), linetype = "dashed", size = 1, color = "red") +
   annotate("rect", xmin = 1970, xmax = 2004, ymin = -2, ymax = 0, alpha = .2)
 
-fed_boot + pop_boot
+fed_boot
 
 ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/boot_cis.png"), 
        height = 6, width = 10)
