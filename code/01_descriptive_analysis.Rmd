@@ -105,6 +105,9 @@ org_df <- orgs
 org_df <- add_decade(org_df, F.year) %>%
   filter(!is.na(decade))
 
+```
+
+```{r}
 # Pop mass 
 pop_mass_plot <- org_df %>%
   count(category, Type, decade) %>%
@@ -118,6 +121,9 @@ pop_mass_plot <- org_df %>%
          y = "N of organizations founded", 
          title = "Organizational founding trend (mass)")
 
+```
+
+```{r}
 # Pop density 
 
 ## Wrangle 

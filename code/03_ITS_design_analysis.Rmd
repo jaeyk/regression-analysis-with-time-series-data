@@ -102,11 +102,11 @@ conflicted::conflict_prefer("annotate", "ggplot2")
 
 # Wrangle data 
 
-## Merge Asian American and Latino CBO and advocacy org 
+## Merge Asian American and Latino CSO and advocacy org 
 
 ```{r}
 
-# Merge CBO and advocacy org data 
+# Merge CSO and advocacy org data 
 org_freq <- merge_by_group(asian_year, latino_year) %>% 
     count(F.year, Type, category) %>% 
     rename(Year = F.year, 
@@ -564,11 +564,11 @@ pred_org_type
 
 ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/outputs/pred_org_type.png"))
 
-reagan_org_fit_cbo <- subset(reagan_org_fit, Type == "CBO")
+reagan_org_fit_cbo <- subset(reagan_org_fit, Type == "CSO")
 
 pred_org_group <- ols_its_only_cbo(reagan_org_fit_cbo %>% mutate(Freq = log(Freq))) + 
   labs(title = "How treatment effects vary by groups",
-       subtitle = "Only included CBOs",
+       subtitle = "Only included CSOs",
        y = "Logged organizational founding") + 
   facet_wrap(~category)
 
@@ -596,7 +596,7 @@ ggsave(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure
 \hline \\[-1.8ex] 
  Year & 0.059$^{***}$ (0.016) & 0.066$^{***}$ (0.016) \\ 
   Intervention & 67.587$^{*}$ (34.569) & 80.450$^{**}$ (33.919) \\ 
-  CBO & 1.081$^{***}$ (0.094) & 1.096$^{***}$ (0.092) \\ 
+  CSO & 1.081$^{***}$ (0.094) & 1.096$^{***}$ (0.092) \\ 
   Hybrid & $-$0.059 (0.105) & $-$0.054 (0.102) \\ 
   Latino &  & 0.247$^{***}$ (0.077) \\ 
   Year:Intervention & $-$0.034$^{*}$ (0.018) & $-$0.041$^{**}$ (0.017) \\ 
@@ -636,7 +636,7 @@ stargazer(add_AIC(lm_log_out1),
                             "Model 2"),
           covariate.labels = c("Year",
                                "Intervention",
-                               "CBO",
+                               "CSO",
                                "Hybrid",
                                "Latino",
                                "Year:Intervention"),
@@ -712,14 +712,14 @@ fed_coef <- for_loop %>%
   geom_point() +
   geom_vline(xintercept = c(1981), linetype = "dashed", size = 1, color = "red") +
   labs(title = "Federal funding", 
-       subtitle = "Only included CBOs", y = "OLS coefficients") 
+       subtitle = "Only included CSOs", y = "OLS coefficients") 
 
 pop_coef <- for_loop %>%
   ggplot(aes(x = Year, y = Pop_growth)) +
   geom_point() +
   geom_vline(xintercept = c(1981), linetype = "dashed", size = 1, color = "red") +
   labs(title = "Population growth", 
-       subtitle = "Only included CBOs", y = "OLS coefficients") 
+       subtitle = "Only included CSOs", y = "OLS coefficients") 
 
 fed_coef + pop_coef 
 

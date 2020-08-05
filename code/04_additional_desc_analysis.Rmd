@@ -44,6 +44,8 @@ theme_set(theme_pubr())
 
 # Load files
 
+- The additional data come from the Foundation Foundation annual reports. 
+
 ```{r}
 
 ford <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/raw_data/foundation.csv"))
@@ -65,7 +67,7 @@ ford_sum <- ford %>%
   summarize(sum_grant = sum(Grant_amount)) %>%
   filter(Start_year >= 1960 & Start_year < 1980)
 
-ford_sum$Type[ford_sum$Type == "Service"] <- "CBO"
+ford_sum$Type[ford_sum$Type == "Service"] <- "CSO"
 ford_sum$Type[ford_sum$Type == "Mixed"] <- "Hybrid"
 
 ```
