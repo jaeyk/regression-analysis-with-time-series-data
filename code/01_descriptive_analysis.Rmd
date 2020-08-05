@@ -152,7 +152,7 @@ pop_density_plot <- ggplot(org_count, aes(x = decade, y = ratio,
          y = "Same count per 1 million population", 
          title = "Organizational founding trend (density)")
 
-pop_density_plot + labs(y = "Organizational density",
+pop_density_plot + labs(y = "Organizational population density",
                         title = "Organizational founding trend",
                         subtitle = "Y = The number of organizations founded in each decade per one million population")
 
