@@ -526,7 +526,6 @@ reagan_org[opt_breaks$breakpoints[2],]$Year
 
 ## Model fits 
 
-
 ```{r}
 
 reagan_org_fit <- reagan_org %>% filter(between(Year, 1960, 2004))
@@ -627,6 +626,7 @@ poisson.out <- glm(Freq ~ Year + intervention + Year*intervention + Type + categ
 
 nb.out <- glm.nb(Freq ~ Year + intervention + Year*intervention + Type + category, data = reagan_org_fit)
 
+# LaTeX Output 
 stargazer(add_AIC(lm_log_out1),
           add_AIC(lm_log_out2),
           title = "ITS design analysis results", 
@@ -643,6 +643,26 @@ stargazer(add_AIC(lm_log_out1),
           model.numbers = FALSE, 
           single.row = TRUE,
           header = FALSE)
+
+# Word Output 
+stargazer(add_AIC(lm_log_out1),
+          add_AIC(lm_log_out2),
+          title = "ITS design analysis results", 
+          dep.var.labels = c("Founding rate (logged)", "Founding rate (logged)"),
+          keep.stat = c("AIC", "rsq", "n", "adj.rsq"),
+          column.labels = c("Model 1",
+                            "Model 2"),
+          covariate.labels = c("Year",
+                               "Intervention",
+                               "CSO",
+                               "Hybrid",
+                               "Latino",
+                               "Year:Intervention"),
+          model.numbers = FALSE, 
+          single.row = TRUE,
+          header = FALSE,
+          type = "html",
+          out = here("outputs", "its_design_analysis.doc"))
 
 ```
 
@@ -874,40 +894,11 @@ lm_new <- coeftest(lm_log.out, vcov = NeweyWest, prewhite = F, adjust = T)
 
 ### Outliers 
 
-\begin{table}[!htbp] \centering 
-  \caption{Robustness checks} 
-  \label{} 
-\begin{tabular}{@{\extracolsep{5pt}}lccc} 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
- & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-4} 
-\\[-1.8ex] & Founding rate (logged) &   & log(Freq) \\ 
-\\[-1.8ex] & \textit{OLS} & \textit{coefficient} & \textit{MM-type} \\ 
- & \textit{} & \textit{test} & \textit{linear} \\ 
- & Model 1 & Model 2 & Model 3 \\ 
-\hline \\[-1.8ex] 
- Federal funding & 0.325$^{***}$ (0.103) & 0.325$^{***}$ (0.086) & 0.325$^{***}$ (0.083) \\ 
-  Population growth & 0.027 (0.174) & 0.027 (0.090) & 0.022 (0.106) \\ 
-  Latino & 0.397 (0.596) & 0.397 (0.302) & 0.415 (0.419) \\ 
-  Presidency & $-$0.178 (0.187) & $-$0.178 (0.240) & $-$0.180 (0.201) \\ 
-  Senate &  &  &  \\ 
-  House &  &  &  \\ 
-  Constant & $-$0.507 (0.398) & $-$0.507 (0.445) & $-$0.493 (0.372) \\ 
- \hline \\[-1.8ex] 
-Observations & 32 &  & 32 \\ 
-R$^{2}$ & 0.498 &  & 0.472 \\ 
-Adjusted R$^{2}$ & 0.423 &  & 0.394 \\ 
-\hline 
-\hline \\[-1.8ex] 
-\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
-\end{tabular} 
-\end{table} 
-
 ```{r include=FALSE}
 
 lmrobfit <- lmrob(log(Freq) ~ Percentage + pop_percentage + category + presidency + senate + house, data = subset(reagan_org_fit_cbo, Year <= 1980))
 
+# LaTeX Output 
 stargazer(lm_log.out, lm_new, lmrobfit,
           title = "Robustness checks",
           dep.var.labels = c("Founding rate (logged)"),
@@ -923,6 +914,25 @@ stargazer(lm_log.out, lm_new, lmrobfit,
                                "Senate",
                                "House"),
           model.numbers = FALSE)
+
+# Word Output
+stargazer(lm_log.out, lm_new, lmrobfit,
+          title = "Robustness checks",
+          dep.var.labels = c("Founding rate (logged)"),
+          header = FALSE, 
+          keep.stat = c("rsq", "n", "adj.rsq"),
+          column.labels = c("Model 1", "Model 2",
+                            "Model 3"),
+          single.row = TRUE,
+          covariate.labels = c("Federal funding",
+                               "Population growth",
+                               "Latino",
+                               "Presidency",
+                               "Senate",
+                               "House"),
+          model.numbers = FALSE,
+          type = "html",
+          out = here("outputs", "robustness_checks.doc"))
 
 ```
 

@@ -263,27 +263,32 @@ ggsave(here("outputs", "naming_trend.png"),
 ```{r}
 
 # Fill 0 years to each subset
-asian_cbo_year <- org_to_ts(asian_org %>% filter(Type == "CBO"))
+asian_cso_year <- org_to_ts(asian_org %>% filter(Type == "CSO"))
 asian_advo_year <- org_to_ts(asian_org %>% filter(Type == "Advocacy"))
 asian_hybrid_year <- org_to_ts(asian_org %>% filter(Type == "Hybrid"))
 
-latino_cbo_year <- org_to_ts(latino_org %>% filter(Type == "CBO"))
+latino_cso_year <- org_to_ts(latino_org %>% filter(Type == "CSO"))
 latino_advo_year <- org_to_ts(latino_org %>% filter(Type == "Advocacy"))
 latino_hybrid_year <- org_to_ts(latino_org %>% filter(Type == "Hybrid"))
 
 # Bind them
-asian_year <- bind_rows(asian_cbo_year, asian_advo_year, asian_hybrid_year)
-latino_year <- bind_rows(latino_cbo_year, latino_advo_year, latino_hybrid_year)
+asian_year <- bind_rows(asian_cso_year, asian_advo_year, asian_hybrid_year)
+latino_year <- bind_rows(latino_cso_year, latino_advo_year, latino_hybrid_year)
 
 write_csv(asian_year, make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/asian_year.csv"))
 
 write_csv(latino_year, make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_year.csv"))
+
+#asian_year <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/asian_year.csv"))
+
+#latino_year <- read_csv(make_here("/home/jae/analyzing-asian-american-latino-civic-infrastructure/processed_data/latino_year.csv"))
+
 ```
 
 #### Panethnic vs. Ethnic 
 
-- 76% of Chinese CBOs remain Chinese and 24% of them turned into PCBOs. 
-- 24% of Mexican CBOs remain Mexican and 76% of them turned into PCBOs.
+- 76% of Chinese CSOs remain Chinese and 24% of them turned into PCSOs. 
+- 24% of Mexican CSOs remain Mexican and 76% of them turned into PCSOs.
 
 ```{r}
 
@@ -303,19 +308,19 @@ mexican_service_org %>%
 ```{r}
 # Plot 
 
-pcbo_count <- org_df %>%
+pcso_count <- org_df %>%
   count(category, Type, decade) %>%
-  filter(Type == "CBO") 
+  filter(Type == "CSO") 
 
 ethnic_orgs <- merge_by_group_extended(chinese_service_org[,c("F.year")], mexican_service_org[,c("F.year")])
 
 ethnic_orgs <- add_decade(ethnic_orgs, F.year) %>%
   filter(!is.na(decade))
 
-ecbo_count <- ethnic_orgs %>%
+ecso_count <- ethnic_orgs %>%
   count(category, decade) 
 
-df_joined <- full_join(pcbo_count, ecbo_count) %>%
+df_joined <- full_join(pcso_count, ecso_count) %>%
   mutate(Group = ifelse(category %in% c("Asian", "Chinese"), "Asian or Chinese", "Latino or Mexican")) 
 
 df_joined %>%
@@ -360,6 +365,7 @@ org_address <- read_csv(here("processed_data", "org_address.csv"))
 ```
 
 ### EDA
+
 ```{r}
 org_address %>%
   count(States, sort = TRUE)
