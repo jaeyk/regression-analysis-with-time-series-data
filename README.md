@@ -2,8 +2,7 @@
 
 **Regression analysis with time series data**
 
-- Forthcoming at *Political Research Quarterly*. 
-- Preprint: https://osf.io/preprints/socarxiv/n83xs/
+- Published in *Political Research Quarterly*: https://journals.sagepub.com/doi/10.1177/1065912920983456
 
 ## Motivation
 
